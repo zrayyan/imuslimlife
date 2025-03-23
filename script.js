@@ -149,4 +149,4 @@ animateOnScroll(); // Run once on load
 
 // Add current year to footer
 document.querySelector('.footer-bottom p').textContent =
-    `© ${new Date().getFullYear()} Salate Mustaqeem. All rights reserved.`;
+    `© ${new Date().getFullYear()} Salat-e-Mustaqeem. All rights reserved.`;
