@@ -713,6 +713,120 @@ nav .container {
     margin-right: 12px;
 }
 
+/* Widget Showcase Section */
+.widgets {
+    padding: 80px 0;
+    background-color: #f9f9f9;
+}
+
+.widget-showcase {
+    margin-top: 40px;
+}
+
+.widget-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px;
+}
+
+.widget-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 550px;
+    background-color: #fff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding-bottom: 30px;
+}
+
+.widget-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+.widget-device {
+    width: 100%;
+    padding: 20px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4eaef 100%);
+    display: flex;
+    justify-content: center;
+}
+
+.widget-device img {
+    height: 400px;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
+}
+
+.widget-info {
+    padding: 30px;
+    text-align: center;
+}
+
+.widget-info h3 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.widget-info p {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.widget-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    max-width: 300px;
+    text-align: left;
+}
+
+.widget-features li {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    color: #555;
+}
+
+.widget-features li i {
+    color: #4CAF50;
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+/* Responsive Styles for Widget Section */
+@media (max-width: 1200px) {
+    .widget-card {
+        max-width: 480px;
+    }
+
+    .widget-device img {
+        height: 350px;
+    }
+}
+
+@media (max-width: 768px) {
+    .widget-row {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .widget-card {
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .widget-device img {
+        height: 300px;
+    }
+}
+
 /* Footer */
 footer {
     background-color: var(--dark-color);
