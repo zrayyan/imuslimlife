@@ -1,0 +1,20 @@
+salat-e-mustaqeem-frontend/
+├── public/
+│   ├── index.html
+│   └── favicon.ico
+├── src/
+│   ├── components/
+│   │   ├── Header.js
+│   │   ├── LocationInput.js
+│   │   ├── CalculationMethod.js
+│   │   ├── PrayerTimes.js
+│   │   ├── HijriCalendar.js
+│   │   ├── MethodParameters.js
+│   │   ├── ApiResponse.js
+│   │   └── Footer.js
+│   ├── App.js
+│   ├── index.js
+│   ├── styles.css
+│   └── script.js
+├── package.json
+└── README.md

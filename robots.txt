@@ -1,0 +1,2 @@
+npx create-react-app salat-e-mustaqeem-frontend
+cd salat-e-mustaqeem-frontend
