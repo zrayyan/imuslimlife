@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>iMuslimLife - Page Not Found</title>
+    <script type="text/javascript">
+        // Handle redirect for specific non-React URLs
+        const redirectMap = {
+            '/privacy-policy.html': '/#/privacy-policy',
+            // Add more mappings as needed
+        };
+
+        let pathname = window.location.pathname;
+        const redirect = redirectMap[pathname];
+
+        if (redirect) {
+            window.location.href = redirect;
+        } else {
+            // For all other paths, redirect to the root with the path as a hash route
+            const segmentCount = pathname.split('/').length;
+            const baseUrl = window.location.origin;
+            window.location.href = baseUrl + '/#' + pathname;
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Page Not Found</h1>
+    <p>Redirecting you to the home page...</p>
+</body>
+
+</html>
