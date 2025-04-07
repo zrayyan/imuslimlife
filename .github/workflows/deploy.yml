@@ -2,8 +2,8 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [ main, master ]  # Include both common branch names
-  workflow_dispatch:  # Allow manual triggering
+    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -17,20 +17,19 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          # Remove the cache option since we don't have a lock file yet
       
-      - name: Generate lock file if missing
+      - name: Navigate to project directory
         run: |
-          if [ ! -f "package-lock.json" ] && [ ! -f "yarn.lock" ]; then
-            echo "No lock file found. Generating package-lock.json..."
-            npm i --package-lock-only
-          fi
-
+          cd prayer-times-api/public/react/salat-e-mustaqeem-client
+          echo "Current directory: $(pwd)"
+          ls -la  # List files to verify we're in the right place
+      
       - name: Install dependencies
-        # Use ci if there's a lock file, otherwise use install
-        run: npm ci || npm install
+        working-directory: prayer-times-api/public/react/salat-e-mustaqeem-client
+        run: npm install
         
       - name: Build
+        working-directory: prayer-times-api/public/react/salat-e-mustaqeem-client
         run: npm run build
         env:
           REACT_APP_GITHUB_TOKEN: ${{ secrets.REACT_APP_GITHUB_TOKEN }}
@@ -38,5 +37,5 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: build
+          folder: prayer-times-api/public/react/salat-e-mustaqeem-client/build
           branch: gh-pages
