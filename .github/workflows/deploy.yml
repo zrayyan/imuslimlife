@@ -2,8 +2,8 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches: [ main, master ]  # Include both main and master to cover common conventions
+  workflow_dispatch:  # Allow manual triggering
 
 jobs:
   build:
