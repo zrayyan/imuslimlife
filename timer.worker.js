@@ -1,61 +1,3 @@
-/**
- * Web Worker for reliable timer execution
- * This worker provides high-precision timers that work even when browser tabs are inactive
- */
-
-/*let timerId = null;
-
-// This is the entry point for messages from the main thread
-self.onmessage = function (e) {
-    if (e.data.command === 'start') {
-        // Clear any existing timer
-        if (timerId) {
-            clearInterval(timerId);
-        }
-
-        const { duration, interval } = e.data;
-        const endTime = Date.now() + duration * 1000;
-
-        // Log start in worker
-        console.log(`[Worker] Starting timer for ${duration} seconds`);
-
-        // Start the timer
-        timerId = setInterval(() => {
-            const remaining = Math.round((endTime - Date.now()) / 1000);
-
-            // Send updates to the main thread
-            self.postMessage({ type: 'tick', remaining });
-
-            // Check if we're done
-            if (remaining <= 0) {
-                clearInterval(timerId);
-                timerId = null;
-                console.log('[Worker] Timer complete, sending completion message');
-                self.postMessage({ type: 'complete' });
-            }
-        }, interval || 250);
-    }
-    else if (e.data.command === 'stop') {
-        if (timerId) {
-            clearInterval(timerId);
-            timerId = null;
-            console.log('[Worker] Timer stopped by request');
-            self.postMessage({ type: 'stopped' });
-        }
-    }
-    else if (e.data.command === 'ping') {
-        // Respond to ping for testing worker communication
-        console.log('[Worker] Received ping, sending pong');
-        self.postMessage({ type: 'pong' });
-    }
-    else {
-        // Handle unknown commands
-        console.warn('[Worker] Unknown command:', e.data.command);
-    }
-};
-
-// Log when worker is initialized
-console.log('[Worker] Timer worker initialized');*/
 /* eslint-disable no-restricted-globals */
 /**
  * Prayer Times Web Worker 
@@ -65,6 +7,8 @@ console.log('[Worker] Timer worker initialized');*/
 let timerId = null;
 let prayerTimes = [];
 let lastPrayerCheck = Date.now();
+let lastNotificationTime = {}; // Track when notifications were last sent
+let athanSettings = {}; // Store athan settings
 
 // This is the entry point for messages from the main thread
 this.onmessage = function (e) {
@@ -83,25 +27,40 @@ this.onmessage = function (e) {
             prayerTimes = e.data.prayerTimes;
         }
 
-        console.log(`[Prayer Worker] Starting prayer time tracking`);
+        // Update athan settings if provided
+        if (e.data.athanSettings) {
+            athanSettings = e.data.athanSettings;
+        }
 
-        // Start the timer
+        console.log(`[Prayer Worker] Starting prayer time tracking with ${prayerTimes.length} prayers`);
+
+        // Start the timer with high precision
         timerId = setInterval(() => {
             const now = Date.now();
             
-            // Check prayer times
-            const nextPrayer = checkNextPrayer();
+            // Check prayer times every second
+            const checkResult = checkPrayerTimes();
+            
+            // If a prayer time is happening right now, notify the main thread
+            if (checkResult.activePrayer) {
+                self.postMessage({ 
+                    type: 'athanTime',
+                    prayer: checkResult.activePrayer.name,
+                    dateTime: checkResult.activePrayer.dateTime,
+                    settings: athanSettings
+                });
+            }
             
             // Every 10 seconds, send an update to the main thread
             if (now - lastPrayerCheck >= 10000) {
                 lastPrayerCheck = now;
                 
-                if (nextPrayer) {
-                    const minutesRemaining = Math.ceil((new Date(nextPrayer.dateTime) - new Date()) / (1000 * 60));
+                if (checkResult.nextPrayer) {
+                    const minutesRemaining = Math.ceil((new Date(checkResult.nextPrayer.dateTime) - new Date()) / (1000 * 60));
                     
                     self.postMessage({ 
                         type: 'prayerUpdate',
-                        nextPrayer: nextPrayer.name,
+                        nextPrayer: checkResult.nextPrayer.name,
                         minutesRemaining,
                         time: new Date().toISOString()
                     });
@@ -110,18 +69,26 @@ this.onmessage = function (e) {
                     if (minutesRemaining <= 5) {
                         self.postMessage({ 
                             type: 'prayerImminent',
-                            prayer: nextPrayer.name,
+                            prayer: checkResult.nextPrayer.name,
                             minutesRemaining
                         });
+                        
+                        // Attempt to register a notification if it's 5 minutes before prayer time
+                        attemptNotification(checkResult.nextPrayer, minutesRemaining);
                     }
                 }
             }
             
-            // Send heartbeat to keep the worker alive
-            self.postMessage({ 
-                type: 'heartbeat',
-                timestamp: new Date().toISOString()
-            });
+            // Send heartbeat every 30 seconds to keep the worker alive
+            if (now % 30000 < 1000) {
+                self.postMessage({ 
+                    type: 'heartbeat',
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Check if we need to wake up the main thread
+                checkWakeupNeeded();
+            }
             
         }, interval || 1000);
     }
@@ -130,6 +97,13 @@ this.onmessage = function (e) {
         if (e.data.prayerTimes) {
             console.log('[Prayer Worker] Updating prayer times data');
             prayerTimes = e.data.prayerTimes;
+        }
+    }
+    else if (command === 'updateSettings') {
+        // Update athan settings
+        if (e.data.athanSettings) {
+            console.log('[Prayer Worker] Updating athan settings');
+            athanSettings = e.data.athanSettings;
         }
     }
     else if (command === 'stop') {
@@ -143,7 +117,7 @@ this.onmessage = function (e) {
     else if (command === 'ping') {
         // Respond to ping for testing worker communication
         console.log('[Prayer Worker] Received ping, sending pong');
-        self.postMessage({ type: 'pong' });
+        self.postMessage({ type: 'pong', timestamp: new Date().toISOString() });
     }
     else {
         // Handle unknown commands
@@ -151,33 +125,111 @@ this.onmessage = function (e) {
     }
 };
 
-// Find the next prayer time
-function checkNextPrayer() {
+// Check prayer times and return information about next and active prayers
+function checkPrayerTimes() {
     if (!prayerTimes || prayerTimes.length === 0) {
-        return null;
+        return { nextPrayer: null, activePrayer: null };
     }
     
     const now = new Date();
+    let nextPrayer = null;
+    let activePrayer = null;
     
     // Find the next prayer time
     for (const prayer of prayerTimes) {
         const prayerTime = new Date(prayer.dateTime);
+        
+        // Check if this prayer is happening right now (within 30 seconds)
+        const timeDiff = prayerTime - now;
+        if (Math.abs(timeDiff) < 30000) {
+            activePrayer = prayer;
+        }
+        
+        // Find next upcoming prayer
         if (prayerTime > now) {
-            return prayer;
+            if (!nextPrayer || prayerTime < new Date(nextPrayer.dateTime)) {
+                nextPrayer = prayer;
+            }
         }
     }
     
     // If no next prayer found today, return the first prayer of the day
     // (assuming it's for tomorrow)
-    return prayerTimes[0];
+    if (!nextPrayer && prayerTimes.length > 0) {
+        nextPrayer = prayerTimes[0];
+    }
+    
+    return { nextPrayer, activePrayer };
 }
 
-// Calculate time remaining until a prayer time
-function getTimeRemaining(prayerTime) {
-    const now = new Date();
-    const prayerDate = new Date(prayerTime);
-    return Math.max(0, prayerDate - now);
+// Attempt to show a notification for an upcoming prayer
+function attemptNotification(prayer, minutesRemaining) {
+    // Don't send duplicate notifications - check if we've already notified for this prayer
+    const prayerKey = `${prayer.name}-${new Date(prayer.dateTime).toDateString()}`;
+    
+    // For 5-minute warning
+    if (minutesRemaining === 5 && !lastNotificationTime[`${prayerKey}-5min`]) {
+        lastNotificationTime[`${prayerKey}-5min`] = Date.now();
+        
+        // Notify main thread to show notification
+        self.postMessage({
+            type: 'showNotification',
+            title: `${prayer.name} Prayer in 5 minutes`,
+            body: `Prepare for ${prayer.name} prayer`,
+            prayer: prayer.name,
+            timeRemaining: 5
+        });
+    }
+    
+    // For 1-minute warning
+    if (minutesRemaining === 1 && !lastNotificationTime[`${prayerKey}-1min`]) {
+        lastNotificationTime[`${prayerKey}-1min`] = Date.now();
+        
+        // Notify main thread to show notification
+        self.postMessage({
+            type: 'showNotification',
+            title: `${prayer.name} Prayer in 1 minute`,
+            body: `${prayer.name} prayer is starting soon`,
+            prayer: prayer.name,
+            timeRemaining: 1
+        });
+    }
 }
+
+// Check if we need to wake up the main thread for an upcoming prayer
+function checkWakeupNeeded() {
+    const { nextPrayer } = checkPrayerTimes();
+    if (!nextPrayer) return;
+    
+    const now = new Date();
+    const prayerTime = new Date(nextPrayer.dateTime);
+    const minutesUntilPrayer = (prayerTime - now) / (1000 * 60);
+    
+    // If prayer is within 6 minutes, send a wakeup signal
+    if (minutesUntilPrayer > 0 && minutesUntilPrayer <= 6) {
+        self.postMessage({
+            type: 'wakeup',
+            prayer: nextPrayer.name,
+            minutesRemaining: Math.ceil(minutesUntilPrayer),
+            dateTime: nextPrayer.dateTime
+        });
+    }
+}
+
+// Cleanup old notification records (daily)
+function cleanupNotificationRecords() {
+    const now = Date.now();
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    
+    Object.keys(lastNotificationTime).forEach(key => {
+        if (now - lastNotificationTime[key] > oneDayMs) {
+            delete lastNotificationTime[key];
+        }
+    });
+}
+
+// Run cleanup every hour
+setInterval(cleanupNotificationRecords, 60 * 60 * 1000);
 
 // Log when worker is initialized
 console.log('[Prayer Worker] Prayer times worker initialized');
