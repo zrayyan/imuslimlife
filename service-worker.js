@@ -1,3 +1,5 @@
+/* eslint-disable no-restricted-globals */
+
 // Service Worker for Salat-e-Mustaqeem Prayer Times App
 
 // Cache name with version number
@@ -132,7 +134,7 @@ self.addEventListener('notificationclick', (event) => {
   
   // This looks to see if the current is already open
   event.waitUntil(
-    clients.matchAll({
+    self.clients.matchAll({
       type: 'window',
       includeUncontrolled: true
     })
@@ -150,8 +152,8 @@ self.addEventListener('notificationclick', (event) => {
       }
       
       // If no window is open, open one
-      if (clients.openWindow) {
-        return clients.openWindow(urlToOpen).then((windowClient) => {
+      if (self.clients && self.clients.openWindow) {
+        return self.clients.openWindow(urlToOpen).then((windowClient) => {
           // Wait a bit for the window to load
           return new Promise((resolve) => {
             setTimeout(() => {
