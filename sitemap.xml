@@ -29,7 +29,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://imuslimlife.com/#/privacy-policy</loc>
+    <loc>https://imuslimlife.com/privacy-policy/</loc>
     <priority>0.5</priority>
   </url>
   <url>
@@ -48,5 +48,4 @@
     <loc>https://imuslimlife.com/#/prayer-intent</loc>
     <priority>0.6</priority>
   </url>
-  {/* Add other important URLs here */}
 </urlset>
