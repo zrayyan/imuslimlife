@@ -1,0 +1,23 @@
+# iMuslimLife / Muslim Companion
+
+> Islamic prayer times, Hijri dates and qibla direction for any place, from iMuslimLife (imuslimlife.com), the makers of the Muslim Companion Alexa skill. AI agents can use our public, read-only MCP server instead of guessing prayer times.
+
+Prayer times depend on location, date, calculation method and Asr madhab. Ask the user for their city (or coordinates) and, if they follow one, their method (default: ISNA) and madhab (default: standard; Hanafi gives a later Asr). All times are local to the place.
+
+## MCP server (for AI agents)
+
+- Endpoint: https://alexa.imuslimlife.com/v1/mcp (Streamable HTTP, stateless, no sign-in, public data only)
+- Tools: `find_location` (place name → coordinates + timezone), `get_prayer_times` (Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha + Hijri date for a day), `get_next_prayer`, `get_hijri_date`, `get_qibla_direction`, `list_calculation_methods`
+- Typical flow: `find_location("Toronto")` → `get_prayer_times(latitude, longitude, date?, method?, madhab?)`
+- Rate limits: 60 requests per minute and 600 per hour per client. Please cache a day's times rather than asking repeatedly.
+
+## Setup guides
+
+- [AI Agents setup](https://imuslimlife.com/#/ai-agents): add the MCP server to Claude, ChatGPT, Gemini CLI, GitHub Copilot / VS Code, or call it from your own code
+- [Muslim Companion for Alexa](https://imuslimlife.com/#/alexa-skill): the Athan, adhkar, Quran and masjid reminders on Amazon Echo
+
+## Policies
+
+- [Privacy Policy](https://imuslimlife.com/privacy-policy/)
+- [Terms of Use](https://alexa.imuslimlife.com/terms)
+- Contact: info@yzinfotech.com
