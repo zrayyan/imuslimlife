@@ -25,7 +25,7 @@ export const LANGS = {
     asr: ["standard (Shafi'i, Maliki, Hanbali)", 'Hanafi'],
     methods: {},
     nav: { times: 'Prayer Times', cities: 'Cities', quran: 'Quran', alexa: 'Athan on Alexa' },
-    foot: { all: 'All countries', privacy: 'Privacy', terms: 'Terms', adfree: 'Always ad-free', data: 'City data ©', ramadan: (y) => `Ramadan ${y}` },
+    foot: { widget: 'Free widget for masjids', all: 'All countries', privacy: 'Privacy', terms: 'Terms', adfree: 'Always ad-free', data: 'City data ©', ramadan: (y) => `Ramadan ${y}` },
     root: 'Prayer times', countriesCrumb: 'Countries', date: 'Date',
     city: {
       title: (n) => `${n} Prayer Times Today: Fajr, Dhuhr, Asr, Maghrib, Isha`,
@@ -91,7 +91,7 @@ export const LANGS = {
     asr: ['الجمهور (الشافعي والمالكي والحنبلي)', 'الحنفي'],
     methods: { 3: 'رابطة العالم الإسلامي', 4: 'تقويم أم القرى، مكة المكرمة', 5: 'الهيئة المصرية العامة للمساحة', 8: 'منطقة الخليج', 9: 'الكويت', 10: 'قطر', 16: 'دبي', 18: 'تونس', 19: 'الجزائر', 21: 'المغرب', 23: 'الأردن' },
     nav: { times: 'مواقيت الصلاة', cities: 'المدن', quran: 'القرآن', alexa: 'الأذان على أليكسا' },
-    foot: { all: 'جميع الدول', privacy: 'الخصوصية', terms: 'الشروط', adfree: 'بلا إعلانات دائمًا', data: 'بيانات المدن ©', ramadan: (y) => `رمضان ${y}` },
+    foot: { widget: 'أداة مجانية لمواقع المساجد', all: 'جميع الدول', privacy: 'الخصوصية', terms: 'الشروط', adfree: 'بلا إعلانات دائمًا', data: 'بيانات المدن ©', ramadan: (y) => `رمضان ${y}` },
     root: 'مواقيت الصلاة', countriesCrumb: 'الدول', date: 'التاريخ',
     city: {
       title: (n) => `مواقيت الصلاة في ${n} اليوم: الفجر والظهر والعصر والمغرب والعشاء`,
@@ -157,7 +157,7 @@ export const LANGS = {
     asr: ['شافعی، مالکی، حنبلی', 'حنفی'],
     methods: { 1: 'جامعہ علومِ اسلامیہ، کراچی' },
     nav: { times: 'نماز کے اوقات', cities: 'شہر', quran: 'قرآن', alexa: 'الیکسا پر اذان' },
-    foot: { all: 'تمام ممالک', privacy: 'پرائیویسی', terms: 'شرائط', adfree: 'ہمیشہ اشتہارات کے بغیر', data: 'شہروں کا ڈیٹا ©', ramadan: (y) => `رمضان ${y}` },
+    foot: { widget: 'مساجد کی ویب سائٹ کے لیے مفت ویجٹ', all: 'تمام ممالک', privacy: 'پرائیویسی', terms: 'شرائط', adfree: 'ہمیشہ اشتہارات کے بغیر', data: 'شہروں کا ڈیٹا ©', ramadan: (y) => `رمضان ${y}` },
     root: 'نماز کے اوقات', countriesCrumb: 'ممالک', date: 'تاریخ',
     city: {
       title: (n) => `${n} میں آج کے نماز کے اوقات: فجر، ظہر، عصر، مغرب، عشاء`,
@@ -223,7 +223,7 @@ export const LANGS = {
     asr: ["Syafi'i (standar)", 'Hanafi'],
     methods: { 20: 'Kementerian Agama RI (Kemenag)' },
     nav: { times: 'Jadwal Sholat', cities: 'Kota', quran: "Al-Qur'an", alexa: 'Azan di Alexa' },
-    foot: { all: 'Semua negara', privacy: 'Privasi', terms: 'Ketentuan', adfree: 'Selalu tanpa iklan', data: 'Data kota ©', ramadan: (y) => `Ramadan ${y}` },
+    foot: { widget: 'Widget gratis untuk situs masjid', all: 'Semua negara', privacy: 'Privasi', terms: 'Ketentuan', adfree: 'Selalu tanpa iklan', data: 'Data kota ©', ramadan: (y) => `Ramadan ${y}` },
     root: 'Jadwal sholat', countriesCrumb: 'Negara', date: 'Tanggal',
     city: {
       title: (n) => `Jadwal Sholat ${n} Hari Ini: Subuh, Dzuhur, Ashar, Maghrib, Isya`,
@@ -287,7 +287,7 @@ export const LANGS = {
     asr: ['Syafie (standard)', 'Hanafi'],
     methods: { 17: 'JAKIM (Jabatan Kemajuan Islam Malaysia)', 11: 'Majlis Ugama Islam Singapura (MUIS)' },
     nav: { times: 'Waktu Solat', cities: 'Bandar', quran: 'Al-Quran', alexa: 'Azan di Alexa' },
-    foot: { all: 'Semua negara', privacy: 'Privasi', terms: 'Terma', adfree: 'Sentiasa tanpa iklan', data: 'Data bandar ©', ramadan: (y) => `Ramadan ${y}` },
+    foot: { widget: 'Widget percuma untuk laman masjid', all: 'Semua negara', privacy: 'Privasi', terms: 'Terma', adfree: 'Sentiasa tanpa iklan', data: 'Data bandar ©', ramadan: (y) => `Ramadan ${y}` },
     root: 'Waktu solat', countriesCrumb: 'Negara', date: 'Tarikh',
     city: {
       title: (n) => `Waktu Solat ${n} Hari Ini: Subuh, Zohor, Asar, Maghrib, Isyak`,

@@ -142,3 +142,9 @@ details p { margin-top: 8px; color: var(--muted); }
 [dir="rtl"] .tt td, [dir="rtl"] .slot b { direction: ltr; unicode-bidi: isolate; }
 [dir="rtl"] .card h2, [dir="rtl"] .hero h1 { line-height: 1.5; }
 [dir="rtl"] details summary { line-height: 1.7; }
+
+/* Widget builder (2026-10-20) */
+.wb select, .wb textarea, #wb-code { width: 100%; max-width: 420px; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--text); font: inherit; margin-top: 4px; }
+#wb-code { max-width: none; font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+.wb label { font-weight: 500; }
+.hint { font-size: 13px; color: var(--muted); }
