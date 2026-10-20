@@ -122,6 +122,7 @@ function existingMonth(file, y, m) {
 }
 
 let listed = cities; // the cities that have pages; set before anything is rendered
+let ramadan = null; // the coming Ramadan (from Makkah's Umm al-Qura dates); set before rendering
 let footerCountries = [];
 
 function layout({ title, description, canonical, jsonLd, body, image = null }) {
@@ -154,7 +155,7 @@ ${BEACON}
 </header>
 ${body}
 <footer class="foot wrap">
-  <p><a href="/">iMuslim Life</a> · ${footerCountries.map(([cc, c]) => `<a href="${countryUrl(cc)}">${esc(c.name)}</a>`).join(' · ')} · <a href="/prayer-times/countries/">All countries</a></p>
+  <p><a href="/">iMuslim Life</a> · ${ramadan ? `<a href="${ramadan.url}">Ramadan ${ramadan.year}</a> · ` : ''}${footerCountries.map(([cc, c]) => `<a href="${countryUrl(cc)}">${esc(c.name)}</a>`).join(' · ')} · <a href="/prayer-times/countries/">All countries</a></p>
   <p><a href="/privacy-policy/">Privacy</a> · <a href="/terms/">Terms</a> · Always ad-free · City data © <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0)</p>
 </footer>
 </body>
@@ -367,6 +368,70 @@ function countriesPage() {
   });
 }
 
+const longDate = (iso, opts = {}) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC', ...opts });
+
+function ramadanPage() {
+  const { year, hijriYear, start, eid, oddNights, firstTaraweeh } = ramadan;
+  const ramadanMonths = (c) => {
+    const d = data.get(c);
+    if (!d) return [];
+    return d.months.slice(1).filter((mo) => ramadanDays(mo).length && String(mo.y) === year || ramadanDays(mo).some((x) => x.date.startsWith(year)));
+  };
+  const faq = [
+    [`When does Ramadan ${year} start?`, `By the calculated Umm al-Qura calendar, Ramadan ${hijriYear} begins on ${longDate(start)}, so the first Taraweeh is on the evening of ${longDate(firstTaraweeh, { weekday: undefined })} and the first fast that day. The actual start depends on the moon sighting your community follows and can be a day later.`],
+    ...(eid ? [[`When is Eid al-Fitr ${year}?`, `By the same calendar, Eid al-Fitr is on ${longDate(eid)}, depending on the sighting of the Shawwal moon.`]] : []),
+    ['What time is Suhoor and Iftar in my city?', 'Suhoor ends at Fajr and Iftar is at Maghrib. Choose your city below for the full Ramadan timetable with both times for every day.'],
+  ];
+  const body = `
+<main class="wrap">
+  <p class="crumbs"><a href="/prayer-times/">Prayer times</a> › Ramadan ${year}</p>
+  <section class="hero">
+    <h1>Ramadan ${year} (${hijriYear} AH)</h1>
+    <p class="sub">Expected dates, Suhoor and Iftar times, and Ramadan timetables for ${listed.length} cities</p>
+    <div class="today ramadan-dates">
+      <div class="slot"><span>Ramadan begins</span><b>${longDate(start, { weekday: 'short', year: undefined })}</b></div>
+      ${eid ? `<div class="slot"><span>Eid al-Fitr</span><b>${longDate(eid, { weekday: 'short', year: undefined })}</b></div>` : ''}
+      <div class="slot"><span>First Taraweeh</span><b>${longDate(firstTaraweeh, { weekday: 'short', year: undefined })}</b></div>
+    </div>
+    <p class="next" id="rm-count" data-start="${start}">&nbsp;</p>
+  </section>
+
+  <section class="card">
+    <h2>Expected dates</h2>
+    <p>By the calculated Umm al-Qura calendar, the first day of Ramadan ${hijriYear} is <b>${longDate(start)}</b>${eid ? ` and Eid al-Fitr is <b>${longDate(eid)}</b>` : ''}. The month begins with the sighting of the new moon, so where your community follows a local sighting, Ramadan and Eid may begin a day later. Each city's timetable below shows its own calculated Hijri dates.</p>
+    <p class="note">Taraweeh is prayed on the night before each fast: the first Taraweeh is on the evening of ${longDate(firstTaraweeh, { weekday: undefined })}.</p>
+  </section>
+
+  <section class="card">
+    <h2>Suhoor and Iftar</h2>
+    <p><b>Suhoor</b>, the meal before dawn, ends at <b>Fajr</b>. <b>Iftar</b>, breaking the fast, is at <b>Maghrib</b>. Both times change a little every day; your city's Ramadan timetable lists them for the whole month, and the timetables print on one page.</p>
+  </section>
+
+  <section class="card">
+    <h2>The last ten nights</h2>
+    <p>Laylat al-Qadr is sought in the odd nights of the last ten. Each night begins at Maghrib on the evening before the day:</p>
+    <ul class="cities">${oddNights.map((n) => `<li><b>Night ${n.night}</b><span>evening of ${longDate(n.date, { year: undefined })}</span></li>`).join('')}</ul>
+  </section>
+
+  ${listedCountries().map(([cc, c]) => `<section class="card"><h2><a href="${countryUrl(cc)}">Ramadan timetable ${year}: ${esc(c.name)}</a></h2><ul class="cities">${listed.filter((x) => x.country === cc).map((x) => {
+    const mos = ramadanMonths(x);
+    return `<li><a href="${mos[0] ? monthUrl(x, mos[0].m) : cityUrl(x)}">${esc(named(x))}</a><span>${mos.map((mo) => `<a href="${monthUrl(x, mo.m)}">${monthName(mo.m)}</a>`).join(' · ')}</span></li>`;
+  }).join('')}</ul></section>`).join('\n  ')}
+
+  <section class="card cta"><h2>Ramadan on your Echo and iPhone</h2><p>Muslim Companion's Ramadan mode reminds you before Suhoor ends, announces Iftar with the Maghrib Athan and plays Taraweeh from Makkah. The Salat-e-Mustaqeem app brings the same times to your iPhone.</p><p class="btns"><a class="btn" href="/alexa-athan/ramadan/">Ramadan on Alexa</a><a class="btn alt" href="/mobile-app/">Get the app</a></p></section>
+
+  <section class="card"><h2>Questions</h2>${faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</section>
+</main>
+<script>(function(){var el=document.getElementById('rm-count'),s=new Date(el.dataset.start+'T00:00:00'),d=Math.ceil((s-new Date())/864e5);if(d>1)el.innerHTML='<b>'+d+' days</b> until Ramadan';else if(d===1)el.innerHTML='Ramadan begins <b>tomorrow</b>';})();</script>`;
+  return layout({
+    title: `Ramadan ${year}: Dates, Suhoor & Iftar Times for ${listed.length} Cities`,
+    description: `Ramadan ${year} (${hijriYear} AH) is expected to begin on ${longDate(start, { weekday: undefined })}${eid ? ` with Eid al-Fitr on ${longDate(eid, { weekday: undefined })}` : ''}. Suhoor and Iftar timetables for ${listed.length} cities, printable.`,
+    canonical: ramadan.url,
+    jsonLd: [breadcrumb([['iMuslim Life', '/'], ['Prayer times', '/prayer-times/'], [`Ramadan ${year}`, ramadan.url]]), faqLd(faq)],
+    body,
+  });
+}
+
 let changed = 0;
 function writeIfChanged(file, content) {
   if (fs.existsSync(file) && fs.readFileSync(file, 'utf8') === content) return;
@@ -404,6 +469,32 @@ for (const city of order) {
   if (fetched && fetched % 300 === 0) console.log(`city-pages: ${fetched} months fetched, ${data.size} cities ready`);
 }
 
+// The coming Ramadan, by the calculated Umm al-Qura calendar (Makkah's embedded months):
+// first day, Eid al-Fitr and the odd nights of the last ten. Cities may differ by a day.
+{
+  const makkah = [...data].find(([c]) => c.country === 'sa' && c.slug === 'makkah')?.[1];
+  const today = new Date().toISOString().slice(0, 10);
+  const days = makkah ? makkah.months.slice(1).flatMap((mo) => mo.days).sort((a, b) => a.date.localeCompare(b.date)) : [];
+  const hd = (d) => d.hijri.match(/^(\d+) (\S.*) (\d+)$/) || [];
+  const startIdx = days.findIndex((d) => d.date >= today && hd(d)[1] === '1' && hd(d)[2] === 'Ramadan');
+  const ongoing = days.findIndex((d) => d.date === today && hd(d)[2] === 'Ramadan');
+  const from = ongoing > -1 ? days.findIndex((d) => hd(d)[2] === 'Ramadan') : startIdx;
+  if (from > -1) {
+    const start = days[from];
+    const eid = days.slice(from).find((d) => hd(d)[1] === '1' && hd(d)[2] === 'Shawwal');
+    const year = start.date.slice(0, 4);
+    const evening = (n) => {
+      const d = days.slice(from).find((x) => hd(x)[1] === String(n - 1) && hd(x)[2] === 'Ramadan');
+      return d && { night: n, date: d.date };
+    };
+    ramadan = {
+      year, hijriYear: hd(start)[3], start: start.date, eid: eid?.date, url: `/ramadan/${year}/`,
+      oddNights: [21, 23, 25, 27, 29].map(evening).filter(Boolean),
+      firstTaraweeh: days[from - 1]?.date,
+    };
+  }
+}
+
 // Pass 2: pages. Link only to cities that are ready now or already have a page.
 listed = cities.filter((c) => data.has(c) || fs.existsSync(path.join(cityDir(c), 'index.html')));
 footerCountries = Object.entries(countries)
@@ -419,10 +510,11 @@ for (const [city, { now, months }] of data) {
 
 for (const [cc] of listedCountries()) writeIfChanged(path.join(OUT, 'prayer-times', cc, 'index.html'), countryPage(cc));
 writeIfChanged(path.join(OUT, 'prayer-times', 'countries', 'index.html'), countriesPage());
+if (ramadan) writeIfChanged(path.join(OUT, ramadan.url.slice(1), 'index.html'), ramadanPage());
 writeIfChanged(path.join(OUT, 'prayer-times', 'cities.css'), fs.readFileSync(path.join(HERE, 'cities.css'), 'utf8'));
 
 const month = new Date().toISOString().slice(0, 7);
-const urls = ['/prayer-times/countries/', ...listedCountries().map(([cc]) => countryUrl(cc)), ...listed.filter((c) => data.has(c) || fs.existsSync(path.join(cityDir(c), MONTHS[0], 'index.html'))).flatMap((c) => [cityUrl(c), ...MONTHS.map((_, i) => monthUrl(c, i + 1))])];
+const urls = [...(ramadan ? [ramadan.url] : []), '/prayer-times/countries/', ...listedCountries().map(([cc]) => countryUrl(cc)), ...listed.filter((c) => data.has(c) || fs.existsSync(path.join(cityDir(c), MONTHS[0], 'index.html'))).flatMap((c) => [cityUrl(c), ...MONTHS.map((_, i) => monthUrl(c, i + 1))])];
 writeIfChanged(path.join(OUT, 'sitemap-cities.xml'), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map((u) => `  <url><loc>${SITE}${u}</loc><lastmod>${month}-01</lastmod></url>`).join('\n')}
