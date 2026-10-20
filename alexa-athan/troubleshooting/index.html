@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Athan Not Playing on Alexa? Quick Fixes</title>
+<meta name="description" content="Athan not playing on your Echo? Check the routine trigger, re-link the skill, fix the wrong Echo playing, and test with the dashboard. Fixes for the Muslim Companion Alexa skill.">
+<link rel="canonical" href="https://imuslimlife.com/alexa-athan/troubleshooting/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="iMuslim Life">
+<meta property="og:title" content="Athan Not Playing on Alexa? Quick Fixes">
+<meta property="og:description" content="Athan not playing on your Echo? Check the routine trigger, re-link the skill, fix the wrong Echo playing, and test with the dashboard. Fixes for the Muslim Companion Alexa skill.">
+<meta property="og:url" content="https://imuslimlife.com/alexa-athan/troubleshooting/">
+<meta property="og:image" content="https://imuslimlife.com/logo512.png">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#1e1b4b">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/alexa-athan/style.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"iMuslim Life","item":"https://imuslimlife.com/"},{"@type":"ListItem","position":2,"name":"Athan on Alexa","item":"https://imuslimlife.com/alexa-athan/"},{"@type":"ListItem","position":3,"name":"Athan not playing?","item":"https://imuslimlife.com/alexa-athan/troubleshooting/"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Why can't I test the routine by voice?","acceptedAnswer":{"@type":"Answer","text":"The Muslim Companion Azan sensor is a virtual contact sensor. Saying \"Alexa, open Muslim Companion Azan\" only asks what you want to do. Test routine now on the Status page sends the same signal your routine waits for."}},{"@type":"Question","name":"The Athan worked before and stopped. Why?","acceptedAnswer":{"@type":"Answer","text":"The most common reason is that the skill was disabled and enabled again, which creates a new sensor while your routines keep the old one. Rebuild each routine's trigger (step 3)."}}]}]}</script>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "3937a625dcce4781b04cf88f4f50fe59"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+<header class="hero">
+  <div class="dots" aria-hidden="true"></div>
+  <nav class="top">
+    <a class="brand" href="/"><span aria-hidden="true">🕌</span> iMuslim Life</a>
+    <a class="top-link" href="/alexa-athan/">Athan on Alexa</a>
+  </nav>
+  <div class="hero-inner">
+    <p class="crumbs"><a href="/alexa-athan/">Athan on Alexa</a> › Athan not playing?</p>
+    <h1>Athan not playing on Alexa? Start here</h1>
+    <p class="lede">Almost every missed Athan comes down to the routine. Work through these checks in order. Most take less than a minute.</p>
+    <div class="prayers" aria-hidden="true"><span><b>🌅</b>Fajr</span><span><b>🌞</b>Dhuhr</span><span><b>🌇</b>Asr</span><span><b>🌆</b>Maghrib</span><span><b>🌙</b>Isha</span></div>
+    <div class="ctas">
+      <a class="btn-amber" href="https://www.amazon.com/dp/B0GTBN95HQ/" rel="noopener">Enable Muslim Companion on Alexa</a>
+      <a class="btn-glass" href="https://alexa.imuslimlife.com" rel="noopener">Set up at alexa.imuslimlife.com →</a>
+    </div>
+    <p class="free">Free · No ads · Works on every Echo</p>
+  </div>
+</header>
+<main>
+
+<section class="card">
+  <h2>1. Test from the dashboard</h2>
+  <p>Open <a href="https://alexa.imuslimlife.com">alexa.imuslimlife.com</a> → <b>Status</b> and tap <b>Test routine now</b>.</p>
+  <ul>
+    <li><b>The Athan plays:</b> your routine works. Check that Scheduled Athan is on (say <span class="say">“Alexa, ask Muslim Companion what is my scheduled athan status”</span>) and that your location is right on the dashboard.</li>
+    <li><b>Nothing plays:</b> the routine is the problem. Continue with step 2.</li>
+  </ul>
+</section>
+
+<section class="card">
+  <h2>2. Check the routine trigger</h2>
+  <p>In the Alexa app, open your Athan routine. The trigger must read <b>Muslim Companion Azan opens</b>. If it shows a switch or doorbell, or says “turns on”, delete the trigger and add <b>Smart Home → Muslim Companion Azan → Open</b>.</p>
+  <p>Also check the routine is switched on. Alexa turns some new routines off.</p>
+</section>
+
+<section class="card">
+  <h2>3. Re-link and rebuild the trigger</h2>
+  <p>If the sensor is missing or the test still fails:</p>
+  <ol>
+    <li>Alexa app → Skills → Muslim Companion → <b>Disable</b>, then <b>Enable</b> and sign in again.</li>
+    <li>Say <span class="say">“Alexa, discover devices”</span> and check Muslim Companion Azan appears.</li>
+    <li>In <b>each</b> Athan routine, delete the trigger and add Muslim Companion Azan → Open again. Routines keep the old sensor otherwise.</li>
+    <li>Tap Test routine now on the Status page.</li>
+  </ol>
+</section>
+
+<section class="card">
+  <h2>The wrong Echo plays, or none of them</h2>
+  <p>Open the routine and check <b>Hear Alexa from</b>. It must name an Echo that is online. To play on several Echos, see <a href="/alexa-athan/routine/">one routine per Echo</a>.</p>
+</section>
+
+<section class="card">
+  <h2>The Athan is at the wrong time</h2>
+  <p>On the dashboard, confirm your location and calculation method. You can also ask <span class="say">“Alexa, ask Muslim Companion which calculation method should I use”</span>: it suggests the method most used where you live. For a later Asr, set the madhab to Hanafi.</p>
+</section>
+
+<section class="card">
+  <h2>Still stuck?</h2>
+  <p>Say <span class="say">“Alexa, open Muslim Companion”</span> once on your Echo, then check the Status page: it shows when your Echo last checked in and when your next Athan is due. The Alexa app's <b>Activity</b> tab shows whether your routine ran.</p>
+</section>
+<section class="card"><h2>Questions</h2><details><summary>Why can't I test the routine by voice?</summary><p>The Muslim Companion Azan sensor is a virtual contact sensor. Saying "Alexa, open Muslim Companion Azan" only asks what you want to do. Test routine now on the Status page sends the same signal your routine waits for.</p></details><details><summary>The Athan worked before and stopped. Why?</summary><p>The most common reason is that the skill was disabled and enabled again, which creates a new sensor while your routines keep the old one. Rebuild each routine's trigger (step 3).</p></details></section>
+<section class="card start">
+  <h2>Get the Athan on your Echo today</h2>
+  <p>Enable the skill, then choose your settings on the dashboard. It takes about five minutes.</p>
+  <div class="ctas"><a class="btn-amber" href="https://www.amazon.com/dp/B0GTBN95HQ/" rel="noopener">Enable on Alexa</a><a class="btn-blue" href="https://alexa.imuslimlife.com" rel="noopener">Open the dashboard</a></div>
+</section>
+<nav class="card more" aria-label="More guides"><h2>More guides</h2><ul><li><a href="/alexa-athan/setup/">Set up the Athan on Alexa</a><span>The 5 steps, with screenshots.</span></li><li><a href="/alexa-athan/routine/">The Azan routine</a><span>Create the routine and pick which Echos play.</span></li><li><a href="/alexa-athan/fajr/">Fajr Athan on Alexa</a><span>A special Fajr Athan and a gentle wake-up.</span></li><li><a href="/alexa-athan/echo-show/">Prayer times on Echo Show</a><span>Times on screen, countdown and widget.</span></li><li><a href="/alexa-athan/quran/">Quran on Alexa</a><span>30+ reciters, after the Athan or continuous.</span></li><li><a href="/alexa-athan/ramadan/">Ramadan on Alexa</a><span>Suhoor, Iftar and Taraweeh on your Echo.</span></li><li><a href="/alexa-athan/masjid-iqamah/">Masjid iqamah reminders</a><span>Your masjid's iqamah and Jumu'ah times.</span></li><li><a href="/alexa-athan/commands/">Voice commands</a><span>Everything you can say to Muslim Companion.</span></li></ul></nav>
+</main>
+<footer class="foot">
+  <p><a href="/">iMuslim Life</a> · <a href="/alexa-athan/">Athan on Alexa</a> · <a href="/privacy-policy/">Privacy</a> · <a href="/terms/">Terms</a></p>
+  <p>Muslim Companion is an independent skill for Amazon Alexa. Amazon, Alexa and Echo are trademarks of Amazon.com, Inc. or its affiliates.</p>
+</footer>
+</body>
+</html>
