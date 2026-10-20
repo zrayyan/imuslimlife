@@ -123,3 +123,10 @@ details p { margin-top: 8px; color: var(--muted); }
   .month .sub, .note { font-size: 10px; margin-bottom: 6px; padding: 6px 8px; }
   .printnote { display: block; margin-top: 8px; font-size: 9px; color: #555; }
 }
+
+/* Ramadan hub */
+.ramadan-dates { grid-template-columns: repeat(3, 1fr); max-width: 720px; margin-left: auto; margin-right: auto; }
+.ramadan-dates .slot b { font-size: 18px; }
+.cities span a { font-weight: 400; display: inline; color: var(--muted); }
+@media (max-width: 720px) { .ramadan-dates { grid-template-columns: 1fr; } }
+.cities li > b { display: block; }
