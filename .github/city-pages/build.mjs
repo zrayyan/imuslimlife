@@ -44,6 +44,15 @@ const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 
 const SKILL_COUNTRIES = new Set(['us', 'ca', 'uk', 'in', 'au', 'sa']);
 
 const { countries, cities } = JSON.parse(fs.readFileSync(path.join(HERE, 'cities.json'), 'utf8'));
+// Other spellings people search for (aliases.json): shown as "Makkah (Mecca)".
+const aliasFile = path.join(HERE, 'aliases.json');
+const ALIASES = fs.existsSync(aliasFile) ? JSON.parse(fs.readFileSync(aliasFile, 'utf8')) : {};
+const named = (c) => (ALIASES[`${c.country}/${c.slug}`] ? `${c.name} (${ALIASES[`${c.country}/${c.slug}`]})` : c.name);
+// Share image per city (made once by og-images.mjs); the logo where there is none.
+const ogImage = (c) => {
+  const rel = `/prayer-times/og/${c.country}-${c.slug}.jpg`;
+  return fs.existsSync(path.join(OUT, rel)) ? rel : null;
+};
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const cityUrl = (c) => `/prayer-times/${c.country}/${c.slug}/`;
@@ -115,7 +124,7 @@ function existingMonth(file, y, m) {
 let listed = cities; // the cities that have pages; set before anything is rendered
 let footerCountries = [];
 
-function layout({ title, description, canonical, jsonLd, body }) {
+function layout({ title, description, canonical, jsonLd, body, image = null }) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -129,7 +138,7 @@ function layout({ title, description, canonical, jsonLd, body }) {
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${SITE}${canonical}">
-<meta property="og:image" content="${SITE}/logo512.png">
+<meta property="og:image" content="${SITE}${image || '/logo512.png'}">${image ? '\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n<meta name="twitter:card" content="summary_large_image">' : ''}
 <meta name="theme-color" content="#006400">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/prayer-times/cities.css">
@@ -224,8 +233,8 @@ function cityPage(city, cur, nxt, now) {
   const country = countries[city.country];
   const q = qibla(city.lat, city.lon);
   const km = distanceKm(city, KAABA);
-  const title = `${city.name} Prayer Times Today: Fajr, Dhuhr, Asr, Maghrib, Isha`;
-  const description = `Prayer times for ${place(city)}, ${country.name}: today's Fajr, Sunrise, Dhuhr, Asr, Maghrib and Isha, monthly timetables with Hijri dates, and the Qibla direction.`;
+  const title = `${named(city)} Prayer Times Today: Fajr, Dhuhr, Asr, Maghrib, Isha`;
+  const description = `Prayer times for ${named(city)}${city.region ? `, ${city.region}` : ''}, ${country.name}: today's Fajr, Sunrise, Dhuhr, Asr, Maghrib and Isha, monthly timetables with Hijri dates, and the Qibla direction.`;
   const faq = [
     [`How are the prayer times for ${city.name} calculated?`, `With the ${country.methodName} method and the ${country.asrName} time for Asr, for ${city.name}'s coordinates and local time zone. Your masjid's timetable may differ by a few minutes.`],
     [`Which direction is the Qibla in ${city.name}?`, `The Qibla in ${city.name} is ${Math.round(q)}° from true north, roughly ${compass(q)}. Makkah is about ${fmtDistance(km, city.country)} away.`],
@@ -235,7 +244,7 @@ function cityPage(city, cur, nxt, now) {
 <main class="wrap">
   <p class="crumbs"><a href="/prayer-times/">Prayer times</a> › <a href="${countryUrl(city.country)}">${esc(country.name)}</a> › ${esc(city.name)}</p>
   <section class="hero">
-    <h1>Prayer times in ${esc(city.name)}</h1>
+    <h1>Prayer times in ${esc(named(city))}</h1>
     <p class="sub">${city.region ? `${esc(city.region)}, ` : ''}${esc(country.name)} · <span id="pt-date">${monthName(cur.m)} ${cur.y}</span></p>
     <div class="today" aria-live="polite">${PRAYERS.map((p) => `<div class="slot" data-p="${p}"><span>${p}</span><b>—</b></div>`).join('')}</div>
     <p class="next" id="pt-next">&nbsp;</p>
@@ -264,7 +273,7 @@ function cityPage(city, cur, nxt, now) {
 
   <section class="card">
     <h2>Prayer times near ${esc(city.name)}</h2>
-    <ul class="cities">${nearbyCities(city).map((c) => `<li><a href="${cityUrl(c)}">${esc(c.name)}</a><span>${esc(c.region || countries[c.country].name)}</span></li>`).join('')}</ul>
+    <ul class="cities">${nearbyCities(city).map((c) => `<li><a href="${cityUrl(c)}">${esc(named(c))}</a><span>${esc(c.region || countries[c.country].name)}</span></li>`).join('')}</ul>
   </section>
 
   <section class="card">
@@ -275,7 +284,7 @@ function cityPage(city, cur, nxt, now) {
 ${dataScript({ tz: city.tz, days: [...cur.days, ...nxt.days] })}
 <script>${CLIENT_TODAY}</script>`;
   return layout({
-    title, description, canonical: cityUrl(city),
+    title, description, canonical: cityUrl(city), image: ogImage(city),
     jsonLd: [breadcrumb([['iMuslim Life', '/'], ['Prayer times', '/prayer-times/'], [country.name, countryUrl(city.country)], [city.name, cityUrl(city)]]), faqLd(faq)],
     body,
   });
@@ -287,8 +296,8 @@ function monthPage(city, month, now) {
   const ram = ramadanDays(month);
   const ramYear = ram[0]?.hijri.split(' ').pop();
   const title = ram.length
-    ? `${city.name} Prayer Times ${label}: Ramadan Timetable`
-    : `${city.name} Prayer Times ${label} | Monthly Timetable`;
+    ? `${named(city)} Prayer Times ${label}: Ramadan Timetable`
+    : `${named(city)} Prayer Times ${label} | Monthly Timetable`;
   const first = month.days[0];
   const last = month.days[month.days.length - 1];
   const description = `${city.name} prayer timetable for ${label}: Fajr, Sunrise, Dhuhr, Asr, Maghrib and Isha for every day${ram.length ? `, including Ramadan ${ramYear} (Suhoor ends at Fajr, Iftar at Maghrib)` : ''}, with Hijri dates. Printable.`;
@@ -299,7 +308,7 @@ function monthPage(city, month, now) {
 <main class="wrap">
   <p class="crumbs noprint"><a href="/prayer-times/">Prayer times</a> › <a href="${countryUrl(city.country)}">${esc(country.name)}</a> › <a href="${cityUrl(city)}">${esc(city.name)}</a> › ${monthName(month.m)}</p>
   <section class="card month">
-    <h1>${esc(city.name)} prayer times, ${label}</h1>
+    <h1>${esc(named(city))} prayer times, ${label}</h1>
     <p class="sub">${esc(place(city))}, ${esc(country.name)} · ${esc(first.hijri)} – ${esc(last.hijri)} · ${esc(country.methodName)}, Asr ${esc(country.asrName)}</p>
     ${ramNote}
     <p class="noprint"><button class="btn" type="button" onclick="window.print()">Print this timetable</button> <a class="btn alt" href="${cityUrl(city)}">Today in ${esc(city.name)}</a></p>
@@ -315,7 +324,7 @@ function monthPage(city, month, now) {
 ${dataScript({ tz: city.tz, y: month.y, m: month.m, days: month.days })}
 <script>(function(){var D=JSON.parse(document.getElementById('pt-data').textContent);var p={};new Intl.DateTimeFormat('en-CA',{timeZone:D.tz,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).forEach(function(x){p[x.type]=x.value});var r=document.querySelector('tr[data-date="'+p.year+'-'+p.month+'-'+p.day+'"]');if(r)r.classList.add('is-today')})();</script>`;
   return layout({
-    title, description, canonical: monthUrl(city, month.m),
+    title, description, canonical: monthUrl(city, month.m), image: ogImage(city),
     jsonLd: [breadcrumb([['iMuslim Life', '/'], ['Prayer times', '/prayer-times/'], [country.name, countryUrl(city.country)], [city.name, cityUrl(city)], [label, monthUrl(city, month.m)]])],
     body,
   });
@@ -334,7 +343,7 @@ function countryPage(cc) {
   <section class="hero"><h1>Prayer times in ${esc(country.name)}</h1>
   <p class="sub">Daily times and monthly timetables, calculated with ${esc(country.methodName)} and the ${esc(country.asrName)} Asr time.</p></section>
   <section class="card"><h2>Cities</h2>
-  <ul class="cities">${list.map((c) => `<li><a href="${cityUrl(c)}">${esc(c.name)}</a><span>${esc(c.region || '')}</span></li>`).join('')}</ul></section>
+  <ul class="cities">${list.map((c) => `<li><a href="${cityUrl(c)}">${esc(named(c))}</a><span>${esc(c.region || '')}</span></li>`).join('')}</ul></section>
   <section class="card"><h2>Other countries</h2><p><a href="/prayer-times/countries/">All ${listedCountries().length} countries and ${listed.length} cities</a></p></section>
 </main>`;
   return layout({ title, description, canonical: countryUrl(cc), jsonLd: [breadcrumb([['iMuslim Life', '/'], ['Prayer times', '/prayer-times/'], [country.name, countryUrl(cc)]])], body });
@@ -347,7 +356,7 @@ function countriesPage() {
 <main class="wrap">
   <p class="crumbs"><a href="/prayer-times/">Prayer times</a> › Countries</p>
   <section class="hero"><h1>Prayer times by country</h1><p class="sub">${listed.length} cities in ${list.length} countries: today's times, monthly timetables and the Qibla direction.</p></section>
-  ${list.map(([cc, c]) => `<section class="card"><h2><a href="${countryUrl(cc)}">${esc(c.name)}</a></h2><ul class="cities">${listed.filter((x) => x.country === cc).map((x) => `<li><a href="${cityUrl(x)}">${esc(x.name)}</a></li>`).join('')}</ul></section>`).join('\n  ')}
+  ${list.map(([cc, c]) => `<section class="card"><h2><a href="${countryUrl(cc)}">${esc(c.name)}</a></h2><ul class="cities">${listed.filter((x) => x.country === cc).map((x) => `<li><a href="${cityUrl(x)}">${esc(named(x))}</a></li>`).join('')}</ul></section>`).join('\n  ')}
 </main>`;
   return layout({
     title: `Prayer Times in ${listed.length} Cities Worldwide, by Country`,
