@@ -100,3 +100,6 @@ details p { margin-top: 8px; color: var(--gray-700); }
 .cmds dt { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 6px; }
 .cmds dt:first-child { margin-top: 0; }
 .cmds dd { margin-top: 4px; color: var(--gray-700); font-size: 15px; }
+
+.more span a { font-weight: 400; display: inline; color: var(--gray-500); }
+.more span a:hover { color: var(--blue-600); }
