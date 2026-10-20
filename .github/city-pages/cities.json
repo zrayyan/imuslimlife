@@ -1,0 +1,68 @@
+{
+  "_comment": "City prayer-time pages (pilot, 2026-10-20). Each country sets the calculation defaults most used there; params are passed to /v1/calendar as-is. Add a city here and run build.mjs. Coordinates are city centres.",
+  "countries": {
+    "us": { "name": "United States", "params": { "method": 2, "school": 0 }, "methodName": "ISNA (Islamic Society of North America)", "asrName": "standard (Shafi'i, Maliki, Hanbali)" },
+    "ca": { "name": "Canada", "params": { "method": 2, "school": 0 }, "methodName": "ISNA (Islamic Society of North America)", "asrName": "standard (Shafi'i, Maliki, Hanbali)" },
+    "uk": { "name": "United Kingdom", "params": { "method": 3, "school": 0, "latitudeAdjustmentMethod": "ANGLE_BASED" }, "methodName": "Muslim World League, with the angle-based rule for high latitudes", "asrName": "standard (Shafi'i, Maliki, Hanbali)" },
+    "pk": { "name": "Pakistan", "params": { "method": 1, "school": 1 }, "methodName": "University of Islamic Sciences, Karachi", "asrName": "Hanafi" },
+    "in": { "name": "India", "params": { "method": 1, "school": 1 }, "methodName": "University of Islamic Sciences, Karachi", "asrName": "Hanafi" },
+    "au": { "name": "Australia", "params": { "method": 3, "school": 0 }, "methodName": "Muslim World League", "asrName": "standard (Shafi'i, Maliki, Hanbali)" }
+  },
+  "cities": [
+    { "country": "us", "slug": "new-york", "name": "New York", "region": "New York", "lat": 40.7128, "lon": -74.006, "tz": "America/New_York" },
+    { "country": "us", "slug": "los-angeles", "name": "Los Angeles", "region": "California", "lat": 34.0522, "lon": -118.2437, "tz": "America/Los_Angeles" },
+    { "country": "us", "slug": "chicago", "name": "Chicago", "region": "Illinois", "lat": 41.8781, "lon": -87.6298, "tz": "America/Chicago" },
+    { "country": "us", "slug": "houston", "name": "Houston", "region": "Texas", "lat": 29.7604, "lon": -95.3698, "tz": "America/Chicago" },
+    { "country": "us", "slug": "dallas", "name": "Dallas", "region": "Texas", "lat": 32.7767, "lon": -96.797, "tz": "America/Chicago" },
+    { "country": "us", "slug": "orlando", "name": "Orlando", "region": "Florida", "lat": 28.5383, "lon": -81.3792, "tz": "America/New_York" },
+    { "country": "us", "slug": "dearborn", "name": "Dearborn", "region": "Michigan", "lat": 42.3223, "lon": -83.1763, "tz": "America/Detroit" },
+    { "country": "us", "slug": "philadelphia", "name": "Philadelphia", "region": "Pennsylvania", "lat": 39.9526, "lon": -75.1652, "tz": "America/New_York" },
+    { "country": "us", "slug": "washington-dc", "name": "Washington", "region": "District of Columbia", "lat": 38.9072, "lon": -77.0369, "tz": "America/New_York" },
+    { "country": "us", "slug": "atlanta", "name": "Atlanta", "region": "Georgia", "lat": 33.749, "lon": -84.388, "tz": "America/New_York" },
+    { "country": "us", "slug": "minneapolis", "name": "Minneapolis", "region": "Minnesota", "lat": 44.9778, "lon": -93.265, "tz": "America/Chicago" },
+    { "country": "us", "slug": "paterson", "name": "Paterson", "region": "New Jersey", "lat": 40.9168, "lon": -74.1718, "tz": "America/New_York" },
+    { "country": "us", "slug": "san-jose", "name": "San Jose", "region": "California", "lat": 37.3382, "lon": -121.8863, "tz": "America/Los_Angeles" },
+    { "country": "us", "slug": "seattle", "name": "Seattle", "region": "Washington", "lat": 47.6062, "lon": -122.3321, "tz": "America/Los_Angeles" },
+    { "country": "us", "slug": "miami", "name": "Miami", "region": "Florida", "lat": 25.7617, "lon": -80.1918, "tz": "America/New_York" },
+    { "country": "us", "slug": "tampa", "name": "Tampa", "region": "Florida", "lat": 27.9506, "lon": -82.4572, "tz": "America/New_York" },
+
+    { "country": "ca", "slug": "toronto", "name": "Toronto", "region": "Ontario", "lat": 43.6532, "lon": -79.3832, "tz": "America/Toronto" },
+    { "country": "ca", "slug": "mississauga", "name": "Mississauga", "region": "Ontario", "lat": 43.589, "lon": -79.6441, "tz": "America/Toronto" },
+    { "country": "ca", "slug": "montreal", "name": "Montreal", "region": "Quebec", "lat": 45.5019, "lon": -73.5674, "tz": "America/Toronto" },
+    { "country": "ca", "slug": "ottawa", "name": "Ottawa", "region": "Ontario", "lat": 45.4215, "lon": -75.6972, "tz": "America/Toronto" },
+    { "country": "ca", "slug": "calgary", "name": "Calgary", "region": "Alberta", "lat": 51.0447, "lon": -114.0719, "tz": "America/Edmonton" },
+    { "country": "ca", "slug": "edmonton", "name": "Edmonton", "region": "Alberta", "lat": 53.5461, "lon": -113.4938, "tz": "America/Edmonton" },
+    { "country": "ca", "slug": "vancouver", "name": "Vancouver", "region": "British Columbia", "lat": 49.2827, "lon": -123.1207, "tz": "America/Vancouver" },
+    { "country": "ca", "slug": "winnipeg", "name": "Winnipeg", "region": "Manitoba", "lat": 49.8951, "lon": -97.1384, "tz": "America/Winnipeg" },
+
+    { "country": "uk", "slug": "london", "name": "London", "region": "England", "lat": 51.5074, "lon": -0.1278, "tz": "Europe/London" },
+    { "country": "uk", "slug": "birmingham", "name": "Birmingham", "region": "England", "lat": 52.4862, "lon": -1.8904, "tz": "Europe/London" },
+    { "country": "uk", "slug": "manchester", "name": "Manchester", "region": "England", "lat": 53.4808, "lon": -2.2426, "tz": "Europe/London" },
+    { "country": "uk", "slug": "bradford", "name": "Bradford", "region": "England", "lat": 53.796, "lon": -1.7594, "tz": "Europe/London" },
+    { "country": "uk", "slug": "leicester", "name": "Leicester", "region": "England", "lat": 52.6369, "lon": -1.1398, "tz": "Europe/London" },
+    { "country": "uk", "slug": "leeds", "name": "Leeds", "region": "England", "lat": 53.8008, "lon": -1.5491, "tz": "Europe/London" },
+    { "country": "uk", "slug": "glasgow", "name": "Glasgow", "region": "Scotland", "lat": 55.8642, "lon": -4.2518, "tz": "Europe/London" },
+    { "country": "uk", "slug": "luton", "name": "Luton", "region": "England", "lat": 51.8787, "lon": -0.42, "tz": "Europe/London" },
+    { "country": "uk", "slug": "blackburn", "name": "Blackburn", "region": "England", "lat": 53.7488, "lon": -2.4877, "tz": "Europe/London" },
+
+    { "country": "pk", "slug": "karachi", "name": "Karachi", "region": "Sindh", "lat": 24.8607, "lon": 67.0011, "tz": "Asia/Karachi" },
+    { "country": "pk", "slug": "lahore", "name": "Lahore", "region": "Punjab", "lat": 31.5204, "lon": 74.3587, "tz": "Asia/Karachi" },
+    { "country": "pk", "slug": "islamabad", "name": "Islamabad", "region": "Islamabad Capital Territory", "lat": 33.6844, "lon": 73.0479, "tz": "Asia/Karachi" },
+    { "country": "pk", "slug": "rawalpindi", "name": "Rawalpindi", "region": "Punjab", "lat": 33.5651, "lon": 73.0169, "tz": "Asia/Karachi" },
+    { "country": "pk", "slug": "faisalabad", "name": "Faisalabad", "region": "Punjab", "lat": 31.4504, "lon": 73.135, "tz": "Asia/Karachi" },
+    { "country": "pk", "slug": "peshawar", "name": "Peshawar", "region": "Khyber Pakhtunkhwa", "lat": 34.0151, "lon": 71.5249, "tz": "Asia/Karachi" },
+
+    { "country": "in", "slug": "hyderabad", "name": "Hyderabad", "region": "Telangana", "lat": 17.385, "lon": 78.4867, "tz": "Asia/Kolkata" },
+    { "country": "in", "slug": "mumbai", "name": "Mumbai", "region": "Maharashtra", "lat": 19.076, "lon": 72.8777, "tz": "Asia/Kolkata" },
+    { "country": "in", "slug": "delhi", "name": "Delhi", "region": "Delhi", "lat": 28.7041, "lon": 77.1025, "tz": "Asia/Kolkata" },
+    { "country": "in", "slug": "lucknow", "name": "Lucknow", "region": "Uttar Pradesh", "lat": 26.8467, "lon": 80.9462, "tz": "Asia/Kolkata" },
+    { "country": "in", "slug": "bengaluru", "name": "Bengaluru", "region": "Karnataka", "lat": 12.9716, "lon": 77.5946, "tz": "Asia/Kolkata" },
+    { "country": "in", "slug": "kolkata", "name": "Kolkata", "region": "West Bengal", "lat": 22.5726, "lon": 88.3639, "tz": "Asia/Kolkata" },
+
+    { "country": "au", "slug": "sydney", "name": "Sydney", "region": "New South Wales", "lat": -33.8688, "lon": 151.2093, "tz": "Australia/Sydney" },
+    { "country": "au", "slug": "melbourne", "name": "Melbourne", "region": "Victoria", "lat": -37.8136, "lon": 144.9631, "tz": "Australia/Melbourne" },
+    { "country": "au", "slug": "brisbane", "name": "Brisbane", "region": "Queensland", "lat": -27.4698, "lon": 153.0251, "tz": "Australia/Brisbane" },
+    { "country": "au", "slug": "perth", "name": "Perth", "region": "Western Australia", "lat": -31.9505, "lon": 115.8605, "tz": "Australia/Perth" },
+    { "country": "au", "slug": "adelaide", "name": "Adelaide", "region": "South Australia", "lat": -34.9285, "lon": 138.6007, "tz": "Australia/Adelaide" }
+  ]
+}
