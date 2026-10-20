@@ -90,3 +90,36 @@ details p { margin-top: 8px; color: var(--muted); }
   .tt tbody th small { font-size: 10px; white-space: normal; }
   .tt caption { white-space: normal; }
 }
+
+/* Month pages and month links (500 cities, 2026-10-20) */
+.card h3 { color: var(--green); font-size: 17px; font-weight: 500; margin: 18px 0 10px; }
+.month h1 { color: var(--green); font-size: clamp(24px, 4.5vw, 34px); font-weight: 500; line-height: 1.2; }
+.month .sub { margin: 6px 0 14px; }
+.month .btn { border: 0; font: inherit; cursor: pointer; margin-bottom: 14px; }
+.months { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+.months a { display: block; text-align: center; padding: 8px 6px; border: 1px solid var(--line); border-radius: 8px; text-decoration: none; font-weight: 500; }
+.months a span { display: block; font-size: 12px; color: var(--muted); font-weight: 400; }
+.months a:hover { border-color: var(--gold); background: var(--gold-soft); }
+.months .is-current a { border-color: var(--green); background: var(--green-soft); }
+.note { background: var(--gold-soft); border: 1px solid var(--gold); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+.tt tr.ramadan th small { color: var(--gold-dark); font-weight: 600; }
+.tt tr.ramadan { background: color-mix(in srgb, var(--gold-soft) 55%, transparent); }
+.printnote { display: none; }
+
+@media print {
+  @page { size: A4 portrait; margin: 10mm; }
+  :root { --bg: #fff; --paper: #fff; --text: #000; --muted: #444; --line: #bbb; --green: #004d00; --green-soft: #eee; --gold-soft: #f3f3f3; }
+  body { font-size: 11px; }
+  .bar, .foot, .noprint, .crumbs, .cta { display: none !important; }
+  main { padding: 0; }
+  .card { border: 0; padding: 0; }
+  .month h1 { font-size: 20px; }
+  .tt { font-size: 10.5px; }
+  .tt th, .tt td { padding: 1.5px 3px; }
+  .tt thead th { position: static; }
+  .tt td i { display: inline; }
+  .tt tr { break-inside: avoid; }
+  .tt tbody th small { display: inline; margin-left: 6px; font-size: 9px; } /* one line per day: a month fits one A4 page */
+  .month .sub, .note { font-size: 10px; margin-bottom: 6px; padding: 6px 8px; }
+  .printnote { display: block; margin-top: 8px; font-size: 9px; color: #555; }
+}
