@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alexa Routine for the Athan (Azan): Step-by-Step Guide</title>
+<meta name="description" content="Create the Alexa routine that plays the Athan at prayer times: the Muslim Companion Azan trigger, the &quot;open Muslim Companion&quot; action, and how to play the Athan on several Echo devices.">
+<link rel="canonical" href="https://imuslimlife.com/alexa-athan/routine/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="iMuslim Life">
+<meta property="og:title" content="Alexa Routine for the Athan (Azan): Step-by-Step Guide">
+<meta property="og:description" content="Create the Alexa routine that plays the Athan at prayer times: the Muslim Companion Azan trigger, the &quot;open Muslim Companion&quot; action, and how to play the Athan on several Echo devices.">
+<meta property="og:url" content="https://imuslimlife.com/alexa-athan/routine/">
+<meta property="og:image" content="https://imuslimlife.com/logo512.png">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#1e1b4b">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/alexa-athan/style.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"iMuslim Life","item":"https://imuslimlife.com/"},{"@type":"ListItem","position":2,"name":"Athan on Alexa","item":"https://imuslimlife.com/alexa-athan/"},{"@type":"ListItem","position":3,"name":"The Azan routine","item":"https://imuslimlife.com/alexa-athan/routine/"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Why \"open Muslim Companion\" and not \"play athan\"?","acceptedAnswer":{"@type":"Answer","text":"Opening the skill from the routine lets it decide what is due: the Athan for the current prayer, and in Ramadan mode the Iftar announcement at Maghrib."}},{"@type":"Question","name":"Can I add other actions to the routine?","acceptedAnswer":{"@type":"Answer","text":"Yes, but keep the Athan action first. For lights and wake-up scenes, use the separate Home Scenes sensors so the Athan routine stays simple."}},{"@type":"Question","name":"Do I need a routine for each prayer?","acceptedAnswer":{"@type":"Answer","text":"No. One routine covers all five prayers. You only add more routines to play on more Echos."}}]}]}</script>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "3937a625dcce4781b04cf88f4f50fe59"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+<header class="hero">
+  <div class="dots" aria-hidden="true"></div>
+  <nav class="top">
+    <a class="brand" href="/"><span aria-hidden="true">🕌</span> iMuslim Life</a>
+    <a class="top-link" href="/alexa-athan/">Athan on Alexa</a>
+  </nav>
+  <div class="hero-inner">
+    <p class="crumbs"><a href="/alexa-athan/">Athan on Alexa</a> › The Azan routine</p>
+    <h1>The Alexa routine that plays your Athan</h1>
+    <p class="lede">One routine is all the automatic Athan needs. Here is exactly what goes in it, and how to play the Athan on more than one Echo.</p>
+    <div class="prayers" aria-hidden="true"><span><b>🌅</b>Fajr</span><span><b>🌞</b>Dhuhr</span><span><b>🌇</b>Asr</span><span><b>🌆</b>Maghrib</span><span><b>🌙</b>Isha</span></div>
+    <div class="ctas">
+      <a class="btn-amber" href="https://www.amazon.com/dp/B0GTBN95HQ/" rel="noopener">Enable Muslim Companion on Alexa</a>
+      <a class="btn-glass" href="https://alexa.imuslimlife.com" rel="noopener">Set up at alexa.imuslimlife.com →</a>
+    </div>
+    <p class="free">Free · No ads · Works on every Echo</p>
+  </div>
+</header>
+<main>
+
+<section class="card">
+  <h2>What the routine does</h2>
+  <p>At each prayer time, Muslim Companion opens a sensor in your Alexa app called <b>Muslim Companion Azan</b>. Your routine waits for that sensor to open, then runs <b>open Muslim Companion</b> on your Echo. The skill knows which prayer is due, so the same routine plays the right Athan five times a day, including your Fajr Athan.</p>
+</section>
+
+<section class="card">
+  <h2>The routine, step by step</h2>
+  <ol class="steps">
+    <li><b>Find the sensor.</b> Say <span class="say">“Alexa, discover devices”</span> and check that Muslim Companion Azan is in your device list.</li>
+    <li><b>Trigger.</b> Routines → + → When this happens → Smart Home → Muslim Companion Azan → <b>Open</b>.</li>
+    <li><b>Action.</b> Alexa will → Add an action → Customized → type <b>open Muslim Companion</b>.</li>
+    <li><b>Device.</b> Under Hear Alexa from, choose the Echo that should play the Athan.</li>
+    <li><b>Save</b> and make sure the routine is switched on.</li>
+  </ol>
+</section>
+
+<section class="card">
+  <h2>Sensor, not switch</h2>
+  <p>The Athan signal is a <b>contact sensor opening</b>. Some accounts also show a switch or doorbell with a similar name. A routine that listens for a switch turning on never fires at prayer times, even though the name looks right.</p>
+  <p class="note">If you disable and enable the skill again, Alexa creates a new Muslim Companion Azan sensor, but your routine keeps pointing at the old one. Open the routine, delete the trigger, and add Muslim Companion Azan → Open again. Re-selecting the existing trigger is not enough.</p>
+</section>
+
+<section class="card">
+  <h2>Playing the Athan on several Echo devices</h2>
+  <p>A customized action plays on one Echo. To hear the Athan in several rooms, create <b>one routine per Echo</b>: each one uses the same trigger (Muslim Companion Azan opens) and the same action, with a different Echo under Hear Alexa from. They all fire together at each prayer time.</p>
+  <p>Want the Athan in some rooms only, or not in the bedroom? Just leave those Echos without a routine.</p>
+</section>
+
+<section class="card">
+  <h2>Check it works</h2>
+  <p>On the dashboard's <b>Status</b> page, tap <b>Test routine now</b>. Every routine on the Muslim Companion Azan sensor fires, so each of your Echos should play the Athan.</p>
+</section>
+<section class="card"><h2>Questions</h2><details><summary>Why &quot;open Muslim Companion&quot; and not &quot;play athan&quot;?</summary><p>Opening the skill from the routine lets it decide what is due: the Athan for the current prayer, and in Ramadan mode the Iftar announcement at Maghrib.</p></details><details><summary>Can I add other actions to the routine?</summary><p>Yes, but keep the Athan action first. For lights and wake-up scenes, use the separate Home Scenes sensors so the Athan routine stays simple.</p></details><details><summary>Do I need a routine for each prayer?</summary><p>No. One routine covers all five prayers. You only add more routines to play on more Echos.</p></details></section>
+<section class="card start">
+  <h2>Get the Athan on your Echo today</h2>
+  <p>Enable the skill, then choose your settings on the dashboard. It takes about five minutes.</p>
+  <div class="ctas"><a class="btn-amber" href="https://www.amazon.com/dp/B0GTBN95HQ/" rel="noopener">Enable on Alexa</a><a class="btn-blue" href="https://alexa.imuslimlife.com" rel="noopener">Open the dashboard</a></div>
+</section>
+<nav class="card more" aria-label="More guides"><h2>More guides</h2><ul><li><a href="/alexa-athan/setup/">Set up the Athan on Alexa</a><span>The 5 steps, with screenshots.</span></li><li><a href="/alexa-athan/troubleshooting/">Athan not playing?</a><span>Quick fixes for the most common problems.</span></li><li><a href="/alexa-athan/fajr/">Fajr Athan on Alexa</a><span>A special Fajr Athan and a gentle wake-up.</span></li><li><a href="/alexa-athan/echo-show/">Prayer times on Echo Show</a><span>Times on screen, countdown and widget.</span></li><li><a href="/alexa-athan/quran/">Quran on Alexa</a><span>30+ reciters, after the Athan or continuous.</span></li><li><a href="/alexa-athan/ramadan/">Ramadan on Alexa</a><span>Suhoor, Iftar and Taraweeh on your Echo.</span></li><li><a href="/alexa-athan/masjid-iqamah/">Masjid iqamah reminders</a><span>Your masjid's iqamah and Jumu'ah times.</span></li><li><a href="/alexa-athan/commands/">Voice commands</a><span>Everything you can say to Muslim Companion.</span></li></ul></nav>
+</main>
+<footer class="foot">
+  <p><a href="/">iMuslim Life</a> · <a href="/alexa-athan/">Athan on Alexa</a> · <a href="/privacy-policy/">Privacy</a> · <a href="/terms/">Terms</a></p>
+  <p>Muslim Companion is an independent skill for Amazon Alexa. Amazon, Alexa and Echo are trademarks of Amazon.com, Inc. or its affiliates.</p>
+</footer>
+</body>
+</html>
