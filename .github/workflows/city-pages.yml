@@ -1,0 +1,49 @@
+# Rebuilds the city prayer-time pages every night (pilot, 2026-10-20).
+# Lives in the imuslimlife repo as .github/workflows/city-pages.yml; the source
+# of truth is prayer-times-api/public/react/salat-e-mustaqeem-client/scripts/city-pages/,
+# copied here by scripts/publish-site.sh. Pages only change when the month does,
+# so most nights commit nothing.
+name: City prayer-time pages
+
+on:
+  schedule:
+    - cron: '15 9 * * *' # 05:15 EDT / 04:15 EST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: city-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Generate pages
+        run: node .github/city-pages/build.mjs --out .
+      - name: Commit if anything changed
+        id: commit
+        run: |
+          git add prayer-times sitemap-cities.xml
+          if git diff --cached --quiet; then
+            echo "No changes."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git config user.name "imuslimlife-bot"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit -m "City prayer-time pages: $(date -u +%Y-%m-%d)"
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Ask GitHub Pages to rebuild
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST "repos/${{ github.repository }}/pages/builds" || true
