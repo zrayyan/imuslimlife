@@ -1,4 +1,5 @@
-// City prayer-time pages for imuslimlife.com (pilot 2026-10-20; 500 cities + month pages 2026-10-20).
+// City prayer-time pages for imuslimlife.com (pilot 2026-10-20; 500 cities + month pages;
+// alternate names, share images, Ramadan hub; Arabic, Urdu, Indonesian and Malay, all 2026-10-20).
 //
 //   node build.mjs --out <site root> [--full]
 //
@@ -6,20 +7,23 @@
 //   /prayer-times/<country>/<city>/          today, next prayer, this month's timetable, Qibla
 //   /prayer-times/<country>/<city>/<month>/  12 month pages with no year in the URL; each shows
 //                                            the current or next occurrence of that month
-// plus one page per country, /prayer-times/countries/, cities.css and sitemap-cities.xml.
+// plus one page per country, /prayer-times/countries/, /ramadan/<year>/, cities.css and
+// sitemap-cities.xml. Cities in the countries of i18n.mjs LANG_COUNTRIES also get the same
+// pages under /<lang>/prayer-times/... (ar, ur, id, ms), linked with hreflang.
 //
 // Times come from the API the app uses (/v1/calendar, read-only), gently: one request at
 // a time, CITY_PAGES_INTERVAL_MS apart (default 2,500), at most CITY_PAGES_BUDGET requests
-// per run (default 6,600). Month pages already holding the right year are reused, so after
-// the first build (~6,000 calls, ~4 h) a night costs nothing except on the 1st of a month,
-// when each city's finished month rolls to next year (~500 calls). A run that hits the
-// budget carries on the next night; pages, country lists and the sitemap only ever link
-// to cities that have pages. --full refetches everything (e.g. after an API correction).
+// per run (default 6,600). Month pages already holding the right year are reused (the
+// English page's embedded data is the cache), so after the first build a night costs
+// nothing except on the 1st of a month, when each city's finished month rolls to next
+// year (~500 calls). A run that hits the budget carries on the next night; pages, lists
+// and the sitemap only link to cities that have pages. --full refetches everything.
 // "Today", the next prayer and the countdown are worked out in the browser.
 // 2026-10-20: an unpaced first build (3 parallel, ~10 req/s) crashed prayer-api twice;
 // see docs/INCIDENT_PRAYER_API_OOM_CITY_PAGES_BUILD_2026-10-20.md.
 import fs from 'node:fs';
 import path from 'node:path';
+import { LANGS, LANG_COUNTRIES } from './i18n.mjs';
 
 const HERE = import.meta.dirname;
 const arg = (name) => process.argv.includes(name);
@@ -42,30 +46,58 @@ const PRAYERS = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 // Where Muslim Companion (the Alexa skill) is available; elsewhere the pages point to the app.
 const SKILL_COUNTRIES = new Set(['us', 'ca', 'uk', 'in', 'au', 'sa']);
+const ALL_LANGS = ['en', ...Object.keys(LANG_COUNTRIES)];
 
-const { countries, cities } = JSON.parse(fs.readFileSync(path.join(HERE, 'cities.json'), 'utf8'));
-// Other spellings people search for (aliases.json): shown as "Makkah (Mecca)".
-const aliasFile = path.join(HERE, 'aliases.json');
-const ALIASES = fs.existsSync(aliasFile) ? JSON.parse(fs.readFileSync(aliasFile, 'utf8')) : {};
-const named = (c) => (ALIASES[`${c.country}/${c.slug}`] ? `${c.name} (${ALIASES[`${c.country}/${c.slug}`]})` : c.name);
+const readJson = (file, fallback) => (fs.existsSync(path.join(HERE, file)) ? JSON.parse(fs.readFileSync(path.join(HERE, file), 'utf8')) : fallback);
+const { countries, cities } = readJson('cities.json');
+// Other spellings people search for (aliases.json): shown in English as "Makkah (Mecca)".
+const ALIASES = readJson('aliases.json', {});
+// City, region and country names in the page languages (names.json, from GeoNames).
+const NAMES = readJson('names.json', { cities: {}, regions: {}, countries: {} });
+
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const key = (c) => `${c.country}/${c.slug}`;
+const langsOf = (cc) => ['en', ...Object.keys(LANG_COUNTRIES).filter((l) => LANG_COUNTRIES[l].includes(cc))];
+const pre = (L) => (L === 'en' ? '' : `/${L}`);
+const cityUrl = (c, L = 'en') => `${pre(L)}/prayer-times/${c.country}/${c.slug}/`;
+const monthUrl = (c, m, L = 'en') => `${cityUrl(c, L)}${MONTHS[m - 1]}/`;
+const countryUrl = (cc, L = 'en') => `${pre(L)}/prayer-times/${cc}/`;
+const countriesUrl = (L = 'en') => `${pre(L)}/prayer-times/countries/`;
+const rootUrl = (L) => (L === 'en' ? '/prayer-times/' : countriesUrl(L));
+
+// Names in a language (English: the list's names; "named" adds the alias).
+const cname = (c, L) => (L === 'en' ? c.name : NAMES.cities[key(c)]?.[L] || c.name);
+const named = (c, L = 'en') => (L === 'en' && ALIASES[key(c)] ? `${c.name} (${ALIASES[key(c)]})` : cname(c, L));
+const rname = (c, L) => (!c.region ? '' : L === 'en' ? c.region : NAMES.regions[`${c.country}/${c.region}`]?.[L] || c.region);
+const kname = (cc, L) => (L === 'en' ? countries[cc].name : NAMES.countries[cc]?.[L] || countries[cc].name);
+const mname = (cc, L) => LANGS[L].methods[countries[cc].params.method] || countries[cc].methodName;
+const aname = (cc, L) => (L === 'en' ? countries[cc].asrName : LANGS[L].asr[countries[cc].params.school ? 1 : 0]);
+const sep = (L) => (LANGS[L].dir === 'rtl' ? '، ' : ', ');
+const place = (c, L) => (c.region ? `${cname(c, L)}${sep(L)}${rname(c, L)}` : cname(c, L));
+
 // Share image per city (made once by og-images.mjs); the logo where there is none.
 const ogImage = (c) => {
   const rel = `/prayer-times/og/${c.country}-${c.slug}.jpg`;
   return fs.existsSync(path.join(OUT, rel)) ? rel : null;
 };
 
-const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-const cityUrl = (c) => `/prayer-times/${c.country}/${c.slug}/`;
-const monthUrl = (c, m) => `${cityUrl(c)}${MONTHS[m - 1]}/`;
-const countryUrl = (cc) => `/prayer-times/${cc}/`;
 const hhmm = (s) => String(s).match(/\d{1,2}:\d{2}/)?.[0] || '';
-const to12 = (s) => {
+// A time in a language: 12-hour with AM/PM (or ص/م) where the language uses it, else 24-hour.
+function clock(s, L) {
   const [h, m] = hhmm(s).split(':').map(Number);
-  if (Number.isNaN(h)) return '—';
-  return `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`;
-};
+  if (Number.isNaN(h)) return { t: '—', suffix: '' };
+  const { clock: c, ampm } = LANGS[L];
+  if (c === 24) return { t: `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`, suffix: '' };
+  return { t: `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')}`, suffix: ampm?.[h < 12 ? 0 : 1] || '' };
+}
 const cap = (s) => s[0].toUpperCase() + s.slice(1);
-const monthName = (m) => cap(MONTHS[m - 1]);
+const monthName = (m, L = 'en') => (L === 'en' ? cap(MONTHS[m - 1]) : new Intl.DateTimeFormat(LANGS[L].locale, { month: 'long', timeZone: 'UTC' }).format(new Date(Date.UTC(2026, m - 1, 15))));
+const hijri = (h, L) => {
+  const map = LANGS[L].hijri;
+  const p = map && String(h).match(/^(\d+) (.+) (\d+)$/);
+  return p && map[p[2]] ? `${p[1]} ${map[p[2]]} ${p[3]}` : h;
+};
+const dateIn = (iso, L, opts) => new Date(`${iso}T12:00:00Z`).toLocaleDateString(LANGS[L].locale, { timeZone: 'UTC', ...opts });
 
 function todayIn(tz) {
   const p = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date()).map((x) => [x.type, x.value]));
@@ -83,10 +115,11 @@ function distanceKm(a, b) {
   const h = Math.sin(rad(b.lat - a.lat) / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(rad(b.lon - a.lon) / 2) ** 2;
   return 6371 * 2 * Math.asin(Math.sqrt(h));
 }
-const POINTS = ['north', 'north-northeast', 'northeast', 'east-northeast', 'east', 'east-southeast', 'southeast', 'south-southeast', 'south', 'south-southwest', 'southwest', 'west-southwest', 'west', 'west-northwest', 'northwest', 'north-northwest'];
-const compass = (deg) => POINTS[Math.round(deg / 22.5) % 16];
-const fmtDistance = (km, cc) => (cc === 'us' || cc === 'uk' ? `${Math.round(km * 0.621371).toLocaleString('en-US')} miles` : `${Math.round(km).toLocaleString('en-US')} km`);
-const place = (c) => (c.region ? `${c.name}, ${c.region}` : c.name);
+const compass = (deg, L) => LANGS[L].points[Math.round(deg / 22.5) % 16];
+const KM = { ar: 'كم', ur: 'کلومیٹر' };
+const fmtDistance = (km, cc, L) => (L === 'en' && (cc === 'us' || cc === 'uk')
+  ? `${Math.round(km * 0.621371).toLocaleString('en-US')} miles`
+  : `${Math.round(km).toLocaleString(L === 'en' ? 'en-US' : LANGS[L].locale)} ${KM[L] || 'km'}`);
 
 async function fetchMonth(city, y, m) {
   const params = new URLSearchParams({ latitude: city.lat, longitude: city.lon, timezonestring: city.tz, ...countries[city.country].params });
@@ -112,7 +145,7 @@ async function fetchMonth(city, y, m) {
   }
 }
 
-// A month page's embedded data, reused when it is already for the right year.
+// A month page's embedded data (English page), reused when it is already for the right year.
 function existingMonth(file, y, m) {
   if (FULL || !fs.existsSync(file)) return null;
   const json = fs.readFileSync(file, 'utf8').match(/<script type="application\/json" id="pt-data">(.*?)<\/script>/s)?.[1];
@@ -123,17 +156,35 @@ function existingMonth(file, y, m) {
 
 let listed = cities; // the cities that have pages; set before anything is rendered
 let ramadan = null; // the coming Ramadan (from Makkah's Umm al-Qura dates); set before rendering
-let footerCountries = [];
+const inLang = (L) => listed.filter((c) => langsOf(c.country).includes(L));
+const countriesIn = (L) => Object.entries(countries).filter(([cc]) => inLang(L).some((c) => c.country === cc));
+const listedCountries = () => countriesIn('en');
+function footerCountries(L) {
+  return countriesIn(L)
+    .map(([cc]) => [cc, inLang(L).filter((x) => x.country === cc).length])
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+}
 
-function layout({ title, description, canonical, jsonLd, body, image = null }) {
+const RTL_FONT = 'https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600&display=swap';
+
+function layout({ L = 'en', title, description, canonical, alternates = [], jsonLd, body, image = null }) {
+  const T = LANGS[L];
+  const hreflang = alternates.length > 1
+    ? `\n${alternates.map(([l, u]) => `<link rel="alternate" hreflang="${l}" href="${SITE}${u}">`).join('\n')}\n<link rel="alternate" hreflang="x-default" href="${SITE}${alternates[0][1]}">`
+    : '';
+  const switcher = alternates.length > 1
+    ? `\n<nav class="langs wrap" aria-label="Language">${alternates.map(([l, u]) => (l === L ? `<b lang="${l}">${LANGS[l].label}</b>` : `<a href="${u}" lang="${l}" hreflang="${l}">${LANGS[l].label}</a>`)).join(' · ')}</nav>`
+    : '';
+  const rtlFont = T.dir === 'rtl' ? `\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link href="${RTL_FONT}" rel="stylesheet" media="print" onload="this.media='all'">` : '';
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${L}"${T.dir === 'rtl' ? ' dir="rtl"' : ''}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
-<link rel="canonical" href="${SITE}${canonical}">
+<link rel="canonical" href="${SITE}${canonical}">${hreflang}
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="iMuslim Life">
 <meta property="og:title" content="${esc(title)}">
@@ -142,21 +193,21 @@ function layout({ title, description, canonical, jsonLd, body, image = null }) {
 <meta property="og:image" content="${SITE}${image || '/logo512.png'}">${image ? '\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n<meta name="twitter:card" content="summary_large_image">' : ''}
 <meta name="theme-color" content="#006400">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/prayer-times/cities.css">
+<link rel="stylesheet" href="/prayer-times/cities.css">${rtlFont}
 <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': jsonLd }).replace(/</g, '\\u003c')}</script>
 ${BEACON}
 </head>
 <body>
 <header class="bar">
   <div class="wrap bar-in">
-    <a class="brand" href="/"><span aria-hidden="true">🕋</span> i<b>Muslim</b> Life</a>
-    <nav><a href="/prayer-times/">Prayer Times</a><a href="/prayer-times/countries/">Cities</a><a href="/quran/">Quran</a><a href="/alexa-athan/">Athan on Alexa</a></nav>
+    <a class="brand" href="/" dir="ltr"><span aria-hidden="true">🕋</span> i<b>Muslim</b> Life</a>
+    <nav><a href="/prayer-times/">${T.nav.times}</a><a href="${countriesUrl(L)}">${T.nav.cities}</a><a href="/quran/">${T.nav.quran}</a><a href="/alexa-athan/">${T.nav.alexa}</a></nav>
   </div>
-</header>
+</header>${switcher}
 ${body}
 <footer class="foot wrap">
-  <p><a href="/">iMuslim Life</a> · ${ramadan ? `<a href="${ramadan.url}">Ramadan ${ramadan.year}</a> · ` : ''}${footerCountries.map(([cc, c]) => `<a href="${countryUrl(cc)}">${esc(c.name)}</a>`).join(' · ')} · <a href="/prayer-times/countries/">All countries</a></p>
-  <p><a href="/privacy-policy/">Privacy</a> · <a href="/terms/">Terms</a> · Always ad-free · City data © <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0)</p>
+  <p><a href="/">iMuslim Life</a> · ${ramadan ? `<a href="${ramadan.url}">${T.foot.ramadan(ramadan.year)}</a> · ` : ''}${footerCountries(L).map(([cc]) => `<a href="${countryUrl(cc, L)}">${esc(kname(cc, L))}</a>`).join(' · ')} · <a href="${countriesUrl(L)}">${T.foot.all}</a></p>
+  <p><a href="/privacy-policy/">${T.foot.privacy}</a> · <a href="/terms/">${T.foot.terms}</a> · ${T.foot.adfree} · ${T.foot.data} <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0)</p>
 </footer>
 </body>
 </html>
@@ -169,36 +220,40 @@ const breadcrumb = (items) => ({
 });
 const faqLd = (faq) => ({ '@type': 'FAQPage', mainEntity: faq.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) });
 
-function monthTable(month, caption) {
+function monthTable(month, caption, L) {
+  const T = LANGS[L];
   return `<table class="tt">
 <caption>${esc(caption)}</caption>
-<thead><tr><th scope="col">Date</th>${PRAYERS.map((p) => `<th scope="col">${p}</th>`).join('')}</tr></thead>
+<thead><tr><th scope="col">${T.date}</th>${PRAYERS.map((p) => `<th scope="col">${T.prayers[p]}</th>`).join('')}</tr></thead>
 <tbody>${month.days.map((d) => {
-    const label = new Date(`${d.date}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', timeZone: 'UTC' });
-    const ramadan = /^\d+ Ramadan /.test(d.hijri) ? ' class="ramadan"' : '';
-    return `<tr data-date="${d.date}"${ramadan}><th scope="row">${label}<small>${esc(d.hijri)}</small></th>${PRAYERS.map((p) => `<td>${to12(d.t[p]).replace(/ (AM|PM)$/, '<i> $1</i>')}</td>`).join('')}</tr>`;
+    const label = dateIn(d.date, L, { weekday: 'short', day: 'numeric' });
+    const ram = /^\d+ Ramadan /.test(d.hijri) ? ' class="ramadan"' : '';
+    return `<tr data-date="${d.date}"${ram}><th scope="row">${label}<small>${esc(hijri(d.hijri, L))}</small></th>${PRAYERS.map((p) => {
+      const { t, suffix } = clock(d.t[p], L);
+      return `<td>${t}${suffix ? `<i> ${suffix}</i>` : ''}</td>`;
+    }).join('')}</tr>`;
   }).join('')}</tbody>
 </table>`;
 }
 
 const ramadanDays = (month) => month.days.filter((d) => /^\d+ Ramadan /.test(d.hijri));
 
-function ctaCard(city) {
-  return SKILL_COUNTRIES.has(city.country)
-    ? `<section class="card cta noprint"><h2>Hear the Athan at these times</h2><p>Muslim Companion plays the Athan on your Amazon Echo at your local prayer times, free. The Salat-e-Mustaqeem app brings the same times to your iPhone and Apple Watch.</p><p class="btns"><a class="btn" href="/alexa-athan/">Athan on Alexa</a><a class="btn alt" href="/mobile-app/">Get the app</a></p></section>`
-    : `<section class="card cta noprint"><h2>Never miss a prayer</h2><p>The free Salat-e-Mustaqeem app gives you these times with Athan notifications on your iPhone and Apple Watch, ad-free.</p><p class="btns"><a class="btn" href="/mobile-app/">Get the app</a></p></section>`;
+function ctaCard(city, L) {
+  const T = LANGS[L].cta;
+  return SKILL_COUNTRIES.has(city.country) && T.skill
+    ? `<section class="card cta noprint"><h2>${T.skillH}</h2><p>${T.skill}</p><p class="btns"><a class="btn" href="/alexa-athan/">${T.skillBtn}</a><a class="btn alt" href="/mobile-app/">${T.appBtn}</a></p></section>`
+    : `<section class="card cta noprint"><h2>${T.appH}</h2><p>${T.app}</p><p class="btns"><a class="btn" href="/mobile-app/">${T.appBtn}</a></p></section>`;
 }
 
-function monthLinks(city, now, current) {
+function monthLinks(city, now, current, L) {
   return `<ul class="months">${MONTHS.map((_, i) => {
     const m = i + 1;
-    const y = yearFor(m, now);
-    return `<li${m === current ? ' class="is-current"' : ''}><a href="${monthUrl(city, m)}">${monthName(m)} <span>${y}</span></a></li>`;
+    return `<li${m === current ? ' class="is-current"' : ''}><a href="${monthUrl(city, m, L)}">${monthName(m, L)} <span>${yearFor(m, now)}</span></a></li>`;
   }).join('')}</ul>`;
 }
 
-function nearbyCities(city) {
-  return listed
+function nearbyCities(city, L) {
+  return inLang(L)
     .filter((c) => c !== city)
     .map((c) => ({ c, d: distanceKm(city, c) + (c.country === city.country ? 0 : 5000) }))
     .sort((a, b) => a.d - b.d)
@@ -207,169 +262,189 @@ function nearbyCities(city) {
 }
 
 // Runs in the browser: today's times, the next prayer and a countdown, in the city's time zone.
+// D.i carries the page language's words and time format.
 const CLIENT_TODAY = `(function(){
-var D=JSON.parse(document.getElementById('pt-data').textContent);
+var D=JSON.parse(document.getElementById('pt-data').textContent),I=D.i;
 var P=['Fajr','Dhuhr','Asr','Maghrib','Isha'];
 function now(){var p={};new Intl.DateTimeFormat('en-CA',{timeZone:D.tz,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(new Date()).forEach(function(x){p[x.type]=x.value});return{date:p.year+'-'+p.month+'-'+p.day,min:(+p.hour)*60+(+p.minute)+(+p.second)/60}}
 function mins(s){var a=s.split(':');return +a[0]*60+(+a[1])}
-function h12(s){var a=s.split(':'),h=+a[0];return((h+11)%12+1)+':'+a[1]+(h<12?' AM':' PM')}
+function fmt(s){var a=s.split(':'),h=+a[0];if(I.clock===24)return(h<10?'0':'')+h+':'+a[1];return((h+11)%12+1)+':'+a[1]+(I.ampm&&I.ampm[0]?' '+I.ampm[h<12?0:1]:'')}
+function hij(h){var m=h.match(/^(\\d+) (.+) (\\d+)$/);return m&&I.hm&&I.hm[m[2]]?m[1]+' '+I.hm[m[2]]+' '+m[3]:h}
 var n=now(),i=-1;for(var k=0;k<D.days.length;k++)if(D.days[k].date===n.date)i=k;
 var row=document.querySelector('tr[data-date="'+n.date+'"]');if(row)row.classList.add('is-today');
 if(i<0||!document.querySelector('.today'))return;var d=D.days[i];
-document.querySelectorAll('.today .slot').forEach(function(el){el.querySelector('b').textContent=h12(d.t[el.dataset.p])});
-document.getElementById('pt-date').textContent=new Date(n.date+'T12:00:00Z').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric',timeZone:'UTC'})+(d.hijri?' · '+d.hijri:'');
+document.querySelectorAll('.today .slot').forEach(function(el){el.querySelector('b').textContent=fmt(d.t[el.dataset.p])});
+document.getElementById('pt-date').textContent=new Date(n.date+'T12:00:00Z').toLocaleDateString(I.locale,{weekday:'long',month:'long',day:'numeric',year:'numeric',timeZone:'UTC'})+(d.hijri?' · '+hij(d.hijri):'');
 function tick(){var n2=now(),day=D.days[i],next=null,at=0,label;
 if(n2.date!==n.date){location.reload();return}
 for(var j=0;j<P.length;j++){if(mins(day.t[P[j]])>n2.min){next=P[j];at=mins(day.t[P[j]]);break}}
-if(next){label=next}else if(D.days[i+1]){next='Fajr';at=mins(D.days[i+1].t.Fajr)+1440;label='Fajr (tomorrow)'}
-document.querySelectorAll('.today .slot').forEach(function(el){el.classList.toggle('is-next',el.dataset.p===next&&label===next)});
+if(next){label=I.names[next]}else if(D.days[i+1]){next='Fajr';at=mins(D.days[i+1].t.Fajr)+1440;label=I.names.Fajr+' '+I.tomorrow}
+document.querySelectorAll('.today .slot').forEach(function(el){el.classList.toggle('is-next',el.dataset.p===next&&label===I.names[next])});
 if(!next){document.getElementById('pt-next').textContent='';return}
 var left=Math.max(0,Math.round(at-n2.min)),h=Math.floor(left/60),m=left%60;
-document.getElementById('pt-next').innerHTML='Next: <b>'+label+'</b> in '+(h?h+' h ':'')+m+' min'}
+document.getElementById('pt-next').innerHTML=I.next+' <b>'+label+'</b> '+(h?I.leftH.replace('{h}',h):I.leftM).replace('{m}',m)}
 tick();setInterval(tick,30000)})();`;
 
+const clientWords = (L) => {
+  const T = LANGS[L];
+  return { locale: T.locale, clock: T.clock, ampm: T.ampm, names: T.prayers, hm: T.hijri, next: T.client.next, tomorrow: T.client.tomorrow, leftH: T.client.left('{h}', '{m}'), leftM: T.client.left(0, '{m}') };
+};
 const dataScript = (data) => `<script type="application/json" id="pt-data">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`;
 
-function cityPage(city, cur, nxt, now) {
-  const country = countries[city.country];
+function cityPage(city, cur, nxt, now, L) {
+  const T = LANGS[L];
+  const cc = city.country;
+  const n = cname(city, L);
   const q = qibla(city.lat, city.lon);
-  const km = distanceKm(city, KAABA);
-  const title = `${named(city)} Prayer Times Today: Fajr, Dhuhr, Asr, Maghrib, Isha`;
-  const description = `Prayer times for ${named(city)}${city.region ? `, ${city.region}` : ''}, ${country.name}: today's Fajr, Sunrise, Dhuhr, Asr, Maghrib and Isha, monthly timetables with Hijri dates, and the Qibla direction.`;
-  const faq = [
-    [`How are the prayer times for ${city.name} calculated?`, `With the ${country.methodName} method and the ${country.asrName} time for Asr, for ${city.name}'s coordinates and local time zone. Your masjid's timetable may differ by a few minutes.`],
-    [`Which direction is the Qibla in ${city.name}?`, `The Qibla in ${city.name} is ${Math.round(q)}° from true north, roughly ${compass(q)}. Makkah is about ${fmtDistance(km, city.country)} away.`],
-    [`When does Suhoor end and when is Iftar in ${city.name}?`, `Suhoor ends at Fajr and Iftar is at Maghrib. Both are in the monthly timetables for every day of the year.`],
-  ];
+  const deg = Math.round(q);
+  const dist = fmtDistance(distanceKm(city, KAABA), cc, L);
+  const curLabel = `${monthName(cur.m, L)} ${cur.y}`;
+  const placeTail = `${city.region ? `${sep(L)}${rname(city, L)}` : ''}${sep(L)}${kname(cc, L)}`;
+  const faq = T.city.faq(n, mname(cc, L), aname(cc, L), deg, compass(q, L), dist);
   const body = `
 <main class="wrap">
-  <p class="crumbs"><a href="/prayer-times/">Prayer times</a> › <a href="${countryUrl(city.country)}">${esc(country.name)}</a> › ${esc(city.name)}</p>
+  <p class="crumbs"><a href="${rootUrl(L)}">${T.root}</a> › <a href="${countryUrl(cc, L)}">${esc(kname(cc, L))}</a> › ${esc(n)}</p>
   <section class="hero">
-    <h1>Prayer times in ${esc(named(city))}</h1>
-    <p class="sub">${city.region ? `${esc(city.region)}, ` : ''}${esc(country.name)} · <span id="pt-date">${monthName(cur.m)} ${cur.y}</span></p>
-    <div class="today" aria-live="polite">${PRAYERS.map((p) => `<div class="slot" data-p="${p}"><span>${p}</span><b>—</b></div>`).join('')}</div>
+    <h1>${esc(T.city.h1(named(city, L)))}</h1>
+    <p class="sub">${city.region ? `${esc(rname(city, L))}${sep(L)}` : ''}${esc(kname(cc, L))} · <span id="pt-date">${curLabel}</span></p>
+    <div class="today" aria-live="polite">${PRAYERS.map((p) => `<div class="slot" data-p="${p}"><span>${T.prayers[p]}</span><b>—</b></div>`).join('')}</div>
     <p class="next" id="pt-next">&nbsp;</p>
   </section>
 
   <section class="card">
-    <h2>${esc(city.name)} prayer timetable, ${monthName(cur.m)} ${cur.y}</h2>
-    ${monthTable(cur, `Daily prayer times in ${place(city)}, ${monthName(cur.m)} ${cur.y}, with Hijri dates`)}
-    <h3>Monthly timetables</h3>
-    ${monthLinks(city, now, cur.m)}
+    <h2>${esc(T.city.timetable(n, curLabel))}</h2>
+    ${monthTable(cur, T.city.caption(place(city, L), curLabel), L)}
+    <h3>${T.city.monthly}</h3>
+    ${monthLinks(city, now, cur.m, L)}
   </section>
 
   <div class="two">
     <section class="card">
-      <h2>Qibla direction from ${esc(city.name)}</h2>
+      <h2>${esc(T.city.qiblaH(n))}</h2>
       <div class="qibla"><svg viewBox="0 0 100 100" width="96" height="96" aria-hidden="true"><circle cx="50" cy="50" r="46" class="ring"/><text x="50" y="14" text-anchor="middle">N</text><g transform="rotate(${q.toFixed(1)} 50 50)"><path d="M50 14 L57 52 L50 46 L43 52 Z" class="needle"/></g><circle cx="50" cy="50" r="4" class="hub"/></svg>
-      <p>Face <b>${Math.round(q)}°</b> from true north (${compass(q)}). Makkah is about <b>${fmtDistance(km, city.country)}</b> from ${esc(city.name)}.</p></div>
+      <p>${T.city.qibla(deg, compass(q, L), dist, esc(n))}</p></div>
     </section>
     <section class="card">
-      <h2>About these times</h2>
-      <p>Calculated with <b>${esc(country.methodName)}</b>, Asr <b>${esc(country.asrName)}</b>, in ${esc(city.tz.replace(/_/g, ' '))} time. Your masjid may use a different method or add a few minutes; follow its timetable for congregation.</p>
+      <h2>${T.city.aboutH}</h2>
+      <p>${T.city.about(esc(mname(cc, L)), esc(aname(cc, L)), esc(city.tz.replace(/_/g, ' ')))}</p>
     </section>
   </div>
 
-  ${ctaCard(city)}
+  ${ctaCard(city, L)}
 
   <section class="card">
-    <h2>Prayer times near ${esc(city.name)}</h2>
-    <ul class="cities">${nearbyCities(city).map((c) => `<li><a href="${cityUrl(c)}">${esc(named(c))}</a><span>${esc(c.region || countries[c.country].name)}</span></li>`).join('')}</ul>
+    <h2>${esc(T.city.nearby(n))}</h2>
+    <ul class="cities">${nearbyCities(city, L).map((c) => `<li><a href="${cityUrl(c, L)}">${esc(named(c, L))}</a><span>${esc(rname(c, L) || kname(c.country, L))}</span></li>`).join('')}</ul>
   </section>
 
   <section class="card">
-    <h2>Questions</h2>
+    <h2>${T.city.questions}</h2>
     ${faq.map(([qq, a]) => `<details><summary>${esc(qq)}</summary><p>${esc(a)}</p></details>`).join('')}
   </section>
 </main>
-${dataScript({ tz: city.tz, days: [...cur.days, ...nxt.days] })}
+${dataScript({ tz: city.tz, days: [...cur.days, ...nxt.days], i: clientWords(L) })}
 <script>${CLIENT_TODAY}</script>`;
   return layout({
-    title, description, canonical: cityUrl(city), image: ogImage(city),
-    jsonLd: [breadcrumb([['iMuslim Life', '/'], ['Prayer times', '/prayer-times/'], [country.name, countryUrl(city.country)], [city.name, cityUrl(city)]]), faqLd(faq)],
+    L,
+    title: T.city.title(named(city, L)),
+    description: T.city.description(named(city, L), placeTail),
+    canonical: cityUrl(city, L),
+    alternates: langsOf(cc).map((l) => [l, cityUrl(city, l)]),
+    image: ogImage(city),
+    jsonLd: [breadcrumb([['iMuslim Life', '/'], [T.root, rootUrl(L)], [kname(cc, L), countryUrl(cc, L)], [n, cityUrl(city, L)]]), faqLd(faq)],
     body,
   });
 }
 
-function monthPage(city, month, now) {
-  const country = countries[city.country];
-  const label = `${monthName(month.m)} ${month.y}`;
+function monthPage(city, month, now, L) {
+  const T = LANGS[L];
+  const cc = city.country;
+  const n = cname(city, L);
+  const label = `${monthName(month.m, L)} ${month.y}`;
   const ram = ramadanDays(month);
   const ramYear = ram[0]?.hijri.split(' ').pop();
-  const title = ram.length
-    ? `${named(city)} Prayer Times ${label}: Ramadan Timetable`
-    : `${named(city)} Prayer Times ${label} | Monthly Timetable`;
   const first = month.days[0];
   const last = month.days[month.days.length - 1];
-  const description = `${city.name} prayer timetable for ${label}: Fajr, Sunrise, Dhuhr, Asr, Maghrib and Isha for every day${ram.length ? `, including Ramadan ${ramYear} (Suhoor ends at Fajr, Iftar at Maghrib)` : ''}, with Hijri dates. Printable.`;
-  const ramNote = ram.length
-    ? `<p class="note">Ramadan ${esc(ramYear)} falls in this month from <b>${new Date(`${ram[0].date}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' })}</b> (highlighted), by the calculated Hijri calendar; the start depends on the moon sighting your community follows. Suhoor ends at Fajr and Iftar is at Maghrib.</p>`
-    : '';
+  const ramNote = ram.length ? `<p class="note">${T.month.ramNote(esc(ramYear), dateIn(ram[0].date, L, { month: 'long', day: 'numeric' }))}</p>` : '';
   const body = `
 <main class="wrap">
-  <p class="crumbs noprint"><a href="/prayer-times/">Prayer times</a> › <a href="${countryUrl(city.country)}">${esc(country.name)}</a> › <a href="${cityUrl(city)}">${esc(city.name)}</a> › ${monthName(month.m)}</p>
+  <p class="crumbs noprint"><a href="${rootUrl(L)}">${T.root}</a> › <a href="${countryUrl(cc, L)}">${esc(kname(cc, L))}</a> › <a href="${cityUrl(city, L)}">${esc(n)}</a> › ${monthName(month.m, L)}</p>
   <section class="card month">
-    <h1>${esc(named(city))} prayer times, ${label}</h1>
-    <p class="sub">${esc(place(city))}, ${esc(country.name)} · ${esc(first.hijri)} – ${esc(last.hijri)} · ${esc(country.methodName)}, Asr ${esc(country.asrName)}</p>
+    <h1>${esc(T.month.h1(named(city, L), label))}</h1>
+    <p class="sub">${esc(place(city, L))}${sep(L)}${esc(kname(cc, L))} · ${esc(hijri(first.hijri, L))} – ${esc(hijri(last.hijri, L))} · ${esc(T.month.sub(mname(cc, L), aname(cc, L)))}</p>
     ${ramNote}
-    <p class="noprint"><button class="btn" type="button" onclick="window.print()">Print this timetable</button> <a class="btn alt" href="${cityUrl(city)}">Today in ${esc(city.name)}</a></p>
-    ${monthTable(month, `Daily prayer times in ${place(city)}, ${label}`)}
-    <p class="printnote">imuslimlife.com${monthUrl(city, month.m)} · Times by ${esc(country.methodName)}. Your masjid's timetable may differ by a few minutes.</p>
+    <p class="noprint"><button class="btn" type="button" onclick="window.print()">${T.month.print}</button> <a class="btn alt" href="${cityUrl(city, L)}">${esc(T.month.today(n))}</a></p>
+    ${monthTable(month, T.month.caption(place(city, L), label), L)}
+    <p class="printnote">imuslimlife.com${monthUrl(city, month.m, L)} · ${esc(T.month.printnote(mname(cc, L)))}</p>
   </section>
   <section class="card noprint">
-    <h2>Other months in ${esc(city.name)}</h2>
-    ${monthLinks(city, now, month.m)}
+    <h2>${esc(T.month.others(n))}</h2>
+    ${monthLinks(city, now, month.m, L)}
   </section>
-  ${ctaCard(city)}
+  ${ctaCard(city, L)}
 </main>
 ${dataScript({ tz: city.tz, y: month.y, m: month.m, days: month.days })}
 <script>(function(){var D=JSON.parse(document.getElementById('pt-data').textContent);var p={};new Intl.DateTimeFormat('en-CA',{timeZone:D.tz,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).forEach(function(x){p[x.type]=x.value});var r=document.querySelector('tr[data-date="'+p.year+'-'+p.month+'-'+p.day+'"]');if(r)r.classList.add('is-today')})();</script>`;
   return layout({
-    title, description, canonical: monthUrl(city, month.m), image: ogImage(city),
-    jsonLd: [breadcrumb([['iMuslim Life', '/'], ['Prayer times', '/prayer-times/'], [country.name, countryUrl(city.country)], [city.name, cityUrl(city)], [label, monthUrl(city, month.m)]])],
+    L,
+    title: T.month.title(named(city, L), label, ram.length > 0),
+    description: T.month.description(n, label, ram.length ? ramYear : null),
+    canonical: monthUrl(city, month.m, L),
+    alternates: langsOf(cc).map((l) => [l, monthUrl(city, month.m, l)]),
+    image: ogImage(city),
+    jsonLd: [breadcrumb([['iMuslim Life', '/'], [T.root, rootUrl(L)], [kname(cc, L), countryUrl(cc, L)], [n, cityUrl(city, L)], [label, monthUrl(city, month.m, L)]])],
     body,
   });
 }
 
-function countryPage(cc) {
-  const country = countries[cc];
-  const list = listed.filter((c) => c.country === cc);
-  const title = list.length > 2
-    ? `Prayer Times in ${country.name}: ${list.slice(0, 3).map((c) => c.name).join(', ')} and More`
-    : `Prayer Times in ${country.name}: ${list.map((c) => c.name).join(' and ')}`;
-  const description = `Prayer times for ${list.length} ${list.length === 1 ? 'city' : 'cities'} in ${country.name}, calculated with ${country.methodName}: daily Fajr, Dhuhr, Asr, Maghrib and Isha, monthly timetables and the Qibla direction.`;
+function countryPage(cc, L) {
+  const T = LANGS[L];
+  const list = inLang(L).filter((c) => c.country === cc);
+  const k = kname(cc, L);
   const body = `
 <main class="wrap">
-  <p class="crumbs"><a href="/prayer-times/">Prayer times</a> › <a href="/prayer-times/countries/">Countries</a> › ${esc(country.name)}</p>
-  <section class="hero"><h1>Prayer times in ${esc(country.name)}</h1>
-  <p class="sub">Daily times and monthly timetables, calculated with ${esc(country.methodName)} and the ${esc(country.asrName)} Asr time.</p></section>
-  <section class="card"><h2>Cities</h2>
-  <ul class="cities">${list.map((c) => `<li><a href="${cityUrl(c)}">${esc(named(c))}</a><span>${esc(c.region || '')}</span></li>`).join('')}</ul></section>
-  <section class="card"><h2>Other countries</h2><p><a href="/prayer-times/countries/">All ${listedCountries().length} countries and ${listed.length} cities</a></p></section>
-</main>`;
-  return layout({ title, description, canonical: countryUrl(cc), jsonLd: [breadcrumb([['iMuslim Life', '/'], ['Prayer times', '/prayer-times/'], [country.name, countryUrl(cc)]])], body });
-}
-
-const listedCountries = () => Object.entries(countries).filter(([cc]) => listed.some((c) => c.country === cc));
-function countriesPage() {
-  const list = listedCountries();
-  const body = `
-<main class="wrap">
-  <p class="crumbs"><a href="/prayer-times/">Prayer times</a> › Countries</p>
-  <section class="hero"><h1>Prayer times by country</h1><p class="sub">${listed.length} cities in ${list.length} countries: today's times, monthly timetables and the Qibla direction.</p></section>
-  ${list.map(([cc, c]) => `<section class="card"><h2><a href="${countryUrl(cc)}">${esc(c.name)}</a></h2><ul class="cities">${listed.filter((x) => x.country === cc).map((x) => `<li><a href="${cityUrl(x)}">${esc(named(x))}</a></li>`).join('')}</ul></section>`).join('\n  ')}
+  <p class="crumbs"><a href="${rootUrl(L)}">${T.root}</a> › <a href="${countriesUrl(L)}">${T.countriesCrumb}</a> › ${esc(k)}</p>
+  <section class="hero"><h1>${esc(T.country.h1(k))}</h1>
+  <p class="sub">${esc(T.country.sub(mname(cc, L), aname(cc, L)))}</p></section>
+  <section class="card"><h2>${T.country.cities}</h2>
+  <ul class="cities">${list.map((c) => `<li><a href="${cityUrl(c, L)}">${esc(named(c, L))}</a><span>${esc(rname(c, L))}</span></li>`).join('')}</ul></section>
+  <section class="card"><h2>${T.country.others}</h2><p><a href="${countriesUrl(L)}">${T.country.all(countriesIn(L).length, inLang(L).length)}</a></p></section>
 </main>`;
   return layout({
-    title: `Prayer Times in ${listed.length} Cities Worldwide, by Country`,
-    description: `Prayer times for ${listed.length} cities in ${list.length} countries, from Makkah and Istanbul to London and New York: daily times, monthly timetables and the Qibla direction.`,
-    canonical: '/prayer-times/countries/',
-    jsonLd: [breadcrumb([['iMuslim Life', '/'], ['Prayer times', '/prayer-times/'], ['Countries', '/prayer-times/countries/']])],
+    L,
+    title: T.country.title(k, list.slice(0, list.length > 2 ? 3 : 2).map((c) => cname(c, L)), list.length > 2),
+    description: T.country.description(k, list.length, mname(cc, L)),
+    canonical: countryUrl(cc, L),
+    alternates: langsOf(cc).map((l) => [l, countryUrl(cc, l)]),
+    jsonLd: [breadcrumb([['iMuslim Life', '/'], [T.root, rootUrl(L)], [k, countryUrl(cc, L)]])],
+    body,
+  });
+}
+
+function countriesPage(L) {
+  const T = LANGS[L];
+  const list = countriesIn(L);
+  const cs = inLang(L);
+  const body = `
+<main class="wrap">
+  <p class="crumbs"><a href="${rootUrl(L)}">${T.root}</a> › ${T.countriesCrumb}</p>
+  <section class="hero"><h1>${T.countries.h1}</h1><p class="sub">${T.countries.sub(cs.length, list.length)}</p></section>
+  ${list.map(([cc]) => `<section class="card"><h2><a href="${countryUrl(cc, L)}">${esc(kname(cc, L))}</a></h2><ul class="cities">${cs.filter((x) => x.country === cc).map((x) => `<li><a href="${cityUrl(x, L)}">${esc(named(x, L))}</a></li>`).join('')}</ul></section>`).join('\n  ')}
+</main>`;
+  return layout({
+    L,
+    title: T.countries.title(cs.length),
+    description: T.countries.description(cs.length, list.length),
+    canonical: countriesUrl(L),
+    alternates: ALL_LANGS.map((l) => [l, countriesUrl(l)]),
+    jsonLd: [breadcrumb([['iMuslim Life', '/'], [T.root, rootUrl(L)], [T.countriesCrumb, countriesUrl(L)]])],
     body,
   });
 }
 
 const longDate = (iso, opts = {}) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC', ...opts });
 
+// The Ramadan hub (English).
 function ramadanPage() {
   const { year, hijriYear, start, eid, oddNights, firstTaraweeh } = ramadan;
   const ramadanMonths = (c) => {
@@ -439,10 +514,10 @@ function writeIfChanged(file, content) {
   fs.writeFileSync(file, content);
   changed++;
 }
+const outFile = (url) => path.join(OUT, url.slice(1), 'index.html');
 
 // Pass 1: each city's 12 months: reuse month pages that already hold the right year,
 // fetch the rest while the budget lasts. Pilot cities first, then by size.
-const cityDir = (city) => path.join(OUT, 'prayer-times', city.country, city.slug);
 const order = [...cities].sort((a, b) => (a.muslims ?? Infinity) > (b.muslims ?? Infinity) ? -1 : 1);
 const data = new Map();
 const failed = [];
@@ -454,7 +529,7 @@ for (const city of order) {
   try {
     for (let m = 1; m <= 12; m++) {
       const y = yearFor(m, now);
-      months[m] = existingMonth(path.join(cityDir(city), MONTHS[m - 1], 'index.html'), y, m);
+      months[m] = existingMonth(outFile(monthUrl(city, m)), y, m);
       if (!months[m]) {
         if (budget <= 0) throw Object.assign(new Error('budget'), { budget: true });
         months[m] = await fetchMonth(city, y, m);
@@ -495,26 +570,29 @@ for (const city of order) {
   }
 }
 
-// Pass 2: pages. Link only to cities that are ready now or already have a page.
-listed = cities.filter((c) => data.has(c) || fs.existsSync(path.join(cityDir(c), 'index.html')));
-footerCountries = Object.entries(countries)
-  .map(([cc, c]) => [cc, c, listed.filter((x) => x.country === cc).length])
-  .filter(([, , n]) => n)
-  .sort((a, b) => b[2] - a[2])
-  .slice(0, 8);
+// Pass 2: pages, in every language of each city. Link only to cities that are ready now or
+// already have a page.
+listed = cities.filter((c) => data.has(c) || fs.existsSync(outFile(cityUrl(c))));
 for (const [city, { now, months }] of data) {
-  const nxt = months[(now.m % 12) + 1];
-  writeIfChanged(path.join(cityDir(city), 'index.html'), cityPage(city, months[now.m], nxt, now));
-  for (let m = 1; m <= 12; m++) writeIfChanged(path.join(cityDir(city), MONTHS[m - 1], 'index.html'), monthPage(city, months[m], now));
+  for (const L of langsOf(city.country)) {
+    writeIfChanged(outFile(cityUrl(city, L)), cityPage(city, months[now.m], months[(now.m % 12) + 1], now, L));
+    for (let m = 1; m <= 12; m++) writeIfChanged(outFile(monthUrl(city, m, L)), monthPage(city, months[m], now, L));
+  }
 }
-
-for (const [cc] of listedCountries()) writeIfChanged(path.join(OUT, 'prayer-times', cc, 'index.html'), countryPage(cc));
-writeIfChanged(path.join(OUT, 'prayer-times', 'countries', 'index.html'), countriesPage());
-if (ramadan) writeIfChanged(path.join(OUT, ramadan.url.slice(1), 'index.html'), ramadanPage());
+for (const L of ALL_LANGS) {
+  for (const [cc] of countriesIn(L)) writeIfChanged(outFile(countryUrl(cc, L)), countryPage(cc, L));
+  writeIfChanged(outFile(countriesUrl(L)), countriesPage(L));
+}
+if (ramadan) writeIfChanged(outFile(ramadan.url), ramadanPage());
 writeIfChanged(path.join(OUT, 'prayer-times', 'cities.css'), fs.readFileSync(path.join(HERE, 'cities.css'), 'utf8'));
 
 const month = new Date().toISOString().slice(0, 7);
-const urls = [...(ramadan ? [ramadan.url] : []), '/prayer-times/countries/', ...listedCountries().map(([cc]) => countryUrl(cc)), ...listed.filter((c) => data.has(c) || fs.existsSync(path.join(cityDir(c), MONTHS[0], 'index.html'))).flatMap((c) => [cityUrl(c), ...MONTHS.map((_, i) => monthUrl(c, i + 1))])];
+const built = (c) => data.has(c) || fs.existsSync(outFile(monthUrl(c, 1)));
+const urls = [
+  ...(ramadan ? [ramadan.url] : []),
+  ...ALL_LANGS.flatMap((L) => [countriesUrl(L), ...countriesIn(L).map(([cc]) => countryUrl(cc, L))]),
+  ...listed.filter(built).flatMap((c) => langsOf(c.country).flatMap((L) => [cityUrl(c, L), ...MONTHS.map((_, i) => monthUrl(c, i + 1, L))])),
+];
 writeIfChanged(path.join(OUT, 'sitemap-cities.xml'), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map((u) => `  <url><loc>${SITE}${u}</loc><lastmod>${month}-01</lastmod></url>`).join('\n')}

@@ -130,3 +130,15 @@ details p { margin-top: 8px; color: var(--muted); }
 .cities span a { font-weight: 400; display: inline; color: var(--muted); }
 @media (max-width: 720px) { .ramadan-dates { grid-template-columns: 1fr; } }
 .cities li > b { display: block; }
+
+/* Languages (2026-10-20): switcher, and right-to-left pages (Arabic, Urdu) */
+.langs { font-size: 13px; color: var(--muted); padding-top: 10px; }
+.langs a { color: var(--green); text-decoration: none; }
+.langs b { color: var(--text); font-weight: 600; }
+[dir="rtl"] body, [dir="rtl"] .btn { font-family: 'Noto Naskh Arabic', 'Geeza Pro', 'Segoe UI', Tahoma, sans-serif; }
+[dir="rtl"] .tt tbody th { text-align: right; }
+[dir="rtl"] .tt caption { text-align: right; }
+[dir="rtl"] .tt tr.is-today th { box-shadow: inset -4px 0 0 var(--gold); }
+[dir="rtl"] .tt td, [dir="rtl"] .slot b { direction: ltr; unicode-bidi: isolate; }
+[dir="rtl"] .card h2, [dir="rtl"] .hero h1 { line-height: 1.5; }
+[dir="rtl"] details summary { line-height: 1.7; }
