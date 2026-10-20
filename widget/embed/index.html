@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Prayer times widget · iMuslim Life</title>
+<style>
+:root{--bg:#fff;--text:#333;--muted:#666;--line:#e6e2d6;--green:#006400;--gold:#d4af37;--soft:#fbf5e1}
+.dark{--bg:#1e1e1e;--text:#e0e0e0;--muted:#aaa;--line:#333;--green:#5cbf60;--soft:#2b2615}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font:14px/1.45 Rubik,Roboto,-apple-system,'Segoe UI',Arial,sans-serif}
+[dir=rtl] body{font-family:'Noto Naskh Arabic','Geeza Pro',Tahoma,sans-serif}
+.w{border:1px solid var(--line);border-top:4px solid var(--gold);border-radius:10px;padding:12px 14px;min-height:100vh}
+h1{font-size:17px;color:var(--green);font-weight:600}
+.sub{font-size:12px;color:var(--muted);margin-top:2px}
+ul{list-style:none;margin-top:10px}
+li{display:flex;justify-content:space-between;padding:6px 8px;border-radius:6px}
+li+li{border-top:1px solid var(--line)}
+li b{font-weight:600;direction:ltr;unicode-bidi:isolate}
+li.next{background:var(--soft);border-color:transparent;box-shadow:inset 3px 0 0 var(--gold)}
+[dir=rtl] li.next{box-shadow:inset -3px 0 0 var(--gold)}
+.nx{margin-top:10px;font-size:13px}
+.nx b{color:var(--green)}
+.by{margin-top:10px;font-size:11px;color:var(--muted)}
+.by a{color:var(--green);text-decoration:none}
+</style>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "3937a625dcce4781b04cf88f4f50fe59"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+<div class="w" id="w"><p class="sub" id="msg"></p></div>
+<script>
+(function(){
+var W={"en":{"dir":"ltr","locale":"en-US","clock":12,"ampm":["AM","PM"],"names":{"Fajr":"Fajr","Sunrise":"Sunrise","Dhuhr":"Dhuhr","Asr":"Asr","Maghrib":"Maghrib","Isha":"Isha"},"hm":null,"next":"Next:","tomorrow":"(tomorrow)","leftH":"in {h} h {m} min","leftM":"in {m} min","by":"Prayer times by","loading":"Loading…","error":"Prayer times are not available right now."},"ar":{"dir":"rtl","locale":"ar-u-nu-latn","clock":12,"ampm":["ص","م"],"names":{"Fajr":"الفجر","Sunrise":"الشروق","Dhuhr":"الظهر","Asr":"العصر","Maghrib":"المغرب","Isha":"العشاء"},"hm":{"Muharram":"محرم","Safar":"صفر","Rabi al-Awwal":"ربيع الأول","Rabi al-Thani":"ربيع الآخر","Jumada al-Awwal":"جمادى الأولى","Jumada al-Thani":"جمادى الآخرة","Rajab":"رجب","Shaban":"شعبان","Ramadan":"رمضان","Shawwal":"شوال","Dhu al-Qadah":"ذو القعدة","Dhu al-Hijjah":"ذو الحجة"},"next":"الصلاة القادمة:","tomorrow":"(غدًا)","leftH":"بعد {h} س {m} د","leftM":"بعد {m} د","by":"مواقيت الصلاة من","loading":"جارٍ التحميل…","error":"مواقيت الصلاة غير متاحة الآن."},"ur":{"dir":"rtl","locale":"ur-u-nu-latn","clock":12,"ampm":["",""],"names":{"Fajr":"فجر","Sunrise":"طلوعِ آفتاب","Dhuhr":"ظہر","Asr":"عصر","Maghrib":"مغرب","Isha":"عشاء"},"hm":{"Muharram":"محرم","Safar":"صفر","Rabi al-Awwal":"ربیع الاول","Rabi al-Thani":"ربیع الثانی","Jumada al-Awwal":"جمادی الاول","Jumada al-Thani":"جمادی الثانی","Rajab":"رجب","Shaban":"شعبان","Ramadan":"رمضان","Shawwal":"شوال","Dhu al-Qadah":"ذوالقعدہ","Dhu al-Hijjah":"ذوالحجہ"},"next":"اگلی نماز:","tomorrow":"(کل)","leftH":"{h} گھنٹے {m} منٹ میں","leftM":"{m} منٹ میں","by":"نماز کے اوقات:","loading":"لوڈ ہو رہا ہے…","error":"نماز کے اوقات اس وقت دستیاب نہیں۔"},"id":{"dir":"ltr","locale":"id-ID","clock":24,"ampm":null,"names":{"Fajr":"Subuh","Sunrise":"Terbit","Dhuhr":"Dzuhur","Asr":"Ashar","Maghrib":"Maghrib","Isha":"Isya"},"hm":{"Muharram":"Muharram","Safar":"Safar","Rabi al-Awwal":"Rabiul Awal","Rabi al-Thani":"Rabiul Akhir","Jumada al-Awwal":"Jumadil Awal","Jumada al-Thani":"Jumadil Akhir","Rajab":"Rajab","Shaban":"Syakban","Ramadan":"Ramadan","Shawwal":"Syawal","Dhu al-Qadah":"Zulkaidah","Dhu al-Hijjah":"Zulhijah"},"next":"Berikutnya:","tomorrow":"(besok)","leftH":"dalam {h} jam {m} menit","leftM":"dalam {m} menit","by":"Jadwal sholat dari","loading":"Memuat…","error":"Jadwal sholat belum tersedia."},"ms":{"dir":"ltr","locale":"ms-MY","clock":24,"ampm":null,"names":{"Fajr":"Subuh","Sunrise":"Syuruk","Dhuhr":"Zohor","Asr":"Asar","Maghrib":"Maghrib","Isha":"Isyak"},"hm":{"Muharram":"Muharam","Safar":"Safar","Rabi al-Awwal":"Rabiulawal","Rabi al-Thani":"Rabiulakhir","Jumada al-Awwal":"Jamadilawal","Jumada al-Thani":"Jamadilakhir","Rajab":"Rejab","Shaban":"Syaaban","Ramadan":"Ramadan","Shawwal":"Syawal","Dhu al-Qadah":"Zulkaedah","Dhu al-Hijjah":"Zulhijah"},"next":"Seterusnya:","tomorrow":"(esok)","leftH":"dalam {h} jam {m} minit","leftM":"dalam {m} minit","by":"Waktu solat oleh","loading":"Memuatkan…","error":"Waktu solat tidak tersedia sekarang."}};
+var q=new URLSearchParams(location.search),c=(q.get('c')||'').replace(/[^a-z0-9/-]/g,''),L=W[q.get('lang')]?q.get('lang'):'en',I=W[L];
+if(q.get('theme')==='dark')document.documentElement.className='dark';
+document.documentElement.lang=L;document.documentElement.dir=I.dir;
+var box=document.getElementById('w');document.getElementById('msg').textContent=I.loading;
+function esc(s){return String(s).replace(/[&<>"]/g,function(x){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[x]})}
+function now(tz){var p={};new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(new Date()).forEach(function(x){p[x.type]=x.value});return{date:p.year+'-'+p.month+'-'+p.day,min:(+p.hour)*60+(+p.minute)+(+p.second)/60}}
+function mins(s){var a=s.split(':');return +a[0]*60+(+a[1])}
+function fmt(s){var a=s.split(':'),h=+a[0];if(I.clock===24)return(h<10?'0':'')+h+':'+a[1];return((h+11)%12+1)+':'+a[1]+(I.ampm&&I.ampm[0]?' '+I.ampm[h<12?0:1]:'')}
+function hij(h){var m=h.match(/^(\d+) (.+) (\d+)$/);return m&&I.hm&&I.hm[m[2]]?m[1]+' '+I.hm[m[2]]+' '+m[3]:h}
+fetch('/prayer-times/data/'+c.replace('/','-')+'.json').then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(D){
+  var lang=D.langs.indexOf(L)>-1?L:'en',name=D.names[lang]||D.names.en,url=D.urls[lang]||D.urls.en;
+  function draw(){var n=now(D.tz),i=-1;for(var k=0;k<D.days.length;k++)if(D.days[k].date===n.date)i=k;
+    if(i<0){box.innerHTML='<p class="sub">'+esc(I.error)+'</p>';return}
+    var d=D.days[i],P=['Fajr','Dhuhr','Asr','Maghrib','Isha'],next=null,at=0,label;
+    for(var j=0;j<P.length;j++)if(mins(d.t[P[j]])>n.min){next=P[j];at=mins(d.t[P[j]]);break}
+    if(next)label=I.names[next];else if(D.days[i+1]){next='Fajr';at=mins(D.days[i+1].t.Fajr)+1440;label=I.names.Fajr+' '+I.tomorrow}
+    var left=Math.max(0,Math.round(at-n.min)),h=Math.floor(left/60),m=left%60;
+    var date=new Date(n.date+'T12:00:00Z').toLocaleDateString(I.locale,{weekday:'long',month:'long',day:'numeric',timeZone:'UTC'});
+    box.innerHTML='<h1>'+esc(name)+'</h1><p class="sub">'+esc(date)+' · '+esc(hij(d.hijri))+'</p><ul>'+
+      ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'].map(function(p){return'<li'+(p===next&&label===I.names[p]?' class="next"':'')+'><span>'+esc(I.names[p])+'</span><b>'+fmt(d.t[p])+'</b></li>'}).join('')+'</ul>'+
+      (next?'<p class="nx">'+esc(I.next)+' <b>'+esc(label)+'</b> '+esc((h?I.leftH.replace('{h}',h):I.leftM).replace('{m}',m))+'</p>':'')+
+      '<p class="by">'+esc(I.by)+' <a href="'+esc(url)+'" target="_blank" rel="noopener">iMuslim Life</a></p>';
+  }
+  draw();setInterval(draw,30000);
+}).catch(function(){box.innerHTML='<p class="sub">'+esc(I.error)+'</p>'});
+})();
+</script>
+</body>
+</html>

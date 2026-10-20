@@ -24,6 +24,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { LANGS, LANG_COUNTRIES } from './i18n.mjs';
+import { cityData, embedPage, builderBody } from './widget.mjs';
 
 const HERE = import.meta.dirname;
 const arg = (name) => process.argv.includes(name);
@@ -207,7 +208,7 @@ ${BEACON}
 ${body}
 <footer class="foot wrap">
   <p><a href="/">iMuslim Life</a> · ${ramadan ? `<a href="${ramadan.url}">${T.foot.ramadan(ramadan.year)}</a> · ` : ''}${footerCountries(L).map(([cc]) => `<a href="${countryUrl(cc, L)}">${esc(kname(cc, L))}</a>`).join(' · ')} · <a href="${countriesUrl(L)}">${T.foot.all}</a></p>
-  <p><a href="/privacy-policy/">${T.foot.privacy}</a> · <a href="/terms/">${T.foot.terms}</a> · ${T.foot.adfree} · ${T.foot.data} <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0)</p>
+  <p><a href="/widget/">${T.foot.widget}</a> · <a href="/privacy-policy/">${T.foot.privacy}</a> · <a href="/terms/">${T.foot.terms}</a> · ${T.foot.adfree} · ${T.foot.data} <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0)</p>
 </footer>
 </body>
 </html>
@@ -586,9 +587,32 @@ for (const L of ALL_LANGS) {
 if (ramadan) writeIfChanged(outFile(ramadan.url), ramadanPage());
 writeIfChanged(path.join(OUT, 'prayer-times', 'cities.css'), fs.readFileSync(path.join(HERE, 'cities.css'), 'utf8'));
 
+// The masjid widget (widget.mjs): a data file per city, the city index, the embed and builder pages.
+for (const [city, { now, months }] of data) {
+  const langs = langsOf(city.country);
+  writeIfChanged(path.join(OUT, 'prayer-times', 'data', `${city.country}-${city.slug}.json`), cityData({
+    city, now, months, langs, SITE,
+    names: Object.fromEntries(langs.map((l) => [l, named(city, l)])),
+    country: Object.fromEntries(langs.map((l) => [l, kname(city.country, l)])),
+    urls: Object.fromEntries(langs.map((l) => [l, cityUrl(city, l)])),
+  }));
+}
+writeIfChanged(path.join(OUT, 'prayer-times', 'data', 'index.json'), `${JSON.stringify(listed.filter((c) => fs.existsSync(path.join(OUT, 'prayer-times', 'data', `${c.country}-${c.slug}.json`)))
+  .map((c) => ({ k: key(c), n: named(c), country: countries[c.country].name, tz: c.tz, u: cityUrl(c), langs: langsOf(c.country) }))
+  .sort((a, b) => a.country.localeCompare(b.country) || a.n.localeCompare(b.n)))}\n`);
+writeIfChanged(outFile('/widget/embed/'), embedPage({ BEACON }));
+writeIfChanged(outFile('/widget/'), layout({
+  title: 'Free Prayer Times Widget for Masjid Websites | iMuslim Life',
+  description: `Add today's prayer times, the next prayer and the Hijri date to your masjid's website: a free widget for ${listed.length} cities in English, Arabic, Urdu, Indonesian and Malay. No ads, no account.`,
+  canonical: '/widget/',
+  jsonLd: [breadcrumb([['iMuslim Life', '/'], ['Prayer times', '/prayer-times/'], ['Widget', '/widget/']])],
+  body: builderBody(),
+}));
+
 const month = new Date().toISOString().slice(0, 7);
 const built = (c) => data.has(c) || fs.existsSync(outFile(monthUrl(c, 1)));
 const urls = [
+  '/widget/',
   ...(ramadan ? [ramadan.url] : []),
   ...ALL_LANGS.flatMap((L) => [countriesUrl(L), ...countriesIn(L).map(([cc]) => countryUrl(cc, L))]),
   ...listed.filter(built).flatMap((c) => langsOf(c.country).flatMap((L) => [cityUrl(c, L), ...MONTHS.map((_, i) => monthUrl(c, i + 1, L))])),

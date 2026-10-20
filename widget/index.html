@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free Prayer Times Widget for Masjid Websites | iMuslim Life</title>
+<meta name="description" content="Add today's prayer times, the next prayer and the Hijri date to your masjid's website: a free widget for 500 cities in English, Arabic, Urdu, Indonesian and Malay. No ads, no account.">
+<link rel="canonical" href="https://imuslimlife.com/widget/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="iMuslim Life">
+<meta property="og:title" content="Free Prayer Times Widget for Masjid Websites | iMuslim Life">
+<meta property="og:description" content="Add today's prayer times, the next prayer and the Hijri date to your masjid's website: a free widget for 500 cities in English, Arabic, Urdu, Indonesian and Malay. No ads, no account.">
+<meta property="og:url" content="https://imuslimlife.com/widget/">
+<meta property="og:image" content="https://imuslimlife.com/logo512.png">
+<meta name="theme-color" content="#006400">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/prayer-times/cities.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"iMuslim Life","item":"https://imuslimlife.com/"},{"@type":"ListItem","position":2,"name":"Prayer times","item":"https://imuslimlife.com/prayer-times/"},{"@type":"ListItem","position":3,"name":"Widget","item":"https://imuslimlife.com/widget/"}]}]}</script>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "3937a625dcce4781b04cf88f4f50fe59"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+<header class="bar">
+  <div class="wrap bar-in">
+    <a class="brand" href="/" dir="ltr"><span aria-hidden="true">🕋</span> i<b>Muslim</b> Life</a>
+    <nav><a href="/prayer-times/">Prayer Times</a><a href="/prayer-times/countries/">Cities</a><a href="/quran/">Quran</a><a href="/alexa-athan/">Athan on Alexa</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="crumbs"><a href="/prayer-times/">Prayer times</a> › Widget for your website</p>
+  <section class="hero">
+    <h1>Free prayer times widget for your masjid's website</h1>
+    <p class="sub">Today's prayer times, the next prayer with a countdown and the Hijri date, updated every day. No ads, no account, no cost.</p>
+  </section>
+  <div class="two wb">
+    <section class="card">
+      <h2>1. Choose your city</h2>
+      <p><label>Country<br><select id="wb-country"></select></label></p>
+      <p><label>City<br><select id="wb-city"></select></label></p>
+      <p><label>Language<br><select id="wb-lang"></select></label></p>
+      <p><label>Theme<br><select id="wb-theme"><option value="light">Light</option><option value="dark">Dark</option></select></label></p>
+      <p class="hint">Times are calculated for the city with the method its masjids most often use. If your city isn't listed, choose the nearest one; times are usually within a few minutes. Your masjid's own iqamah times may differ.</p>
+    </section>
+    <section class="card">
+      <h2>2. Preview</h2>
+      <iframe id="wb-preview" title="Prayer times widget preview" style="width:100%;max-width:340px;height:360px;border:0"></iframe>
+    </section>
+  </div>
+  <section class="card">
+    <h2>3. Copy this code into your website</h2>
+    <p>Paste it into an HTML block (WordPress: Custom HTML; Wix: Embed code; Squarespace: Code block).</p>
+    <textarea id="wb-code" rows="6" readonly></textarea>
+    <p class="btns"><button class="btn" type="button" id="wb-copy">Copy code</button> <span id="wb-copied" class="hint"></span></p>
+  </section>
+  <section class="card">
+    <h2>Questions</h2>
+    <details><summary>Does it cost anything?</summary><p>No. The widget is free, has no ads and needs no account.</p></details>
+    <details><summary>Does it update by itself?</summary><p>Yes. It shows today's times every day, with the next prayer and a countdown, in the city's time zone.</p></details>
+    <details><summary>Can it show our iqamah times?</summary><p>Not yet. Masjids that join Masjid Connect can publish their iqamah and Jumu'ah times for the Muslim Companion Alexa skill; email info@yzinfotech.com.</p></details>
+  </section>
+</main>
+<script>
+(function(){
+var C=[],byCc={};
+var $=function(id){return document.getElementById(id)};
+fetch('/prayer-times/data/index.json').then(function(r){return r.json()}).then(function(list){
+  C=list;list.forEach(function(c){(byCc[c.country]=byCc[c.country]||[]).push(c)});
+  $('wb-country').innerHTML=Object.keys(byCc).sort().map(function(k){return'<option>'+k+'</option>'}).join('');
+  var guess=Intl.DateTimeFormat().resolvedOptions().timeZone,hit=list.find(function(c){return c.tz===guess});
+  if(hit)$('wb-country').value=hit.country;
+  cities(hit&&hit.k);
+});
+function cities(sel){var cs=byCc[$('wb-country').value]||[];$('wb-city').innerHTML=cs.map(function(c){return'<option value="'+c.k+'">'+c.n+'</option>'}).join('');if(sel)$('wb-city').value=sel;langs()}
+function langs(){var c=C.find(function(x){return x.k===$('wb-city').value});var names={en:'English',ar:'العربية',ur:'اردو',id:'Bahasa Indonesia',ms:'Bahasa Melayu'};
+  $('wb-lang').innerHTML=(c?c.langs:['en']).map(function(l){return'<option value="'+l+'">'+names[l]+'</option>'}).join('');update()}
+function update(){var c=C.find(function(x){return x.k===$('wb-city').value});if(!c)return;
+  var src='https://imuslimlife.com/widget/embed/?c='+c.k+($('wb-theme').value==='dark'?'&theme=dark':'')+($('wb-lang').value!=='en'?'&lang='+$('wb-lang').value:'');
+  $('wb-preview').src=src.replace('https://imuslimlife.com','');
+  $('wb-code').value='<iframe src="'+src+'" title="Prayer times for '+c.n+'" style="width:100%;max-width:340px;height:360px;border:0" loading="lazy"></iframe>\n<p style="font:12px sans-serif;margin:4px 0">Prayer times for <a href="https://imuslimlife.com'+c.u+'">'+c.n+'</a> by iMuslim Life</p>';}
+$('wb-country').onchange=function(){cities()};$('wb-city').onchange=langs;$('wb-lang').onchange=update;$('wb-theme').onchange=update;
+$('wb-copy').onclick=function(){$('wb-code').select();navigator.clipboard.writeText($('wb-code').value).then(function(){$('wb-copied').textContent='Copied.'})};
+})();
+</script>
+<footer class="foot wrap">
+  <p><a href="/">iMuslim Life</a> · <a href="/ramadan/2027/">Ramadan 2027</a> · <a href="/prayer-times/pk/">Pakistan</a> · <a href="/prayer-times/id/">Indonesia</a> · <a href="/prayer-times/tr/">Turkey</a> · <a href="/prayer-times/ir/">Iran</a> · <a href="/prayer-times/ng/">Nigeria</a> · <a href="/prayer-times/eg/">Egypt</a> · <a href="/prayer-times/in/">India</a> · <a href="/prayer-times/iq/">Iraq</a> · <a href="/prayer-times/countries/">All countries</a></p>
+  <p><a href="/widget/">Free widget for masjids</a> · <a href="/privacy-policy/">Privacy</a> · <a href="/terms/">Terms</a> · Always ad-free · City data © <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0)</p>
+</footer>
+</body>
+</html>
