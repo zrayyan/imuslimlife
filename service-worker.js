@@ -3,7 +3,9 @@
 // Service Worker for Salat-e-Mustaqeem Prayer Times App
 
 // Cache name with version number
-const CACHE_NAME = 'salat-e-mustaqeem-cache-v1';
+// v2 (2026-10-20): page loads are network-first, so a new release is never hidden
+// behind an old cached index.html (real URLs replaced /#/ routes).
+const CACHE_NAME = 'salat-e-mustaqeem-cache-v2';
 
 // Assets to cache
 const ASSETS_TO_CACHE = [
@@ -12,13 +14,9 @@ const ASSETS_TO_CACHE = [
   '/manifest.json',
   '/favicon.svg',
   '/logo192.png',
-  '/logo512.png',
-  '/audio/athan/default.mp3',
-  '/audio/athan/al-makkah.mp3',
-  '/audio/athan/al-madinah.mp3',
-  '/audio/athan/egyptian.mp3',
-  '/audio/athan/turkey.mp3',
-  '/audio/beep.mp3'
+  '/logo512.png'
+  // The /audio/athan/*.mp3 and /audio/beep.mp3 files listed here before no longer
+  // exist; one missing file makes cache.addAll fail, so no new worker could install.
 ];
 
 // Prayer times data (will be updated by the app)
@@ -67,8 +65,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // For API or dynamic content - network first, then cache
-  if (event.request.url.includes('/api/') || event.request.url.includes('prayer-times')) {
+  // Pages, API and dynamic content - network first, then cache (offline)
+  if (event.request.mode === 'navigate' || event.request.url.includes('/api/') || event.request.url.includes('prayer-times')) {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
@@ -79,8 +77,8 @@ self.addEventListener('fetch', (event) => {
           });
         })
         .catch(() => {
-          // If network fails, try from cache
-          return caches.match(event.request);
+          // If network fails, try from cache (any page falls back to the app shell)
+          return caches.match(event.request).then((cached) => cached || (event.request.mode === 'navigate' ? caches.match('/index.html') : undefined));
         })
     );
   } else {
