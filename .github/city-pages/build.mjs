@@ -21,10 +21,14 @@
 // "Today", the next prayer and the countdown are worked out in the browser.
 // 2026-10-20: an unpaced first build (3 parallel, ~10 req/s) crashed prayer-api twice;
 // see docs/INCIDENT_PRAYER_API_OOM_CITY_PAGES_BUILD_2026-10-20.md.
+// Masjid pages (masjids.mjs, 2026-10-20): /masjids/** from osm-masjids.json plus Masjid
+// Connect (1 + one request per masjid, same pacing, own cap MASJID_CONNECT_MAX, default 50,
+// so a 0-budget publish still lists them).
 import fs from 'node:fs';
 import path from 'node:path';
 import { LANGS, LANG_COUNTRIES } from './i18n.mjs';
 import { cityData, embedPage, builderBody } from './widget.mjs';
+import { loadMasjids, loadMasjidConnect, buildMasjids } from './masjids.mjs';
 
 const HERE = import.meta.dirname;
 const arg = (name) => process.argv.includes(name);
@@ -156,6 +160,7 @@ function existingMonth(file, y, m) {
 }
 
 let listed = cities; // the cities that have pages; set before anything is rendered
+let masjidDir = null; // buildMasjids() result; set before the city pages are rendered
 let ramadan = null; // the coming Ramadan (from Makkah's Umm al-Qura dates); set before rendering
 const inLang = (L) => listed.filter((c) => langsOf(c.country).includes(L));
 const countriesIn = (L) => Object.entries(countries).filter(([cc]) => inLang(L).some((c) => c.country === cc));
@@ -169,7 +174,7 @@ function footerCountries(L) {
 
 const RTL_FONT = 'https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600&display=swap';
 
-function layout({ L = 'en', title, description, canonical, alternates = [], jsonLd, body, image = null }) {
+function layout({ L = 'en', title, description, canonical, alternates = [], jsonLd, body, image = null, credit = null }) {
   const T = LANGS[L];
   const hreflang = alternates.length > 1
     ? `\n${alternates.map(([l, u]) => `<link rel="alternate" hreflang="${l}" href="${SITE}${u}">`).join('\n')}\n<link rel="alternate" hreflang="x-default" href="${SITE}${alternates[0][1]}">`
@@ -208,7 +213,7 @@ ${BEACON}
 ${body}
 <footer class="foot wrap">
   <p><a href="/">iMuslim Life</a> · ${ramadan ? `<a href="${ramadan.url}">${T.foot.ramadan(ramadan.year)}</a> · ` : ''}${footerCountries(L).map(([cc]) => `<a href="${countryUrl(cc, L)}">${esc(kname(cc, L))}</a>`).join(' · ')} · <a href="${countriesUrl(L)}">${T.foot.all}</a></p>
-  <p><a href="/widget/">${T.foot.widget}</a> · <a href="/privacy-policy/">${T.foot.privacy}</a> · <a href="/terms/">${T.foot.terms}</a> · ${T.foot.adfree} · ${T.foot.data} <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0)</p>
+  <p><a href="/widget/">${T.foot.widget}</a> · <a href="/privacy-policy/">${T.foot.privacy}</a> · <a href="/terms/">${T.foot.terms}</a> · ${T.foot.adfree} · ${T.foot.data} <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0)</p>${credit ? `\n  <p>${credit}</p>` : ''}
 </footer>
 </body>
 </html>
@@ -332,7 +337,7 @@ function cityPage(city, cur, nxt, now, L) {
   </div>
 
   ${ctaCard(city, L)}
-
+${L === 'en' ? masjidDir?.nearCity(city)?.html || '' : ''}
   <section class="card">
     <h2>${esc(T.city.nearby(n))}</h2>
     <ul class="cities">${nearbyCities(city, L).map((c) => `<li><a href="${cityUrl(c, L)}">${esc(named(c, L))}</a><span>${esc(rname(c, L) || kname(c.country, L))}</span></li>`).join('')}</ul>
@@ -574,6 +579,20 @@ for (const city of order) {
 // Pass 2: pages, in every language of each city. Link only to cities that are ready now or
 // already have a page.
 listed = cities.filter((c) => data.has(c) || fs.existsSync(outFile(cityUrl(c))));
+{
+  let connectLeft = Number(process.env.MASJID_CONNECT_MAX || 50);
+  const get = async (url) => {
+    if (connectLeft-- <= 0) throw new Error('MASJID_CONNECT_MAX reached');
+    await pace();
+    const res = await fetch(url, { signal: AbortSignal.timeout(20000) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  };
+  const connect = await loadMasjidConnect(get, API.replace(/\/calendar$/, ''));
+  masjidDir = buildMasjids({ osm: loadMasjids(HERE), connect, layout, esc, breadcrumb, qibla, compass, distanceKm, cityUrl, named, listed, SITE });
+  for (const [url, html] of masjidDir.pages) writeIfChanged(outFile(url), html);
+  writeIfChanged(path.join(OUT, 'masjids', 'index.json'), `${JSON.stringify(masjidDir.index)}\n`);
+}
 for (const [city, { now, months }] of data) {
   for (const L of langsOf(city.country)) {
     writeIfChanged(outFile(cityUrl(city, L)), cityPage(city, months[now.m], months[(now.m % 12) + 1], now, L));
@@ -613,6 +632,7 @@ const month = new Date().toISOString().slice(0, 7);
 const built = (c) => data.has(c) || fs.existsSync(outFile(monthUrl(c, 1)));
 const urls = [
   '/widget/',
+  ...masjidDir.urls,
   ...(ramadan ? [ramadan.url] : []),
   ...ALL_LANGS.flatMap((L) => [countriesUrl(L), ...countriesIn(L).map(([cc]) => countryUrl(cc, L))]),
   ...listed.filter(built).flatMap((c) => langsOf(c.country).flatMap((L) => [cityUrl(c, L), ...MONTHS.map((_, i) => monthUrl(c, i + 1, L))])),
