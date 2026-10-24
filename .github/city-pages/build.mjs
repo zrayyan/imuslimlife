@@ -21,14 +21,14 @@
 // "Today", the next prayer and the countdown are worked out in the browser.
 // 2026-10-20: an unpaced first build (3 parallel, ~10 req/s) crashed prayer-api twice;
 // see docs/INCIDENT_PRAYER_API_OOM_CITY_PAGES_BUILD_2026-10-20.md.
-// Masjid pages (masjids.mjs, 2026-10-20): /masjids/** from osm-masjids.json plus Masjid
-// Connect (1 + one request per masjid, same pacing, own cap MASJID_CONNECT_MAX, default 50,
-// so a 0-budget publish still lists them).
+// Masjid pages (masjids.mjs, 2026-10-20): /masjids/** from osm-masjids.json, approved
+// additions (1 request) and Masjid Connect (1 + one request per masjid), same pacing, own
+// cap MASJID_CONNECT_MAX (default 50), so a 0-budget publish still lists them.
 import fs from 'node:fs';
 import path from 'node:path';
 import { LANGS, LANG_COUNTRIES } from './i18n.mjs';
 import { cityData, embedPage, builderBody } from './widget.mjs';
-import { loadMasjids, loadMasjidConnect, buildMasjids } from './masjids.mjs';
+import { loadMasjids, loadMasjidAdditions, loadMasjidConnect, buildMasjids } from './masjids.mjs';
 
 const HERE = import.meta.dirname;
 const arg = (name) => process.argv.includes(name);
@@ -588,8 +588,10 @@ listed = cities.filter((c) => data.has(c) || fs.existsSync(outFile(cityUrl(c))))
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
   };
-  const connect = await loadMasjidConnect(get, API.replace(/\/calendar$/, ''));
-  masjidDir = buildMasjids({ osm: loadMasjids(HERE), connect, layout, esc, breadcrumb, qibla, compass, distanceKm, cityUrl, named, listed, SITE });
+  const base = API.replace(/\/calendar$/, '');
+  const additions = await loadMasjidAdditions(get, base);
+  const connect = await loadMasjidConnect(get, base);
+  masjidDir = buildMasjids({ osm: loadMasjids(HERE), additions, connect, layout, esc, breadcrumb, qibla, compass, distanceKm, cityUrl, named, listed, SITE });
   for (const [url, html] of masjidDir.pages) writeIfChanged(outFile(url), html);
   writeIfChanged(path.join(OUT, 'masjids', 'index.json'), `${JSON.stringify(masjidDir.index)}\n`);
 }

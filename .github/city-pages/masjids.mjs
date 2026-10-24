@@ -5,7 +5,9 @@
 //                                     times (browser, from the widget data file), Qibla
 //   /masjids/index.json               compact list for the React /mosque-directory
 // Data: osm-masjids.json (scripts/masjids/fetch-osm.mjs; © OpenStreetMap contributors,
-// ODbL) plus Masjid Connect masjids from the API (1 + one per masjid, paced by build.mjs).
+// ODbL), masjids added through the "Add a masjid" form once the admin approves them
+// (GET /v1/alexa/masjid-additions, 1 call), plus Masjid Connect masjids from the API
+// (1 + one per masjid). All calls paced by build.mjs.
 // A Masjid Connect masjid within 300 m of an OSM one takes it over: the page links to its
 // live iqamah times at /mosque/<id>; one with no OSM match is listed by its live page.
 import fs from 'node:fs';
@@ -58,11 +60,42 @@ export async function loadMasjidConnect(get, api) {
   }
 }
 
+// Approved "Add a masjid" requests, shaped like the OSM records. Slugs: the name, then
+// name + town, then name + request id, avoiding the region's OSM slugs (computed in buildMasjids).
+export async function loadMasjidAdditions(get, api) {
+  try {
+    const list = (await get(`${api}/alexa/masjid-additions`))?.data?.additions || [];
+    return list.filter((a) => a.lat != null && a.region && ['us', 'ca'].includes(a.country)).map((a) => ({
+      id: `add-${a.id.slice(3)}`, osm: null, name: a.name, type: a.type === 'musalla' ? 'musalla' : 'masjid',
+      country: a.country.toUpperCase(), cc: a.country, region: a.region, lat: a.lat, lon: a.lon,
+      address: a.address || null, city: a.town || null, town: a.town || null, postcode: null,
+      website: a.website || null, phone: a.phone || null, denomination: null, flags: [],
+    }));
+  } catch (err) {
+    console.warn(`masjids: additions unavailable (${err.message}); building without them`);
+    return [];
+  }
+}
+
+const slugify = (s) => String(s || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  .replace(/['’`]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70).replace(/-+$/, '');
+
 export function buildMasjids(ctx) {
-  const { osm, connect, layout, esc, breadcrumb, qibla, compass, distanceKm, cityUrl, named, listed, SITE } = ctx;
+  const { osm: osmOnly, additions = [], connect, layout, esc, breadcrumb, qibla, compass, distanceKm, cityUrl, named, listed, SITE } = ctx;
   const hubUrl = '/masjids/';
   const regionUrl = (cc, code) => `/masjids/${cc}/${regionSlug(code)}/`;
   const pageUrl = (m) => `${regionUrl(m.cc, m.region)}${m.slug}/`;
+  // Additions get slugs that don't clash with the OSM ones in their region.
+  const taken = new Set(osmOnly.map((m) => `${m.cc}/${m.region}/${m.slug}`));
+  for (const a of additions) {
+    const base = slugify(a.name) || 'masjid';
+    const town = slugify(a.town);
+    a.slug = [base, town && !base.includes(town) ? `${base}-${town}` : null, `${base}-${a.id.slice(-8)}`].filter(Boolean)
+      .find((o) => !taken.has(`${a.cc}/${a.region}/${o}`));
+    taken.add(`${a.cc}/${a.region}/${a.slug}`);
+  }
+  const osm = [...osmOnly, ...additions];
+  const requestUrl = (q) => `/masjid-request/?${new URLSearchParams(q)}`;
   const credit = 'Masjid data © <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap contributors</a> (ODbL) and the masjids on Masjid Connect';
 
   // Masjid Connect takes over the nearest OSM entry within 300 m; the rest stand alone.
@@ -127,7 +160,7 @@ export function buildMasjids(ctx) {
   ${['us', 'ca'].map((cc) => `<section class="card"><h2>Masjids in ${COUNTRY_NAMES[cc]}</h2><ul class="cities">${regionsOf(cc).map(({ code, list }) => `<li><a href="${regionUrl(cc, code)}">${esc(regionName(cc, code))}</a><span>${list.length} ${list.length === 1 ? 'masjid' : 'masjids'}</span></li>`).join('')}</ul></section>`).join('\n  ')}
   <section class="card"><h2>Is your masjid missing or out of date?</h2>
     <p>Masjids on <b>Masjid Connect</b> keep their own iqamah and Jumu&rsquo;ah times, announcements and Alexa reminders up to date here, for free. The rest of the list comes from OpenStreetMap, the free world map anyone can edit.</p>
-    <p class="btns"><a class="btn" href="mailto:info@yzinfotech.com?subject=Add%20our%20masjid%20to%20iMuslim%20Life">Add your masjid</a></p>
+    <p class="btns"><a class="btn" href="${requestUrl({ kind: 'add' })}">Add a masjid</a><a class="btn alt" href="${requestUrl({ kind: 'claim' })}">I run a masjid</a></p>
   </section>
 </main>`;
     pages.push([hubUrl, layout({
@@ -165,7 +198,7 @@ export function buildMasjids(ctx) {
     ${townList.map(([town, ms]) => `<h2 class="town">${esc(town)}</h2><ul class="masjids">${ms.map((m) => `<li><a href="${linkOf(m)}">${esc(m.name)}</a>${m.live || m.connect ? ' <span class="tag ok">Iqamah times</span>' : ''}${m.type === 'musalla' ? ' <span class="tag">Musalla</span>' : ''}${denomination(m) ? ` <span class="tag">${esc(denomination(m))}</span>` : ''}<span>${esc(m.address || where(m))}</span></li>`).join('')}</ul>`).join('\n    ')}
   </section>
   ${cityPagesHere.length ? `<section class="card"><h2>Prayer times in ${esc(name)}</h2><ul class="cities">${cityPagesHere.map((c) => `<li><a href="${cityUrl(c)}">${esc(named(c))}</a><span>Prayer times &amp; Qibla</span></li>`).join('')}</ul></section>` : ''}
-  <section class="card"><h2>Is your masjid missing?</h2><p>Add it on Masjid Connect to list your iqamah and Jumu&rsquo;ah times here, or add it to <a href="https://www.openstreetmap.org/" rel="noopener">OpenStreetMap</a>; this page follows OpenStreetMap.</p><p class="btns"><a class="btn" href="mailto:info@yzinfotech.com?subject=Add%20our%20masjid%20to%20iMuslim%20Life">Add your masjid</a></p></section>
+  <section class="card"><h2>Is your masjid missing?</h2><p>Add it on Masjid Connect to list your iqamah and Jumu&rsquo;ah times here, or add it to <a href="https://www.openstreetmap.org/" rel="noopener">OpenStreetMap</a>; this page follows OpenStreetMap.</p><p class="btns"><a class="btn" href="${requestUrl({ kind: 'add', country: cc, region: code })}">Add a masjid</a></p></section>
 </main>`;
       pages.push([url, layout({
         title: `Mosques in ${name}: ${list.length} Masjids, Directions & Prayer Times | iMuslim Life`,
@@ -188,7 +221,8 @@ export function buildMasjids(ctx) {
     const phone = m.connect?.phone || m.phone;
     const denom = denomination(m);
     const addressLine = m.address ? [m.address, m.town, m.region, m.postcode].filter(Boolean).join(', ') : null;
-    const osmEdit = `https://www.openstreetmap.org/edit?${m.osm.split('/').slice(-2).join('=')}`;
+    const osmEdit = m.osm ? `https://www.openstreetmap.org/edit?${m.osm.split('/').slice(-2).join('=')}` : null;
+    const claimUrl = requestUrl({ kind: 'claim', ...(m.osm ? { osm: m.id } : {}), name: m.name, url, lat: m.lat, lon: m.lon, region: m.region, country: m.cc });
     const d = 0.004;
     const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${(m.lon - d).toFixed(5)},${(m.lat - d * 0.7).toFixed(5)},${(m.lon + d).toFixed(5)},${(m.lat + d * 0.7).toFixed(5)}&layer=mapnik&marker=${m.lat},${m.lon}`;
     const close = nearby(m);
@@ -225,9 +259,11 @@ export function buildMasjids(ctx) {
   </div>
   ${close.length ? `<section class="card"><h2>Masjids nearby</h2><ul class="cities">${close.map(({ x, d: dist }) => `<li><a href="${linkOf(x)}">${esc(x.name)}</a><span>${esc(x.town || '')}${x.town ? ' · ' : ''}${fmtDist(dist, m.cc)}</span></li>`).join('')}</ul></section>` : ''}
   <section class="card">
-    <h2>Is this your masjid?</h2>
-    <p>Add your iqamah and Jumu&rsquo;ah times, announcements and Alexa reminders on Masjid Connect, free. Something wrong here? Fix it on <a href="${osmEdit}" rel="noopener nofollow">OpenStreetMap</a> (this page follows it) or <a href="mailto:info@yzinfotech.com?subject=${encodeURIComponent(`Correction: ${m.name}`)}">tell us</a>.</p>
-    <p class="btns"><a class="btn" href="mailto:info@yzinfotech.com?subject=${encodeURIComponent(`Claim ${m.name} on iMuslim Life`)}">Claim this masjid</a></p>
+    ${m.connect
+    ? `<h2>Masjid staff</h2><p>${esc(m.name)} is on Masjid Connect. Staff update its times and announcements at <a href="https://alexa.imuslimlife.com/masjid/manage" rel="noopener">alexa.imuslimlife.com</a>. Something wrong? <a href="mailto:info@yzinfotech.com?subject=${encodeURIComponent(`Correction: ${m.name}`)}">Tell us</a>.</p>`
+    : `<h2>Is this your masjid?</h2>
+    <p>Add your iqamah and Jumu&rsquo;ah times, announcements and Alexa reminders on Masjid Connect, free. Something wrong here? ${osmEdit ? `Fix it on <a href="${osmEdit}" rel="noopener nofollow">OpenStreetMap</a> (this page follows it) or ` : ''}<a href="mailto:info@yzinfotech.com?subject=${encodeURIComponent(`Correction: ${m.name}`)}">tell us</a>.</p>
+    <p class="btns"><a class="btn" href="${esc(claimUrl)}">Claim this masjid</a></p>`}
   </section>
 </main>
 ${near ? `<script>(function(){var el=document.getElementById('mt');fetch(el.dataset.src).then(function(r){return r.json()}).then(function(D){var p={};new Intl.DateTimeFormat('en-CA',{timeZone:D.tz,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).forEach(function(x){p[x.type]=x.value});var day=D.days.filter(function(d){return d.date===p.year+'-'+p.month+'-'+p.day})[0];if(!day)return;el.querySelectorAll('.slot').forEach(function(s){var t=(day.t[s.dataset.p]||'').match(/(\\d{1,2}):(\\d{2})/);if(!t)return;var h=+t[1];s.querySelector('b').textContent=((h+11)%12+1)+':'+t[2]+(h<12?' AM':' PM')})}).catch(function(){})})();</script>` : ''}`;
