@@ -29,6 +29,10 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://imuslimlife.com/niyyah/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://imuslimlife.com/api/</loc>
     <priority>0.6</priority>
   </url>
