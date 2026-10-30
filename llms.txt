@@ -16,6 +16,10 @@ Prayer times depend on location, date, calculation method and Asr madhab. Ask th
 - [AI Agents setup](https://imuslimlife.com/#/ai-agents): add the MCP server to Claude, ChatGPT, Gemini CLI, GitHub Copilot / VS Code, or call it from your own code
 - [Muslim Companion for Alexa](https://imuslimlife.com/#/alexa-skill): the Athan, adhkar, Quran and masjid reminders on Amazon Echo
 
+## Features
+
+- [Tasmīʿ](https://imuslimlife.com/tasmi/): recite the Quran in the Salat-e-Mustaqeem app (iOS, Android) and the page follows you word by word, marking skipped words for review; on-device, never recorded, works offline, free. It checks words, not tajweed.
+
 ## Policies
 
 - [Privacy Policy](https://imuslimlife.com/privacy-policy/)
