@@ -25,6 +25,10 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://imuslimlife.com/mihrab/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://imuslimlife.com/alexa-skill/</loc>
     <priority>0.7</priority>
   </url>
