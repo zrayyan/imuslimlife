@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunksalat_e_mustaqeem_client=self.webpackChunksalat_e_mustaqeem_client||[]).push([[914],{10914:a=>{a.exports=JSON.parse('{"features":{"tasmi":{"title":"Tasm\u012b\u02bf","description":"Bacalah, dan halaman mengikuti Anda. Kata-kata menyala keemasan; yang terlewat menanti dengan lembut. Di ponsel Anda, tanpa internet, tidak pernah direkam."}}}')}}]);

@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunksalat_e_mustaqeem_client=self.webpackChunksalat_e_mustaqeem_client||[]).push([[8265],{98265:e=>{e.exports=JSON.parse('{"features":{"tasmi":{"title":"Tasm\u012b\u02bf","description":"Recita, y la p\xe1gina te sigue. Las palabras se iluminan en oro; lo omitido te espera con suavidad. En tu tel\xe9fono, sin conexi\xf3n, nunca se graba."}}}')}}]);

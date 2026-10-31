@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunksalat_e_mustaqeem_client=self.webpackChunksalat_e_mustaqeem_client||[]).push([[5091],{45091:e=>{e.exports=JSON.parse('{"features":{"tasmi":{"title":"Tasm\u012b\u02bf","description":"Okuyun, sayfa sizi takip etsin. Kelimeler alt\u0131n renginde parlar; atlanan ne varsa yumu\u015fak\xe7a bekler. Telefonunuzda, internetsiz, asla kaydedilmez."}}}')}}]);

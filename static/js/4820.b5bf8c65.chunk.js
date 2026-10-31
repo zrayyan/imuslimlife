@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunksalat_e_mustaqeem_client=self.webpackChunksalat_e_mustaqeem_client||[]).push([[4820],{34820:e=>{e.exports=JSON.parse('{"features":{"tasmi":{"title":"Tasm\u012b\u02bf","description":"Recite, and the page follows you. Words light in gold; anything missed waits softly. On your phone, offline, never recorded."}}}')}}]);
