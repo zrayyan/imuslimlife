@@ -60,6 +60,8 @@
     <ul class="months"><li><a href="/prayer-times/ne/niamey/january/">January <span>2027</span></a></li><li><a href="/prayer-times/ne/niamey/february/">February <span>2027</span></a></li><li><a href="/prayer-times/ne/niamey/march/">March <span>2027</span></a></li><li><a href="/prayer-times/ne/niamey/april/">April <span>2027</span></a></li><li><a href="/prayer-times/ne/niamey/may/">May <span>2027</span></a></li><li><a href="/prayer-times/ne/niamey/june/">June <span>2027</span></a></li><li><a href="/prayer-times/ne/niamey/july/">July <span>2027</span></a></li><li><a href="/prayer-times/ne/niamey/august/">August <span>2027</span></a></li><li><a href="/prayer-times/ne/niamey/september/">September <span>2027</span></a></li><li><a href="/prayer-times/ne/niamey/october/">October <span>2027</span></a></li><li class="is-current"><a href="/prayer-times/ne/niamey/november/">November <span>2026</span></a></li><li><a href="/prayer-times/ne/niamey/december/">December <span>2026</span></a></li></ul>
   </section>
 
+  <section class="card events"><h2>Upcoming Islamic events</h2><ul><li><a href="/islamic-calendar/isra-miraj-2027/">Isra and Mi’raj</a><span>Tuesday, January 5, 2027 · 27 Rajab 1448 (from Maghrib the evening before)</span><span><a href="/prayer-times/ne/niamey/january/">Prayer times that day</a>: Fajr <b data-d="2027-01-05" data-p="Fajr">6:00 AM</b> · Sunrise <b data-d="2027-01-05" data-p="Sunrise">7:16 AM</b> · Maghrib <b data-d="2027-01-05" data-p="Maghrib">6:38 PM</b></span></li><li><a href="/islamic-calendar/mid-shaban-2027/">15 Sha’ban</a><span>Saturday, January 23, 2027 · 15 Shaban 1448 (from Maghrib the evening before)</span><span><a href="/prayer-times/ne/niamey/january/">Prayer times that day</a>: Fajr <b data-d="2027-01-23" data-p="Fajr">6:05 AM</b> · Sunrise <b data-d="2027-01-23" data-p="Sunrise">7:19 AM</b> · Maghrib <b data-d="2027-01-23" data-p="Maghrib">6:48 PM</b></span></li><li><a href="/islamic-calendar/ramadan-2027/">Start of Ramadan</a><span>Monday, February 8, 2027 · 1 Ramadan 1448</span><span><a href="/prayer-times/ne/niamey/february/">Prayer times that day</a>: Fajr <b data-d="2027-02-08" data-p="Fajr">6:04 AM</b> · Sunrise <b data-d="2027-02-08" data-p="Sunrise">7:17 AM</b> · Maghrib <b data-d="2027-02-08" data-p="Maghrib">6:55 PM</b></span></li></ul><p class="sub">Calculated Umm al-Qura dates; with a local moon sighting an event may be a day later. <a href="/islamic-calendar/">Islamic calendar</a></p></section>
+
   <div class="two">
     <section class="card">
       <h2>Qibla direction from Niamey</h2>
@@ -100,6 +102,7 @@ function fmt(t){var p=t.split(':'),h=+p[0];if(I.clock===24)return t;return((h+11
 var P=['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'],t=PTCalc.compute(D.days,{lat:C.lat,lon:C.lon,tz:D.tz,method:m,school:a,dst:x});
 D.days.forEach(function(d,k){d.t=t[k];var r=document.querySelector('tr[data-date="'+d.date+'"]');if(!r)return;var td=r.querySelectorAll('td');P.forEach(function(p,j){td[j].innerHTML=fmt(d.t[p])})});
 el.textContent=JSON.stringify(D);
+document.querySelectorAll('b[data-d][data-p]').forEach(function(b){var e=PTCalc.compute([{date:b.dataset.d}],{lat:C.lat,lon:C.lon,tz:D.tz,method:m,school:a,dst:x})[0];b.innerHTML=fmt(e[b.dataset.p]).replace(/<\/?i>/g,'')});
 })();</script>
 <script>(function(){
 var D=JSON.parse(document.getElementById('pt-data').textContent),I=D.i;
@@ -123,7 +126,7 @@ var left=Math.max(0,Math.round(at-n2.min)),h=Math.floor(left/60),m=left%60;
 document.getElementById('pt-next').innerHTML=I.next+' <b>'+label+'</b> '+(h?I.leftH.replace('{h}',h):I.leftM).replace('{m}',m)}
 tick();setInterval(tick,30000)})();</script>
 <footer class="foot wrap">
-  <p><a href="/">iMuslim Life</a> · <a href="/ramadan/2027/">Ramadan 2027</a> · <a href="/prayer-times/pk/">Pakistan</a> · <a href="/prayer-times/id/">Indonesia</a> · <a href="/prayer-times/tr/">Turkey</a> · <a href="/prayer-times/ir/">Iran</a> · <a href="/prayer-times/ng/">Nigeria</a> · <a href="/prayer-times/eg/">Egypt</a> · <a href="/prayer-times/in/">India</a> · <a href="/prayer-times/iq/">Iraq</a> · <a href="/prayer-times/countries/">All countries</a></p>
+  <p><a href="/">iMuslim Life</a> · <a href="/ramadan/2027/">Ramadan 2027</a> · <a href="/islamic-calendar/">Islamic calendar</a> · <a href="/prayer-times/pk/">Pakistan</a> · <a href="/prayer-times/id/">Indonesia</a> · <a href="/prayer-times/tr/">Turkey</a> · <a href="/prayer-times/ir/">Iran</a> · <a href="/prayer-times/ng/">Nigeria</a> · <a href="/prayer-times/eg/">Egypt</a> · <a href="/prayer-times/in/">India</a> · <a href="/prayer-times/iq/">Iraq</a> · <a href="/prayer-times/countries/">All countries</a></p>
   <p><a href="/widget/">Free widget for masjids</a> · <a href="/privacy-policy/">Privacy</a> · <a href="/terms/">Terms</a> · Always ad-free · City data © <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0)</p>
 </footer>
 </body>

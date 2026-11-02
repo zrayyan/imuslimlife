@@ -163,3 +163,9 @@ details p { margin-top: 8px; color: var(--muted); }
 .calc label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); flex: 1 1 180px; min-width: 0; }
 .calc select { font: inherit; font-size: 15px; color: var(--text); background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 8px; max-width: 100%; }
 .calc .sub { font-size: 13px; }
+/* Upcoming Islamic events card (2026-11-02) */
+.events ul { list-style: none; padding: 0; margin: 8px 0 0; }
+.events li { padding: 10px 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 2px; }
+.events li:first-child { border-top: 0; }
+.events li > a { font-weight: 500; }
+.events li span { font-size: 14px; color: var(--muted); }

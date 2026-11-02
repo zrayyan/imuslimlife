@@ -66,6 +66,8 @@
     <ul class="months"><li><a href="/ar/prayer-times/lb/beirut/january/">يناير <span>2027</span></a></li><li><a href="/ar/prayer-times/lb/beirut/february/">فبراير <span>2027</span></a></li><li><a href="/ar/prayer-times/lb/beirut/march/">مارس <span>2027</span></a></li><li><a href="/ar/prayer-times/lb/beirut/april/">أبريل <span>2027</span></a></li><li><a href="/ar/prayer-times/lb/beirut/may/">مايو <span>2027</span></a></li><li><a href="/ar/prayer-times/lb/beirut/june/">يونيو <span>2027</span></a></li><li><a href="/ar/prayer-times/lb/beirut/july/">يوليو <span>2027</span></a></li><li><a href="/ar/prayer-times/lb/beirut/august/">أغسطس <span>2027</span></a></li><li><a href="/ar/prayer-times/lb/beirut/september/">سبتمبر <span>2027</span></a></li><li><a href="/ar/prayer-times/lb/beirut/october/">أكتوبر <span>2027</span></a></li><li class="is-current"><a href="/ar/prayer-times/lb/beirut/november/">نوفمبر <span>2026</span></a></li><li><a href="/ar/prayer-times/lb/beirut/december/">ديسمبر <span>2026</span></a></li></ul>
   </section>
 
+  <section class="card events"><h2>المناسبات الإسلامية القادمة</h2><ul><li><a href="/islamic-calendar/isra-miraj-2027/">الإسراء والمعراج</a><span>الثلاثاء، 5 يناير 2027 · 27 رجب 1448 (من المغرب في الليلة السابقة)</span><span><a href="/ar/prayer-times/lb/beirut/january/">مواقيت الصلاة في ذلك اليوم</a>: الفجر <b data-d="2027-01-05" data-p="Fajr">5:07 ص</b> · الشروق <b data-d="2027-01-05" data-p="Sunrise">6:44 ص</b> · المغرب <b data-d="2027-01-05" data-p="Maghrib">4:43 م</b></span></li><li><a href="/islamic-calendar/mid-shaban-2027/">ليلة النصف من شعبان</a><span>السبت، 23 يناير 2027 · 15 شعبان 1448 (من المغرب في الليلة السابقة)</span><span><a href="/ar/prayer-times/lb/beirut/january/">مواقيت الصلاة في ذلك اليوم</a>: الفجر <b data-d="2027-01-23" data-p="Fajr">5:06 ص</b> · الشروق <b data-d="2027-01-23" data-p="Sunrise">6:40 ص</b> · المغرب <b data-d="2027-01-23" data-p="Maghrib">5:00 م</b></span></li><li><a href="/islamic-calendar/ramadan-2027/">بداية رمضان</a><span>الاثنين، 8 فبراير 2027 · 1 رمضان 1448</span><span><a href="/ar/prayer-times/lb/beirut/february/">مواقيت الصلاة في ذلك اليوم</a>: الفجر <b data-d="2027-02-08" data-p="Fajr">4:58 ص</b> · الشروق <b data-d="2027-02-08" data-p="Sunrise">6:30 ص</b> · المغرب <b data-d="2027-02-08" data-p="Maghrib">5:15 م</b></span></li></ul><p class="sub">تواريخ تقويم أم القرى المحسوبة؛ ومع رؤية الهلال محليًا قد تتأخر المناسبة يومًا. <a href="/islamic-calendar/">التقويم الإسلامي</a></p></section>
+
   <div class="two">
     <section class="card">
       <h2>اتجاه القبلة من بيروت</h2>
@@ -106,6 +108,7 @@ function fmt(t){var p=t.split(':'),h=+p[0];if(I.clock===24)return t;return((h+11
 var P=['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'],t=PTCalc.compute(D.days,{lat:C.lat,lon:C.lon,tz:D.tz,method:m,school:a,dst:x});
 D.days.forEach(function(d,k){d.t=t[k];var r=document.querySelector('tr[data-date="'+d.date+'"]');if(!r)return;var td=r.querySelectorAll('td');P.forEach(function(p,j){td[j].innerHTML=fmt(d.t[p])})});
 el.textContent=JSON.stringify(D);
+document.querySelectorAll('b[data-d][data-p]').forEach(function(b){var e=PTCalc.compute([{date:b.dataset.d}],{lat:C.lat,lon:C.lon,tz:D.tz,method:m,school:a,dst:x})[0];b.innerHTML=fmt(e[b.dataset.p]).replace(/<\/?i>/g,'')});
 })();</script>
 <script>(function(){
 var D=JSON.parse(document.getElementById('pt-data').textContent),I=D.i;
@@ -129,7 +132,7 @@ var left=Math.max(0,Math.round(at-n2.min)),h=Math.floor(left/60),m=left%60;
 document.getElementById('pt-next').innerHTML=I.next+' <b>'+label+'</b> '+(h?I.leftH.replace('{h}',h):I.leftM).replace('{m}',m)}
 tick();setInterval(tick,30000)})();</script>
 <footer class="foot wrap">
-  <p><a href="/">iMuslim Life</a> · <a href="/ramadan/2027/">رمضان 2027</a> · <a href="/ar/prayer-times/eg/">مصر</a> · <a href="/ar/prayer-times/iq/">العراق</a> · <a href="/ar/prayer-times/sa/">المملكة العربية السعودية</a> · <a href="/ar/prayer-times/ma/">المغرب</a> · <a href="/ar/prayer-times/sd/">السودان</a> · <a href="/ar/prayer-times/sy/">سوريا</a> · <a href="/ar/prayer-times/dz/">الجزائر</a> · <a href="/ar/prayer-times/ye/">اليمن</a> · <a href="/ar/prayer-times/countries/">جميع الدول</a></p>
+  <p><a href="/">iMuslim Life</a> · <a href="/ramadan/2027/">رمضان 2027</a> · <a href="/islamic-calendar/">التقويم الإسلامي</a> · <a href="/ar/prayer-times/eg/">مصر</a> · <a href="/ar/prayer-times/iq/">العراق</a> · <a href="/ar/prayer-times/sa/">المملكة العربية السعودية</a> · <a href="/ar/prayer-times/ma/">المغرب</a> · <a href="/ar/prayer-times/sd/">السودان</a> · <a href="/ar/prayer-times/sy/">سوريا</a> · <a href="/ar/prayer-times/dz/">الجزائر</a> · <a href="/ar/prayer-times/ye/">اليمن</a> · <a href="/ar/prayer-times/countries/">جميع الدول</a></p>
   <p><a href="/widget/">أداة مجانية لمواقع المساجد</a> · <a href="/privacy-policy/">الخصوصية</a> · <a href="/terms/">الشروط</a> · بلا إعلانات دائمًا · بيانات المدن © <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0)</p>
 </footer>
 </body>

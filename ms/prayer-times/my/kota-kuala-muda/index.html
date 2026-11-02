@@ -64,6 +64,8 @@
     <ul class="months"><li><a href="/ms/prayer-times/my/kota-kuala-muda/january/">Januari <span>2027</span></a></li><li><a href="/ms/prayer-times/my/kota-kuala-muda/february/">Februari <span>2027</span></a></li><li><a href="/ms/prayer-times/my/kota-kuala-muda/march/">Mac <span>2027</span></a></li><li><a href="/ms/prayer-times/my/kota-kuala-muda/april/">April <span>2027</span></a></li><li><a href="/ms/prayer-times/my/kota-kuala-muda/may/">Mei <span>2027</span></a></li><li><a href="/ms/prayer-times/my/kota-kuala-muda/june/">Jun <span>2027</span></a></li><li><a href="/ms/prayer-times/my/kota-kuala-muda/july/">Julai <span>2027</span></a></li><li><a href="/ms/prayer-times/my/kota-kuala-muda/august/">Ogos <span>2027</span></a></li><li><a href="/ms/prayer-times/my/kota-kuala-muda/september/">September <span>2027</span></a></li><li><a href="/ms/prayer-times/my/kota-kuala-muda/october/">Oktober <span>2027</span></a></li><li class="is-current"><a href="/ms/prayer-times/my/kota-kuala-muda/november/">November <span>2026</span></a></li><li><a href="/ms/prayer-times/my/kota-kuala-muda/december/">Disember <span>2026</span></a></li></ul>
   </section>
 
+  <section class="card events"><h2>Hari kebesaran Islam akan datang</h2><ul><li><a href="/islamic-calendar/isra-miraj-2027/">Israk dan Mikraj</a><span>Selasa, 5 Januari 2027 · 27 Rejab 1448 (dari Maghrib malam sebelumnya)</span><span><a href="/ms/prayer-times/my/kota-kuala-muda/january/">Waktu solat hari itu</a>: Subuh <b data-d="2027-01-05" data-p="Fajr">06:06</b> · Syuruk <b data-d="2027-01-05" data-p="Sunrise">07:29</b> · Maghrib <b data-d="2027-01-05" data-p="Maghrib">19:18</b></span></li><li><a href="/islamic-calendar/mid-shaban-2027/">Nisfu Syaaban</a><span>Sabtu, 23 Januari 2027 · 15 Syaaban 1448 (dari Maghrib malam sebelumnya)</span><span><a href="/ms/prayer-times/my/kota-kuala-muda/january/">Waktu solat hari itu</a>: Subuh <b data-d="2027-01-23" data-p="Fajr">06:13</b> · Syuruk <b data-d="2027-01-23" data-p="Sunrise">07:35</b> · Maghrib <b data-d="2027-01-23" data-p="Maghrib">19:26</b></span></li><li><a href="/islamic-calendar/ramadan-2027/">Awal Ramadan</a><span>Isnin, 8 Februari 2027 · 1 Ramadan 1448</span><span><a href="/ms/prayer-times/my/kota-kuala-muda/february/">Waktu solat hari itu</a>: Subuh <b data-d="2027-02-08" data-p="Fajr">06:16</b> · Syuruk <b data-d="2027-02-08" data-p="Sunrise">07:35</b> · Maghrib <b data-d="2027-02-08" data-p="Maghrib">19:30</b></span></li></ul><p class="sub">Tarikh Umm al-Qura yang dikira; dengan rukyah tempatan, hari kebesaran mungkin lewat sehari. <a href="/islamic-calendar/">Kalendar Islam</a></p></section>
+
   <div class="two">
     <section class="card">
       <h2>Arah kiblat dari Kota Kuala Muda</h2>
@@ -104,6 +106,7 @@ function fmt(t){var p=t.split(':'),h=+p[0];if(I.clock===24)return t;return((h+11
 var P=['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'],t=PTCalc.compute(D.days,{lat:C.lat,lon:C.lon,tz:D.tz,method:m,school:a,dst:x});
 D.days.forEach(function(d,k){d.t=t[k];var r=document.querySelector('tr[data-date="'+d.date+'"]');if(!r)return;var td=r.querySelectorAll('td');P.forEach(function(p,j){td[j].innerHTML=fmt(d.t[p])})});
 el.textContent=JSON.stringify(D);
+document.querySelectorAll('b[data-d][data-p]').forEach(function(b){var e=PTCalc.compute([{date:b.dataset.d}],{lat:C.lat,lon:C.lon,tz:D.tz,method:m,school:a,dst:x})[0];b.innerHTML=fmt(e[b.dataset.p]).replace(/<\/?i>/g,'')});
 })();</script>
 <script>(function(){
 var D=JSON.parse(document.getElementById('pt-data').textContent),I=D.i;
@@ -127,7 +130,7 @@ var left=Math.max(0,Math.round(at-n2.min)),h=Math.floor(left/60),m=left%60;
 document.getElementById('pt-next').innerHTML=I.next+' <b>'+label+'</b> '+(h?I.leftH.replace('{h}',h):I.leftM).replace('{m}',m)}
 tick();setInterval(tick,30000)})();</script>
 <footer class="foot wrap">
-  <p><a href="/">iMuslim Life</a> · <a href="/ramadan/2027/">Ramadan 2027</a> · <a href="/ms/prayer-times/my/">Malaysia</a> · <a href="/ms/prayer-times/bn/">Brunei</a> · <a href="/ms/prayer-times/sg/">Singapura</a> · <a href="/ms/prayer-times/countries/">Semua negara</a></p>
+  <p><a href="/">iMuslim Life</a> · <a href="/ramadan/2027/">Ramadan 2027</a> · <a href="/islamic-calendar/">Kalendar Islam</a> · <a href="/ms/prayer-times/my/">Malaysia</a> · <a href="/ms/prayer-times/bn/">Brunei</a> · <a href="/ms/prayer-times/sg/">Singapura</a> · <a href="/ms/prayer-times/countries/">Semua negara</a></p>
   <p><a href="/widget/">Widget percuma untuk laman masjid</a> · <a href="/privacy-policy/">Privasi</a> · <a href="/terms/">Terma</a> · Sentiasa tanpa iklan · Data bandar © <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0)</p>
 </footer>
 </body>

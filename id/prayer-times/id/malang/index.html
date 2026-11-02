@@ -64,6 +64,8 @@
     <ul class="months"><li><a href="/id/prayer-times/id/malang/january/">Januari <span>2027</span></a></li><li><a href="/id/prayer-times/id/malang/february/">Februari <span>2027</span></a></li><li><a href="/id/prayer-times/id/malang/march/">Maret <span>2027</span></a></li><li><a href="/id/prayer-times/id/malang/april/">April <span>2027</span></a></li><li><a href="/id/prayer-times/id/malang/may/">Mei <span>2027</span></a></li><li><a href="/id/prayer-times/id/malang/june/">Juni <span>2027</span></a></li><li><a href="/id/prayer-times/id/malang/july/">Juli <span>2027</span></a></li><li><a href="/id/prayer-times/id/malang/august/">Agustus <span>2027</span></a></li><li><a href="/id/prayer-times/id/malang/september/">September <span>2027</span></a></li><li><a href="/id/prayer-times/id/malang/october/">Oktober <span>2027</span></a></li><li class="is-current"><a href="/id/prayer-times/id/malang/november/">November <span>2026</span></a></li><li><a href="/id/prayer-times/id/malang/december/">Desember <span>2026</span></a></li></ul>
   </section>
 
+  <section class="card events"><h2>Hari besar Islam mendatang</h2><ul><li><a href="/islamic-calendar/isra-miraj-2027/">Isra Mikraj</a><span>Selasa, 5 Januari 2027 · 27 Rajab 1448 (sejak Magrib malam sebelumnya)</span><span><a href="/id/prayer-times/id/malang/january/">Jadwal salat hari itu</a>: Subuh <b data-d="2027-01-05" data-p="Fajr">03:52</b> · Terbit <b data-d="2027-01-05" data-p="Sunrise">05:18</b> · Maghrib <b data-d="2027-01-05" data-p="Maghrib">17:52</b></span></li><li><a href="/islamic-calendar/mid-shaban-2027/">Nisfu Syakban</a><span>Sabtu, 23 Januari 2027 · 15 Syakban 1448 (sejak Magrib malam sebelumnya)</span><span><a href="/id/prayer-times/id/malang/january/">Jadwal salat hari itu</a>: Subuh <b data-d="2027-01-23" data-p="Fajr">04:03</b> · Terbit <b data-d="2027-01-23" data-p="Sunrise">05:26</b> · Maghrib <b data-d="2027-01-23" data-p="Maghrib">17:56</b></span></li><li><a href="/islamic-calendar/ramadan-2027/">Awal Ramadan</a><span>Senin, 8 Februari 2027 · 1 Ramadan 1448</span><span><a href="/id/prayer-times/id/malang/february/">Jadwal salat hari itu</a>: Subuh <b data-d="2027-02-08" data-p="Fajr">04:10</b> · Terbit <b data-d="2027-02-08" data-p="Sunrise">05:31</b> · Maghrib <b data-d="2027-02-08" data-p="Maghrib">17:56</b></span></li></ul><p class="sub">Tanggal Umm al-Qura hasil perhitungan; dengan rukyat lokal, hari besar bisa mundur satu hari. <a href="/islamic-calendar/">Kalender Islam</a></p></section>
+
   <div class="two">
     <section class="card">
       <h2>Arah kiblat dari Kabupaten Malang</h2>
@@ -104,6 +106,7 @@ function fmt(t){var p=t.split(':'),h=+p[0];if(I.clock===24)return t;return((h+11
 var P=['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'],t=PTCalc.compute(D.days,{lat:C.lat,lon:C.lon,tz:D.tz,method:m,school:a,dst:x});
 D.days.forEach(function(d,k){d.t=t[k];var r=document.querySelector('tr[data-date="'+d.date+'"]');if(!r)return;var td=r.querySelectorAll('td');P.forEach(function(p,j){td[j].innerHTML=fmt(d.t[p])})});
 el.textContent=JSON.stringify(D);
+document.querySelectorAll('b[data-d][data-p]').forEach(function(b){var e=PTCalc.compute([{date:b.dataset.d}],{lat:C.lat,lon:C.lon,tz:D.tz,method:m,school:a,dst:x})[0];b.innerHTML=fmt(e[b.dataset.p]).replace(/<\/?i>/g,'')});
 })();</script>
 <script>(function(){
 var D=JSON.parse(document.getElementById('pt-data').textContent),I=D.i;
@@ -127,7 +130,7 @@ var left=Math.max(0,Math.round(at-n2.min)),h=Math.floor(left/60),m=left%60;
 document.getElementById('pt-next').innerHTML=I.next+' <b>'+label+'</b> '+(h?I.leftH.replace('{h}',h):I.leftM).replace('{m}',m)}
 tick();setInterval(tick,30000)})();</script>
 <footer class="foot wrap">
-  <p><a href="/">iMuslim Life</a> · <a href="/ramadan/2027/">Ramadan 2027</a> · <a href="/id/prayer-times/id/">Indonesia</a> · <a href="/id/prayer-times/countries/">Semua negara</a></p>
+  <p><a href="/">iMuslim Life</a> · <a href="/ramadan/2027/">Ramadan 2027</a> · <a href="/islamic-calendar/">Kalender Islam</a> · <a href="/id/prayer-times/id/">Indonesia</a> · <a href="/id/prayer-times/countries/">Semua negara</a></p>
   <p><a href="/widget/">Widget gratis untuk situs masjid</a> · <a href="/privacy-policy/">Privasi</a> · <a href="/terms/">Ketentuan</a> · Selalu tanpa iklan · Data kota © <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0)</p>
 </footer>
 </body>
