@@ -29,7 +29,7 @@ import path from 'node:path';
 import { LANGS, LANG_COUNTRIES } from './i18n.mjs';
 import { cityData, embedPage, builderBody } from './widget.mjs';
 import { METHODS } from './methods.mjs';
-import { buildCalendar, occurrences, eventUrl, HIJRI_MONTHS } from './calendar.mjs';
+import { buildCalendar, occurrences, eventUrl, hubUrl, HIJRI_MONTHS } from './calendar.mjs';
 import { loadMasjids, loadMasjidAdditions, loadMasjidConnect, buildMasjids } from './masjids.mjs';
 
 const HERE = import.meta.dirname;
@@ -214,7 +214,7 @@ ${BEACON}
 </header>${switcher}
 ${body}
 <footer class="foot wrap">
-  <p><a href="/">iMuslim Life</a> · ${ramadan ? `<a href="${ramadan.url}">${T.foot.ramadan(ramadan.year)}</a> · ` : ''}<a href="/islamic-calendar/">${T.cal.all}</a> · ${footerCountries(L).map(([cc]) => `<a href="${countryUrl(cc, L)}">${esc(kname(cc, L))}</a>`).join(' · ')} · <a href="${countriesUrl(L)}">${T.foot.all}</a></p>
+  <p><a href="/">iMuslim Life</a> · ${ramadan ? `<a href="${ramadan.url}">${T.foot.ramadan(ramadan.year)}</a> · ` : ''}<a href="${hubUrl(L)}">${T.cal.all}</a> · ${footerCountries(L).map(([cc]) => `<a href="${countryUrl(cc, L)}">${esc(kname(cc, L))}</a>`).join(' · ')} · <a href="${countriesUrl(L)}">${T.foot.all}</a></p>
   <p><a href="/widget/">${T.foot.widget}</a> · <a href="/privacy-policy/">${T.foot.privacy}</a> · <a href="/terms/">${T.foot.terms}</a> · ${T.foot.adfree} · ${T.foot.data} <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0)</p>${credit ? `\n  <p>${credit}</p>` : ''}
 </footer>
 </body>
@@ -327,9 +327,9 @@ function eventsCard(city, months, L) {
     const m = Number(o.date.slice(5, 7));
     const day = months?.[m]?.days.find((d) => d.date === o.date);
     const times = day ? ['Fajr', 'Sunrise', 'Maghrib'].map((p) => { const { t, suffix } = clock(day.t[p], L); return `${T.prayers[p]} <b data-d="${o.date}" data-p="${p}">${t}${suffix ? ` ${suffix}` : ''}</b>`; }).join(' · ') : '';
-    return `<li><a href="${eventUrl(o)}">${esc(C.events[o.ev.slug])}</a><span>${dateIn(o.date, L, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · ${esc(hijri(`${o.hijri.d} ${HIJRI_MONTHS[o.hijri.m - 1]} ${o.hijri.y}`, L))}${o.ev.night ? ` (${C.night})` : ''}</span>${times ? `<span><a href="${monthUrl(city, m, L)}">${C.times}</a>: ${times}</span>` : ''}</li>`;
+    return `<li><a href="${eventUrl(o, L)}">${esc(C.events[o.ev.slug])}</a><span>${dateIn(o.date, L, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · ${esc(hijri(`${o.hijri.d} ${HIJRI_MONTHS[o.hijri.m - 1]} ${o.hijri.y}`, L))}${o.ev.night ? ` (${C.night})` : ''}</span>${times ? `<span><a href="${monthUrl(city, m, L)}">${C.times}</a>: ${times}</span>` : ''}</li>`;
   });
-  return items.length ? `<section class="card events"><h2>${C.h}</h2><ul>${items.join('')}</ul><p class="sub">${C.note} <a href="/islamic-calendar/">${C.all}</a></p></section>` : '';
+  return items.length ? `<section class="card events"><h2>${C.h}</h2><ul>${items.join('')}</ul><p class="sub">${C.note} <a href="${hubUrl(L)}">${C.all}</a></p></section>` : '';
 }
 const calcData = (city) => ({ lat: city.lat, lon: city.lon, ...countries[city.country].params });
 // Runs before CLIENT_TODAY: applies the saved choice to the table and to pt-data.
@@ -668,9 +668,9 @@ for (const L of ALL_LANGS) {
   writeIfChanged(outFile(countriesUrl(L)), countriesPage(L));
 }
 if (ramadan) writeIfChanged(outFile(ramadan.url), ramadanPage());
-// The Islamic calendar hub (calendar.mjs, 2026-11-02), English.
+// The Islamic calendar hub (calendar.mjs, 2026-11-02), in every page language.
 const calendar = buildCalendar({
-  layout, esc, breadcrumb, faqLd, listed, countries, cityUrl, monthUrl, named, ramadan,
+  LANGS, langs: ALL_LANGS, layout, esc, breadcrumb, faqLd, inLang, countries, cityUrl, monthUrl, named, kname, countriesUrl, rootUrl, ramadan,
   monthYearShown: (c, m) => yearFor(m, todayIn(c.tz)),
   today: TODAY,
 });

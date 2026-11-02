@@ -169,3 +169,5 @@ details p { margin-top: 8px; color: var(--muted); }
 .events li:first-child { border-top: 0; }
 .events li > a { font-weight: 500; }
 .events li span { font-size: 14px; color: var(--muted); }
+/* Islamic calendar tables (2026-11-02): long dates and names wrap on phones */
+.tt.cal th, .tt.cal td { white-space: normal; text-align: start; vertical-align: top; }
