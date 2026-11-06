@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunksalat_e_mustaqeem_client=self.webpackChunksalat_e_mustaqeem_client||[]).push([[1616],{21616:e=>{e.exports=JSON.parse('{"title":"Prayer Times","nextPrayer":"Next Prayer:","next":"Next","tomorrow":"{{prayer}} (Tomorrow)","empty":{"title":"No prayer times to display","body":"Please select a location to view prayer times."}}')}}]);

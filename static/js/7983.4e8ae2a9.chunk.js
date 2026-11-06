@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunksalat_e_mustaqeem_client=self.webpackChunksalat_e_mustaqeem_client||[]).push([[7983],{97983:t=>{t.exports=JSON.parse('{"title":"Waktu Solat","nextPrayer":"Solat seterusnya:","next":"Seterusnya","tomorrow":"{{prayer}} (esok)","empty":{"title":"Tiada waktu solat untuk dipaparkan","body":"Sila pilih lokasi untuk melihat waktu solat."}}')}}]);
