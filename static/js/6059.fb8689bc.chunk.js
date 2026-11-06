@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunksalat_e_mustaqeem_client=self.webpackChunksalat_e_mustaqeem_client||[]).push([[6059],{86059:e=>{e.exports=JSON.parse('{"remaining":"{{hours}} \u06af\u06be\u0646\u0679\u06d2 {{minutes}} \u0645\u0646\u0679 {{seconds}} \u0633\u06cc\u06a9\u0646\u0688"}')}}]);

@@ -28,6 +28,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { LANGS, LANG_COUNTRIES } from './i18n.mjs';
 import { cityData, embedPage, builderBody } from './widget.mjs';
+import { METHODS } from './methods.mjs';
+import { buildCalendar, occurrences, eventUrl, hubUrl, HIJRI_MONTHS } from './calendar.mjs';
 import { loadMasjids, loadMasjidAdditions, loadMasjidConnect, buildMasjids } from './masjids.mjs';
 
 const HERE = import.meta.dirname;
@@ -106,7 +108,7 @@ const dateIn = (iso, L, opts) => new Date(`${iso}T12:00:00Z`).toLocaleDateString
 
 function todayIn(tz) {
   const p = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date()).map((x) => [x.type, x.value]));
-  return { y: Number(p.year), m: Number(p.month) };
+  return { y: Number(p.year), m: Number(p.month), iso: `${p.year}-${p.month}-${p.day}` };
 }
 // The occurrence each month page shows: this year's if the month hasn't ended yet, else next year's.
 const yearFor = (m, now) => (m >= now.m ? now.y : now.y + 1);
@@ -212,7 +214,7 @@ ${BEACON}
 </header>${switcher}
 ${body}
 <footer class="foot wrap">
-  <p><a href="/">iMuslim Life</a> · ${ramadan ? `<a href="${ramadan.url}">${T.foot.ramadan(ramadan.year)}</a> · ` : ''}${footerCountries(L).map(([cc]) => `<a href="${countryUrl(cc, L)}">${esc(kname(cc, L))}</a>`).join(' · ')} · <a href="${countriesUrl(L)}">${T.foot.all}</a></p>
+  <p><a href="/">iMuslim Life</a> · ${ramadan ? `<a href="${ramadan.url}">${T.foot.ramadan(ramadan.year)}</a> · ` : ''}<a href="${hubUrl(L)}">${T.cal.all}</a> · ${footerCountries(L).map(([cc]) => `<a href="${countryUrl(cc, L)}">${esc(kname(cc, L))}</a>`).join(' · ')} · <a href="${countriesUrl(L)}">${T.foot.all}</a></p>
   <p><a href="/widget/">${T.foot.widget}</a> · <a href="/privacy-policy/">${T.foot.privacy}</a> · <a href="/terms/">${T.foot.terms}</a> · ${T.foot.adfree} · ${T.foot.data} <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0)</p>${credit ? `\n  <p>${credit}</p>` : ''}
 </footer>
 </body>
@@ -295,9 +297,62 @@ const clientWords = (L) => {
   const T = LANGS[L];
   return { locale: T.locale, clock: T.clock, ampm: T.ampm, names: T.prayers, hm: T.hijri, next: T.client.next, tomorrow: T.client.tomorrow, leftH: T.client.left('{h}', '{m}'), leftM: T.client.left(0, '{m}') };
 };
+// The method picker (2026-11-02): calculation method, Asr and a one-hour DST correction,
+// recalculated in the browser by calc.js (the API's engine, see calc-src.mjs) and kept in
+// localStorage. The baked-in times stay the country's default, so search engines see the same page.
+function calcCard(city, L) {
+  const T = LANGS[L];
+  const P = T.pick;
+  const { method, school } = countries[city.country].params;
+  const opt = (v, label, d) => `<option value="${v}">${esc(label)}${d ? ` (${P.def})` : ''}</option>`;
+  return `<section class="card calc noprint">
+    <h2>${P.h}</h2>
+    <form id="pt-calc">
+      <label>${P.method}<select name="m">${METHODS.map(([n, en]) => opt(n, T.methods[n] || en, n === method)).join('')}</select></label>
+      <label>${P.asr}<select name="a">${T.asr.map((a, i) => opt(i, a, i === school)).join('')}</select></label>
+      <label>${P.dst}<select name="x">${opt(0, P.auto)}${opt(1, P.plus)}${opt(-1, P.minus)}</select></label>
+      <button class="btn alt" type="button" name="d">${P.reset}</button>
+    </form>
+    <p class="sub">${P.note}</p>
+  </section>`;
+}
+// The next Islamic events (calendar.mjs, 2026-11-02): the next three, each with the day's
+// Fajr, Sunrise and Maghrib from the city's own months and a link to that month's timetable.
+const TODAY = new Date().toISOString().slice(0, 10);
+const upcoming = occurrences(TODAY, 366);
+function eventsCard(city, months, L) {
+  const T = LANGS[L];
+  const C = T.cal;
+  const items = upcoming.filter((o) => o.date >= todayIn(city.tz).iso).slice(0, 3).map((o) => {
+    const m = Number(o.date.slice(5, 7));
+    const day = months?.[m]?.days.find((d) => d.date === o.date);
+    const times = day ? ['Fajr', 'Sunrise', 'Maghrib'].map((p) => { const { t, suffix } = clock(day.t[p], L); return `${T.prayers[p]} <b data-d="${o.date}" data-p="${p}">${t}${suffix ? ` ${suffix}` : ''}</b>`; }).join(' · ') : '';
+    return `<li><a href="${eventUrl(o, L)}">${esc(C.events[o.ev.slug])}</a><span>${dateIn(o.date, L, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · ${esc(hijri(`${o.hijri.d} ${HIJRI_MONTHS[o.hijri.m - 1]} ${o.hijri.y}`, L))}${o.ev.night ? ` (${C.night})` : ''}</span>${times ? `<span><a href="${monthUrl(city, m, L)}">${C.times}</a>: ${times}</span>` : ''}</li>`;
+  });
+  return items.length ? `<section class="card events"><h2>${C.h}</h2><ul>${items.join('')}</ul><p class="sub">${C.note} <a href="${hubUrl(L)}">${C.all}</a></p></section>` : '';
+}
+const calcData = (city) => ({ lat: city.lat, lon: city.lon, ...countries[city.country].params });
+// Runs before CLIENT_TODAY: applies the saved choice to the table and to pt-data.
+const CLIENT_CALC = `(function(){
+var el=document.getElementById('pt-data'),D=JSON.parse(el.textContent),C=D.c,I=D.i,f=document.getElementById('pt-calc'),s={};
+if(!C||!f)return;
+try{s=JSON.parse(localStorage.getItem('pt-calc')||'{}')||{}}catch(e){}
+var m=s.m!=null?+s.m:C.method,a=s.a!=null?+s.a:C.school,x=+s.x||0,E=f.elements;
+E.m.value=m;E.a.value=a;E.x.value=x;
+function save(v){try{v?localStorage.setItem('pt-calc',JSON.stringify(v)):localStorage.removeItem('pt-calc')}catch(e){}location.reload()}
+f.onchange=function(){save({m:+E.m.value,a:+E.a.value,x:+E.x.value})};
+E.d.onclick=function(){save(null)};
+if((m===C.method&&a===C.school&&!x)||!window.PTCalc)return;
+function fmt(t){var p=t.split(':'),h=+p[0];if(I.clock===24)return t;return((h+11)%12+1)+':'+p[1]+(I.ampm&&I.ampm[0]?'<i> '+I.ampm[h<12?0:1]+'</i>':'')}
+var P=['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'],t=PTCalc.compute(D.days,{lat:C.lat,lon:C.lon,tz:D.tz,method:m,school:a,dst:x});
+D.days.forEach(function(d,k){d.t=t[k];var r=document.querySelector('tr[data-date="'+d.date+'"]');if(!r)return;var td=r.querySelectorAll('td');P.forEach(function(p,j){td[j].innerHTML=fmt(d.t[p])})});
+el.textContent=JSON.stringify(D);
+document.querySelectorAll('b[data-d][data-p]').forEach(function(b){var e=PTCalc.compute([{date:b.dataset.d}],{lat:C.lat,lon:C.lon,tz:D.tz,method:m,school:a,dst:x})[0];b.innerHTML=fmt(e[b.dataset.p]).replace(/<\\/?i>/g,'')});
+})();`;
+const calcScripts = `<script src="/prayer-times/calc.js"></script>\n<script>${CLIENT_CALC}</script>`;
 const dataScript = (data) => `<script type="application/json" id="pt-data">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`;
 
-function cityPage(city, cur, nxt, now, L) {
+function cityPage(city, cur, nxt, now, L, months) {
   const T = LANGS[L];
   const cc = city.country;
   const n = cname(city, L);
@@ -317,12 +372,16 @@ function cityPage(city, cur, nxt, now, L) {
     <p class="next" id="pt-next">&nbsp;</p>
   </section>
 
+  ${calcCard(city, L)}
+
   <section class="card">
     <h2>${esc(T.city.timetable(n, curLabel))}</h2>
     ${monthTable(cur, T.city.caption(place(city, L), curLabel), L)}
     <h3>${T.city.monthly}</h3>
     ${monthLinks(city, now, cur.m, L)}
   </section>
+
+  ${eventsCard(city, months, L)}
 
   <div class="two">
     <section class="card">
@@ -348,7 +407,8 @@ ${L === 'en' ? masjidDir?.nearCity(city)?.html || '' : ''}
     ${faq.map(([qq, a]) => `<details><summary>${esc(qq)}</summary><p>${esc(a)}</p></details>`).join('')}
   </section>
 </main>
-${dataScript({ tz: city.tz, days: [...cur.days, ...nxt.days], i: clientWords(L) })}
+${dataScript({ tz: city.tz, days: [...cur.days, ...nxt.days], i: clientWords(L), c: calcData(city) })}
+${calcScripts}
 <script>${CLIENT_TODAY}</script>`;
   return layout({
     L,
@@ -383,13 +443,15 @@ function monthPage(city, month, now, L) {
     ${monthTable(month, T.month.caption(place(city, L), label), L)}
     <p class="printnote">imuslimlife.com${monthUrl(city, month.m, L)} · ${esc(T.month.printnote(mname(cc, L)))}</p>
   </section>
+  ${calcCard(city, L)}
   <section class="card noprint">
     <h2>${esc(T.month.others(n))}</h2>
     ${monthLinks(city, now, month.m, L)}
   </section>
   ${ctaCard(city, L)}
 </main>
-${dataScript({ tz: city.tz, y: month.y, m: month.m, days: month.days })}
+${dataScript({ tz: city.tz, y: month.y, m: month.m, days: month.days, i: clientWords(L), c: calcData(city) })}
+${calcScripts}
 <script>(function(){var D=JSON.parse(document.getElementById('pt-data').textContent);var p={};new Intl.DateTimeFormat('en-CA',{timeZone:D.tz,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).forEach(function(x){p[x.type]=x.value});var r=document.querySelector('tr[data-date="'+p.year+'-'+p.month+'-'+p.day+'"]');if(r)r.classList.add('is-today')})();</script>`;
   return layout({
     L,
@@ -597,7 +659,7 @@ listed = cities.filter((c) => data.has(c) || fs.existsSync(outFile(cityUrl(c))))
 }
 for (const [city, { now, months }] of data) {
   for (const L of langsOf(city.country)) {
-    writeIfChanged(outFile(cityUrl(city, L)), cityPage(city, months[now.m], months[(now.m % 12) + 1], now, L));
+    writeIfChanged(outFile(cityUrl(city, L)), cityPage(city, months[now.m], months[(now.m % 12) + 1], now, L, months));
     for (let m = 1; m <= 12; m++) writeIfChanged(outFile(monthUrl(city, m, L)), monthPage(city, months[m], now, L));
   }
 }
@@ -606,7 +668,15 @@ for (const L of ALL_LANGS) {
   writeIfChanged(outFile(countriesUrl(L)), countriesPage(L));
 }
 if (ramadan) writeIfChanged(outFile(ramadan.url), ramadanPage());
+// The Islamic calendar hub (calendar.mjs, 2026-11-02), in every page language.
+const calendar = buildCalendar({
+  LANGS, langs: ALL_LANGS, layout, esc, breadcrumb, faqLd, inLang, countries, cityUrl, monthUrl, named, kname, countriesUrl, rootUrl, ramadan,
+  monthYearShown: (c, m) => yearFor(m, todayIn(c.tz)),
+  today: TODAY,
+});
+for (const [url, html] of calendar.pages) writeIfChanged(outFile(url), html);
 writeIfChanged(path.join(OUT, 'prayer-times', 'cities.css'), fs.readFileSync(path.join(HERE, 'cities.css'), 'utf8'));
+writeIfChanged(path.join(OUT, 'prayer-times', 'calc.js'), fs.readFileSync(path.join(HERE, 'calc.js'), 'utf8'));
 
 // The masjid widget (widget.mjs): a data file per city, the city index, the embed and builder pages.
 for (const [city, { now, months }] of data) {
@@ -636,6 +706,7 @@ const urls = [
   '/widget/',
   ...masjidDir.urls,
   ...(ramadan ? [ramadan.url] : []),
+  ...calendar.urls,
   ...ALL_LANGS.flatMap((L) => [countriesUrl(L), ...countriesIn(L).map(([cc]) => countryUrl(cc, L))]),
   ...listed.filter(built).flatMap((c) => langsOf(c.country).flatMap((L) => [cityUrl(c, L), ...MONTHS.map((_, i) => monthUrl(c, i + 1, L))])),
 ];

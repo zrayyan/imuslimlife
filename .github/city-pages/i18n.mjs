@@ -81,6 +81,8 @@ export const LANGS = {
       sub: (n, c) => `${n} cities in ${c} countries: today's times, monthly timetables and the Qibla direction.`,
     },
     client: { next: 'Next:', tomorrow: '(tomorrow)', left: (h, m) => `in ${h ? `${h} h ` : ''}${m} min` },
+    pick: { h: 'Calculation method', method: 'Method', asr: 'Asr', dst: 'Daylight saving', auto: 'Automatic', plus: '+1 hour', minus: '−1 hour', reset: 'Use the default', def: 'default', note: 'Times are recalculated on your device and remembered in this browser. If every time is off by exactly one hour, use Daylight saving.' },
+    cal: { h: 'Upcoming Islamic events', all: 'Islamic calendar', times: 'Prayer times that day', note: 'Calculated Umm al-Qura dates; with a local moon sighting an event may be a day later.', night: 'from Maghrib the evening before', events: { 'islamic-new-year': 'Islamic New Year', ashura: 'Day of Ashura', mawlid: 'Mawlid an-Nabi', 'isra-miraj': 'Isra and Mi’raj', 'mid-shaban': '15 Sha’ban', ramadan: 'Start of Ramadan', 'laylat-al-qadr': 'Laylat al-Qadr (27th night)', 'eid-al-fitr': 'Eid al-Fitr', 'dhul-hijjah': 'First ten days of Dhul Hijjah', 'day-of-arafah': 'Day of Arafah', 'eid-al-adha': 'Eid al-Adha' } },
   },
 
   ar: {
@@ -147,6 +149,8 @@ export const LANGS = {
       sub: (n, c) => `${n} مدينة في ${c} دولة: مواقيت اليوم والجداول الشهرية واتجاه القبلة.`,
     },
     client: { next: 'الصلاة القادمة:', tomorrow: '(غدًا)', left: (h, m) => `بعد ${h ? `${h} س ` : ''}${m} د` },
+    pick: { h: 'طريقة الحساب', method: 'الطريقة', asr: 'العصر', dst: 'التوقيت الصيفي', auto: 'تلقائي', plus: '+ ساعة', minus: '− ساعة', reset: 'العودة إلى الافتراضي', def: 'افتراضي', note: 'تُحسب الأوقات على جهازك وتُحفظ في هذا المتصفح. إذا اختلفت كل الأوقات بساعة واحدة بالضبط، فاستخدم التوقيت الصيفي.' },
+    cal: { h: 'المناسبات الإسلامية القادمة', all: 'التقويم الإسلامي', times: 'مواقيت الصلاة في ذلك اليوم', note: 'تواريخ تقويم أم القرى المحسوبة؛ ومع رؤية الهلال محليًا قد تتأخر المناسبة يومًا.', night: 'من المغرب في الليلة السابقة', events: { 'islamic-new-year': 'رأس السنة الهجرية', ashura: 'يوم عاشوراء', mawlid: 'المولد النبوي', 'isra-miraj': 'الإسراء والمعراج', 'mid-shaban': 'ليلة النصف من شعبان', ramadan: 'بداية رمضان', 'laylat-al-qadr': 'ليلة القدر (ليلة 27)', 'eid-al-fitr': 'عيد الفطر', 'dhul-hijjah': 'العشر الأوائل من ذي الحجة', 'day-of-arafah': 'يوم عرفة', 'eid-al-adha': 'عيد الأضحى' } },
   },
 
   ur: {
@@ -213,6 +217,8 @@ export const LANGS = {
       sub: (n, c) => `${c} ممالک میں ${n} شہر: آج کے اوقات، ماہانہ نظام الاوقات اور قبلہ کی سمت۔`,
     },
     client: { next: 'اگلی نماز:', tomorrow: '(کل)', left: (h, m) => `${h ? `${h} گھنٹے ` : ''}${m} منٹ میں` },
+    pick: { h: 'حساب کا طریقہ', method: 'طریقہ', asr: 'عصر', dst: 'ڈے لائٹ سیونگ', auto: 'خودکار', plus: '+1 گھنٹہ', minus: '−1 گھنٹہ', reset: 'ڈیفالٹ پر واپس', def: 'ڈیفالٹ', note: 'اوقات آپ کے آلے پر دوبارہ حساب ہوتے ہیں اور اس براؤزر میں محفوظ رہتے ہیں۔ اگر ہر وقت ٹھیک ایک گھنٹہ آگے یا پیچھے ہو تو ڈے لائٹ سیونگ استعمال کریں۔' },
+    cal: { h: 'آنے والے اسلامی ایام', all: 'اسلامی کیلنڈر', times: 'اس دن کے نماز کے اوقات', note: 'ام القریٰ کے حسابی تاریخیں؛ مقامی رؤیتِ ہلال کے ساتھ دن ایک دن بعد ہو سکتا ہے۔', night: 'ایک شام پہلے مغرب سے', events: { 'islamic-new-year': 'اسلامی نیا سال', ashura: 'یومِ عاشور', mawlid: 'میلاد النبی', 'isra-miraj': 'شبِ معراج', 'mid-shaban': 'شبِ برات (15 شعبان)', ramadan: 'رمضان کا آغاز', 'laylat-al-qadr': 'لیلۃ القدر (27ویں شب)', 'eid-al-fitr': 'عید الفطر', 'dhul-hijjah': 'ذوالحجہ کے پہلے دس دن', 'day-of-arafah': 'یومِ عرفہ', 'eid-al-adha': 'عید الاضحیٰ' } },
   },
 
   id: {
@@ -277,6 +283,8 @@ export const LANGS = {
       sub: (n, c) => `${n} kota di ${c} negara: waktu hari ini, jadwal bulanan, dan arah kiblat.`,
     },
     client: { next: 'Berikutnya:', tomorrow: '(besok)', left: (h, m) => `dalam ${h ? `${h} jam ` : ''}${m} menit` },
+    pick: { h: 'Metode perhitungan', method: 'Metode', asr: 'Asar', dst: 'Waktu musim panas', auto: 'Otomatis', plus: '+1 jam', minus: '−1 jam', reset: 'Kembali ke bawaan', def: 'bawaan', note: 'Waktu dihitung ulang di perangkat Anda dan diingat di browser ini. Jika semua waktu selisih tepat satu jam, gunakan Waktu musim panas.' },
+    cal: { h: 'Hari besar Islam mendatang', all: 'Kalender Islam', times: 'Jadwal salat hari itu', note: 'Tanggal Umm al-Qura hasil perhitungan; dengan rukyat lokal, hari besar bisa mundur satu hari.', night: 'sejak Magrib malam sebelumnya', events: { 'islamic-new-year': 'Tahun Baru Islam', ashura: 'Hari Asyura', mawlid: 'Maulid Nabi', 'isra-miraj': 'Isra Mikraj', 'mid-shaban': 'Nisfu Syakban', ramadan: 'Awal Ramadan', 'laylat-al-qadr': 'Lailatulkadar (malam ke-27)', 'eid-al-fitr': 'Idulfitri', 'dhul-hijjah': 'Sepuluh hari pertama Zulhijah', 'day-of-arafah': 'Hari Arafah', 'eid-al-adha': 'Iduladha' } },
   },
 
   ms: {
@@ -341,5 +349,7 @@ export const LANGS = {
       sub: (n, c) => `${n} bandar di ${c} negara: waktu hari ini, jadual bulanan dan arah kiblat.`,
     },
     client: { next: 'Seterusnya:', tomorrow: '(esok)', left: (h, m) => `dalam ${h ? `${h} jam ` : ''}${m} minit` },
+    pick: { h: 'Kaedah pengiraan', method: 'Kaedah', asr: 'Asar', dst: 'Waktu musim panas', auto: 'Automatik', plus: '+1 jam', minus: '−1 jam', reset: 'Kembali ke lalai', def: 'lalai', note: 'Waktu dikira semula pada peranti anda dan diingati dalam pelayar ini. Jika semua waktu berbeza tepat satu jam, gunakan Waktu musim panas.' },
+    cal: { h: 'Hari kebesaran Islam akan datang', all: 'Kalendar Islam', times: 'Waktu solat hari itu', note: 'Tarikh Umm al-Qura yang dikira; dengan rukyah tempatan, hari kebesaran mungkin lewat sehari.', night: 'dari Maghrib malam sebelumnya', events: { 'islamic-new-year': 'Awal Muharram', ashura: 'Hari Asyura', mawlid: 'Maulidur Rasul', 'isra-miraj': 'Israk dan Mikraj', 'mid-shaban': 'Nisfu Syaaban', ramadan: 'Awal Ramadan', 'laylat-al-qadr': 'Lailatulqadar (malam ke-27)', 'eid-al-fitr': 'Aidilfitri', 'dhul-hijjah': 'Sepuluh hari pertama Zulhijjah', 'day-of-arafah': 'Hari Arafah', 'eid-al-adha': 'Aidiladha' } },
   },
 };
