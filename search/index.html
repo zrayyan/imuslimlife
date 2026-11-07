@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Search iMuslim Life: Quran, Duas, Prayer Times and More</title>
+<meta name="description" content="Search the Quran's surahs, duas, the 99 Names of Allah, prayer times and Qibla for 500 cities, the Hijri calendar and Islamic events on iMuslim Life.">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://imuslimlife.com/search/">
+<meta name="theme-color" content="#006400">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/prayer-times/cities.css">
+<style>
+.s-hero{text-align:center;padding:30px 18px 26px;border-radius:16px;background:var(--paper);border:1px solid var(--line);border-top:4px solid var(--gold)}
+.s-hero h1{font-family:Marcellus,Georgia,serif;font-weight:400;color:var(--green);font-size:clamp(26px,5vw,36px)}
+.s-box{display:flex;gap:8px;max-width:620px;margin:18px auto 0}
+.s-box input{flex:1;min-width:0;min-height:52px;padding:0 18px;border-radius:999px;border:1px solid var(--line);font:inherit;font-size:17px;background:var(--bg);color:var(--text)}
+.s-box input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.s-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+.s-chips a{padding:8px 14px;border-radius:999px;border:1px solid var(--line);text-decoration:none;font-size:14px;min-height:40px;display:inline-flex;align-items:center}
+#s-res{list-style:none;display:grid;gap:8px}
+#s-res a{display:flex;justify-content:space-between;gap:12px;align-items:center;min-height:52px;padding:12px 16px;border-radius:12px;background:var(--paper);border:1px solid var(--line);text-decoration:none;color:var(--text)}
+#s-res a:hover,#s-res a:focus-visible{border-color:var(--gold)}
+#s-res small{color:var(--gold-dark);font-size:12px;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+#s-res mark{background:var(--gold-soft);color:inherit;border-radius:3px}
+#s-msg{color:var(--muted);text-align:center}
+</style>
+</head>
+<body>
+<header class="bar"><div class="wrap bar-in"><a class="brand" href="/" dir="ltr"><span aria-hidden="true">🕋</span> i<b>Muslim</b> Life</a><nav><a href="/quran/surahs/">Quran</a><a href="/duas/">Duas</a><a href="/prayer-times/">Prayer times</a><a href="/hijri-date/">Hijri date</a></nav></div></header>
+<main class="wrap">
+<section class="s-hero">
+  <h1>Search iMuslim Life</h1>
+  <form class="s-box" role="search" action="/search/"><label for="q" class="sr-only" style="position:absolute;left:-9999px">Search</label><input id="q" name="q" type="search" placeholder="Surah Yasin, dua for rizq, London, Ramadan…" autocomplete="off" autofocus></form>
+  <p class="s-chips"><a href="?q=yasin">Surah Yasin</a><a href="?q=kursi">Ayat al-Kursi</a><a href="?q=sleeping">Dua before sleeping</a><a href="?q=ramadan">Ramadan</a><a href="?q=ar+rahman">Ar-Rahman</a><a href="?q=qibla">Qibla</a></p>
+</section>
+<p id="s-msg" aria-live="polite"></p>
+<ol id="s-res"></ol>
+</main>
+<script>
+(function(){
+var KIND={page:'Page',quran:'Quran',dua:'Dua',name:'99 Names',city:'Prayer times',qibla:'Qibla',hijri:'Hijri',event:'Event'};
+var q=document.getElementById('q'),res=document.getElementById('s-res'),msg=document.getElementById('s-msg'),data=null;
+// Accents, apostrophes, hyphens and doubled vowels fold away, so "yaseen", "yasin" and "ya-sin" all match.
+function norm(s){return s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ'’ʿʾ`]/g,'').replace(/[^a-z0-9؀-ۿ]+/g,' ').replace(/ee/g,'i').replace(/([aeiou])\1+/g,'$1').trim()}
+function esc(s){return s.replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function run(){
+  var v=q.value.trim(),t=norm(v);
+  history.replaceState(null,'',v?'?q='+encodeURIComponent(v):location.pathname);
+  if(!t){res.innerHTML='';msg.textContent='';return}
+  var words=t.split(' '),hits=[];
+  for(var i=0;i<data.length;i++){var n=data[i][3],ok=true,score=0;for(var w=0;w<words.length;w++){var at=n.indexOf(words[w]);if(at<0){ok=false;break}score+=at===0||n[at-1]===' '?2:1}if(ok)hits.push([score-(data[i][2]==='city'?.5:0)-n.length/400,data[i]])}
+  hits.sort(function(a,b){return b[0]-a[0]});
+  res.innerHTML=hits.slice(0,40).map(function(h){var d=h[1];return'<li><a href="'+d[1]+'"><span>'+esc(d[0])+'</span><small>'+KIND[d[2]]+'</small></a></li>'}).join('');
+  msg.textContent=hits.length?'':'Nothing found for “'+v+'”. Try a surah, a dua topic or a city.';
+}
+fetch('/search/index.json').then(function(r){return r.json()}).then(function(d){data=d.map(function(x){return x.concat(norm(x[0]+' '+x[1].replace(/[/-]/g,' ')))});
+  var p=new URLSearchParams(location.search).get('q');if(p){q.value=p}run()}).catch(function(){msg.textContent='Search is unavailable right now.'});
+var tm;q.addEventListener('input',function(){clearTimeout(tm);tm=setTimeout(function(){if(data)run()},120)});
+document.querySelector('form').addEventListener('submit',function(e){e.preventDefault();if(data)run()});
+})();
+</script>
+</body>
+</html>
