@@ -1,0 +1,39 @@
+# Deploys imuslimlife.com to GitHub Pages (2026-11-06). Lives in the imuslimlife repo as
+# .github/workflows/pages.yml; the source of truth is
+# prayer-times-api/public/react/salat-e-mustaqeem-client/scripts/site-pages.yml, copied there
+# by scripts/publish-site.sh. Replaces Pages' built-in "pages build and deployment", whose
+# deploy step gives up after 10 minutes (it timed out twice on 2026-11-07 at ~540 MB).
+# Runs on GitHub's runners: the repo is public, so Actions minutes cost nothing.
+name: Deploy site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          timeout: 1800000 # 30 minutes
