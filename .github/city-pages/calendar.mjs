@@ -12,7 +12,7 @@ export const HIJRI_MONTHS = ['Muharram', 'Safar', 'Rabi al-Awwal', 'Rabi al-Than
 
 // Hijri month and day of each event; `days` spans several days; `night` events begin at
 // Maghrib the evening before. Names: LANGS[L].cal.events; text: CAL[L].about (calendar-i18n.mjs).
-const EVENTS = [
+export const EVENTS = [
   { slug: 'islamic-new-year', hm: 1, hd: 1 },
   { slug: 'ashura', hm: 1, hd: 10 },
   { slug: 'mawlid', hm: 3, hd: 12 },
