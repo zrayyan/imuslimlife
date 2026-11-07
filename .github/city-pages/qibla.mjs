@@ -76,7 +76,7 @@ function on(e){var h=e.webkitCompassHeading!=null?e.webkitCompassHeading:(e.abso
 b.addEventListener('click',function(){var go=function(){addEventListener('deviceorientationabsolute',on);addEventListener('deviceorientation',on);setTimeout(function(){if(!m.textContent)m.textContent=W.no},3000)};
 if(DeviceOrientationEvent.requestPermission){DeviceOrientationEvent.requestPermission().then(function(s){if(s==='granted')go();else m.textContent=W.no}).catch(function(){m.textContent=W.no})}else go();b.hidden=true})})();</script>
 <style>.qhero{display:grid;justify-items:center;gap:8px}.qdeg{font-size:clamp(40px,10vw,64px);line-height:1;color:var(--green)}.qdeg span{font-size:18px;color:var(--muted)}.qdial{width:min(78vw,280px);height:auto}.q-ring{fill:var(--paper);stroke:var(--gold);stroke-width:3}.q-ring2{fill:none;stroke:var(--line)}.q-tick{stroke:var(--muted);stroke-width:1}.q-major{stroke:var(--gold);stroke-width:2.5}.q-n{font:600 15px Rubik,sans-serif;fill:var(--muted)}.q-needle{fill:var(--green)}.q-kaaba{fill:#1d1a12;stroke:var(--gold);stroke-width:2}.q-hub{fill:var(--gold)}#q-rose{transition:transform .2s}.q-btn{min-height:48px;padding:0 22px;border-radius:999px;border:0;background:var(--green);color:#fff;font:inherit;cursor:pointer}.q-steps{padding-inline-start:20px;display:grid;gap:4px}.near{display:flex;flex-wrap:wrap;gap:8px}.near a{padding:8px 12px;border:1px solid var(--line);border-radius:999px;text-decoration:none;min-height:44px;display:inline-flex;align-items:center;gap:6px}@media (prefers-reduced-motion:reduce){#q-rose{transition:none}}</style>`;
-    return layout({ L, title: `${T.title(n, deg)} | iMuslim Life`, description: T.desc(n, deg, compass(q, L), dist), canonical: qUrl(c, L), alternates: langsOf(c.country).map((l) => [l, qUrl(c, l)]),
+    return layout({ L, image: '/og/qibla.jpg', title: `${T.title(n, deg)} | iMuslim Life`, description: T.desc(n, deg, compass(q, L), dist), canonical: qUrl(c, L), alternates: langsOf(c.country).map((l) => [l, qUrl(c, l)]),
       jsonLd: [breadcrumb([[T.country(kname(c.country, L)), kUrl(c.country, L)], [n, qUrl(c, L)]]), { '@type': 'Place', name: n, geo: { '@type': 'GeoCoordinates', latitude: c.lat, longitude: c.lon }, url: `${SITE}${qUrl(c, L)}` }], body });
   }
 
@@ -87,7 +87,7 @@ if(DeviceOrientationEvent.requestPermission){DeviceOrientationEvent.requestPermi
 <section class="card"><p class="near">${cities.map((c) => `<a href="${qUrl(c, L)}">${esc(named(c, L))} <small>${qibla(c.lat, c.lon).toFixed(0)}°</small></a>`).join(' ')}</p></section>
 <p class="cta"><a href="/qibla/">${T.tool}</a></p></main><style>.near{display:flex;flex-wrap:wrap;gap:8px}.near a{padding:8px 12px;border:1px solid var(--line);border-radius:999px;text-decoration:none;min-height:44px;display:inline-flex;align-items:center;gap:6px}</style>`;
     const first = cities[0];
-    return layout({ L, title: `${T.country(kname(cc, L))} | iMuslim Life`, description: T.desc(kname(cc, L), qibla(first.lat, first.lon).toFixed(0), compass(qibla(first.lat, first.lon), L), fmtDistance(distanceKm(first, KAABA), cc, L)),
+    return layout({ L, image: '/og/qibla.jpg', title: `${T.country(kname(cc, L))} | iMuslim Life`, description: T.desc(kname(cc, L), qibla(first.lat, first.lon).toFixed(0), compass(qibla(first.lat, first.lon), L), fmtDistance(distanceKm(first, KAABA), cc, L)),
       canonical: kUrl(cc, L), alternates: langsOf(cc).map((l) => [l, kUrl(cc, l)]), jsonLd: [breadcrumb([[T.country(kname(cc, L)), kUrl(cc, L)]])], body });
   }
 
