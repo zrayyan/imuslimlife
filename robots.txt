@@ -3,3 +3,4 @@ Allow: /
 
 Sitemap: https://imuslimlife.com/sitemap.xml
 Sitemap: https://imuslimlife.com/sitemap-cities.xml
+Sitemap: https://imuslimlife.com/sitemap-quran.xml

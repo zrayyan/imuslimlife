@@ -1,0 +1,72 @@
+/* Static Quran pages (scripts/quran-pages): parchment and gold on the city-pages base,
+   the app's tajweed palette, lifted to 70% lightness in dark mode as in the app. */
+:root {
+  --ink: #1d1a12; --gold: #b38a2a; --gold-hi: #e2c15a; --vellum: #fffdf6; --vellum-2: #f6eeda;
+  --th: #aaa; --tn: #3da5e0; --tp: #4050ff; --to: #2144c1; --tm: #000ebc; --tq: #dd0008; --tg: #ff7e1e;
+  --tf: #9400a8; --ti: #26bffd; --ta: #169777; --tu: #169200; --tc: #d500b7; --tw: #58b800; --td: #a1a1a1;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --ink: #f2ead2; --gold: #e2c15a; --vellum: #121a3d; --vellum-2: #0b1130;
+    --th: #b3b3b3; --tn: #7cc2ea; --tp: #6673ff; --to: #8ba1eb; --tm: #6670ff; --tq: #ff666a; --tg: #ff9e57;
+    --tf: #ec66ff; --ti: #66d4ff; --ta: #5ae7c4; --tu: #6aff53; --tc: #ff66eb; --tw: #a6ff52; --td: #b3b3b3; }
+}
+.th, .tl, .ts { color: var(--th); } .tn { color: var(--tn); } .tp { color: var(--tp); } .to { color: var(--to); }
+.tm { color: var(--tm); } .tq { color: var(--tq); } .tg { color: var(--tg); } .tf { color: var(--tf); }
+.ti { color: var(--ti); } .ta { color: var(--ta); } .tu { color: var(--tu); } .tc { color: var(--tc); }
+.tw { color: var(--tw); } .td, .tb { color: var(--td); }
+
+.langs { font-size: 13px; padding: 10px 16px 0; color: var(--muted); }
+.q { gap: 22px; }
+.qhead { text-align: center; padding: 34px 20px 26px; border-radius: 16px; position: relative;
+  background: radial-gradient(120% 120% at 50% 0%, var(--vellum), var(--vellum-2)); border: 1px solid var(--gold);
+  box-shadow: inset 0 0 0 5px var(--vellum), inset 0 0 0 6px color-mix(in srgb, var(--gold) 55%, transparent); }
+.qhead .num { width: 54px; height: 54px; margin: 0 auto 10px; display: grid; place-items: center; font-family: Marcellus, Georgia, serif;
+  font-size: 20px; color: var(--vellum); background: linear-gradient(135deg, #fbe7a6, #c99b2e 45%, #f3dc8e 70%, #7a5a12);
+  clip-path: polygon(50% 0, 64% 15%, 85% 15%, 85% 36%, 100% 50%, 85% 64%, 85% 85%, 64% 85%, 50% 100%, 36% 85%, 15% 85%, 15% 64%, 0 50%, 15% 36%, 15% 15%, 36% 15%); }
+.qhead h1 { display: grid; gap: 6px; color: var(--ink); }
+.sar { font-family: 'Amiri Quran', Amiri, serif; font-size: clamp(30px, 6vw, 46px); color: var(--gold); line-height: 1.6; }
+.sen { font-family: Marcellus, Georgia, serif; font-weight: 400; font-size: clamp(20px, 3.6vw, 28px); }
+.qhead .sub a { color: inherit; }
+.listen { margin: 18px auto 0; max-width: 440px; display: grid; gap: 6px; font-size: 13px; color: var(--muted); }
+.listen audio { width: 100%; }
+
+.legend { font-size: 14px; color: var(--muted); }
+.legend summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+.legend ul { list-style: none; display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 4px 0 6px; }
+.legend i { font-style: normal; }
+
+.mushaf { padding: clamp(18px, 4vw, 40px); border-radius: 10px; position: relative; color: var(--ink);
+  background: radial-gradient(120% 90% at 50% 0%, var(--vellum), var(--vellum-2)); border: 2px solid var(--gold);
+  box-shadow: 0 18px 50px rgba(138, 101, 16, .14); }
+.mushaf::before { content: ''; position: absolute; inset: 8px; border: 1px solid var(--gold); border-radius: 6px; opacity: .7; pointer-events: none; }
+.bism { text-align: center; font-family: 'Amiri Quran', Amiri, serif; font-size: clamp(24px, 4.5vw, 34px); margin-bottom: 18px; line-height: 2; }
+.ayahs { list-style: none; display: grid; gap: 4px; }
+.ayahs li { padding: 14px 6px; border-bottom: 1px solid color-mix(in srgb, var(--gold) 25%, transparent); scroll-margin-top: 16px; }
+.ayahs li:last-child { border-bottom: 0; }
+.ayahs li:target { background: color-mix(in srgb, var(--gold) 12%, transparent); border-radius: 8px; }
+.ar { font-family: 'Amiri Quran', Amiri, 'Noto Naskh Arabic', serif; font-size: clamp(25px, 4.6vw, 34px); line-height: 2.2; text-align: right; }
+.mushaf.one .ar { text-align: center; font-size: clamp(28px, 5.4vw, 40px); }
+.end { color: var(--gold); text-decoration: none; white-space: nowrap; font-family: Amiri, serif; }
+.tr { color: var(--muted); margin-top: 4px; font-size: 16px; }
+.tr[lang="ar"] { font-family: Amiri, serif; font-size: 18px; line-height: 1.9; }
+.tr1 h2 { font-family: Marcellus, Georgia, serif; font-weight: 400; color: var(--green); font-size: 18px; margin-bottom: 6px; }
+.tr1 h2 small { color: var(--muted); font-size: 13px; }
+.tr1[dir="rtl"] p { font-family: Amiri, 'Noto Nastaliq Urdu', serif; font-size: 19px; line-height: 2; }
+
+.pn { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.pn a { min-height: 44px; display: inline-flex; align-items: center; padding: 0 16px; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); text-decoration: none; }
+.cta { text-align: center; font-size: 15px; }
+
+.slist { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.slist a { display: grid; grid-template-columns: 40px 1fr; grid-template-areas: 'n en' 'n ar' 'n m'; gap: 0 12px; padding: 14px; border-radius: 12px;
+  background: var(--paper); border: 1px solid var(--line); text-decoration: none; color: var(--text); transition: border-color .2s, transform .2s; }
+.slist a:hover { border-color: var(--gold); transform: translateY(-1px); }
+.slist b { grid-area: n; align-self: center; text-align: center; font-family: Marcellus, serif; color: var(--gold-dark); }
+.slist .sen { grid-area: en; font-size: 16px; }
+.slist .sar { grid-area: ar; font-size: 22px; line-height: 1.6; }
+.slist small { grid-area: m; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { .slist a { transition: none; } }
+.q > * { min-width: 0; }
+.listen audio { max-width: 100%; }
+.ar, .tr, .tr1 p { overflow-wrap: anywhere; }
+html, body { overflow-x: clip; }
