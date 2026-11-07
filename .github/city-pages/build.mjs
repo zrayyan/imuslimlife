@@ -29,6 +29,7 @@ import path from 'node:path';
 import { LANGS, LANG_COUNTRIES } from './i18n.mjs';
 import { cityData, embedPage, builderBody } from './widget.mjs';
 import { METHODS } from './methods.mjs';
+import { buildQibla } from './qibla.mjs';
 import { buildCalendar, occurrences, eventUrl, hubUrl, HIJRI_MONTHS } from './calendar.mjs';
 import { loadMasjids, loadMasjidAdditions, loadMasjidConnect, buildMasjids } from './masjids.mjs';
 
@@ -385,7 +386,7 @@ function cityPage(city, cur, nxt, now, L, months) {
 
   <div class="two">
     <section class="card">
-      <h2>${esc(T.city.qiblaH(n))}</h2>
+      <h2><a href="${L === 'en' ? '' : `/${L}`}/qibla/${city.country}/${city.slug}/">${esc(T.city.qiblaH(n))}</a></h2>
       <div class="qibla"><svg viewBox="0 0 100 100" width="96" height="96" aria-hidden="true"><circle cx="50" cy="50" r="46" class="ring"/><text x="50" y="14" text-anchor="middle">N</text><g transform="rotate(${q.toFixed(1)} 50 50)"><path d="M50 14 L57 52 L50 46 L43 52 Z" class="needle"/></g><circle cx="50" cy="50" r="4" class="hub"/></svg>
       <p>${T.city.qibla(deg, compass(q, L), dist, esc(n))}</p></div>
     </section>
@@ -675,6 +676,9 @@ const calendar = buildCalendar({
   today: TODAY,
 });
 for (const [url, html] of calendar.pages) writeIfChanged(outFile(url), html);
+// Qibla direction pages (qibla.mjs, 2026-11-06): one per city and country, no API requests.
+const qiblaPages = buildQibla({ listed, langsOf, ALL_LANGS, countriesIn, layout, esc, breadcrumb, qibla, compass, distanceKm, fmtDistance, named, kname, cityUrl, KAABA, SITE });
+for (const [url, html] of qiblaPages.pages) writeIfChanged(outFile(url), html);
 writeIfChanged(path.join(OUT, 'prayer-times', 'cities.css'), fs.readFileSync(path.join(HERE, 'cities.css'), 'utf8'));
 writeIfChanged(path.join(OUT, 'prayer-times', 'calc.js'), fs.readFileSync(path.join(HERE, 'calc.js'), 'utf8'));
 
@@ -707,6 +711,7 @@ const urls = [
   ...masjidDir.urls,
   ...(ramadan ? [ramadan.url] : []),
   ...calendar.urls,
+  ...qiblaPages.urls,
   ...ALL_LANGS.flatMap((L) => [countriesUrl(L), ...countriesIn(L).map(([cc]) => countryUrl(cc, L))]),
   ...listed.filter(built).flatMap((c) => langsOf(c.country).flatMap((L) => [cityUrl(c, L), ...MONTHS.map((_, i) => monthUrl(c, i + 1, L))])),
 ];

@@ -5,3 +5,4 @@ Sitemap: https://imuslimlife.com/sitemap.xml
 Sitemap: https://imuslimlife.com/sitemap-cities.xml
 Sitemap: https://imuslimlife.com/sitemap-quran.xml
 Sitemap: https://imuslimlife.com/sitemap-hijri.xml
+Sitemap: https://imuslimlife.com/sitemap-duas.xml
