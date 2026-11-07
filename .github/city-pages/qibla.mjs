@@ -24,6 +24,14 @@ const Q = {
     h1: (n) => `Arah kiblat di ${n}`, live: 'Guna kompas telefon saya', liveOn: 'Pusing sehingga anak panah menghala ke atas', liveNo: 'Peranti ini tiada kompas; gunakan sudut di atas dengan kompas.',
     how: 'Cara menggunakan', steps: ['Hadap ke utara (0°) menggunakan kompas atau peta di telefon.', 'Pusing mengikut arah jam sebanyak sudut yang ditunjukkan.', 'Kini anda menghadap Kaabah di Makkah.'],
     note: 'Arah bulatan besar dari pusat bandar ke Kaabah. Pegang telefon mendatar dan jauh dari logam.', times: (n) => `Waktu solat di ${n}`, country: (k) => `Arah kiblat di ${k}`, list: 'Bandar', tool: 'Cari kiblat dari lokasi anda' },
+  fr: { far: (k) => `La Mecque est à environ ${k}.`, title: (n, d) => `Direction de la Qibla à ${n} : ${d}° du nord`, desc: (n, d, c, k) => `À ${n}, la Qibla est à ${d}° du nord géographique (${c}). La Mecque est à environ ${k}. Utilisez la boussole de votre téléphone pour vous tourner vers la Kaaba.`,
+    h1: (n) => `Direction de la Qibla à ${n}`, live: 'Utiliser la boussole de mon téléphone', liveOn: 'Tournez jusqu’à ce que la flèche pointe vers le haut', liveNo: 'Cet appareil n’a pas de boussole ; utilisez l’angle ci-dessus avec une boussole.',
+    how: 'Comment l’utiliser', steps: ['Placez-vous face au nord (0°) avec une boussole ou la carte de votre téléphone.', 'Tournez dans le sens des aiguilles d’une montre de l’angle indiqué.', 'Vous êtes maintenant tourné vers la Kaaba à La Mecque.'],
+    note: 'Direction selon le grand cercle, du centre-ville à la Kaaba. Tenez le téléphone à plat, loin du métal.', times: (n) => `Horaires de prière à ${n}`, country: (k) => `Direction de la Qibla : ${k}`, list: 'Villes', tool: 'Trouver la Qibla depuis votre position' },
+  tr: { far: (k) => `Mekke yaklaşık ${k} uzaklıkta.`, title: (n, d) => `${n} Kıble Yönü: Kuzeyden ${d}°`, desc: (n, d, c, k) => `${n} için kıble, coğrafi kuzeyden ${d}° (${c}). Mekke yaklaşık ${k} uzaklıkta. Kâbe’ye dönmek için telefonunuzun pusulasını kullanın.`,
+    h1: (n) => `${n} kıble yönü`, live: 'Telefonumun pusulasını kullan', liveOn: 'Ok yukarıyı gösterene kadar dönün', liveNo: 'Bu cihazda pusula yok; yukarıdaki açıyı bir pusulayla kullanın.',
+    how: 'Nasıl kullanılır', steps: ['Bir pusula ya da telefonunuzdaki harita ile kuzeye (0°) dönün.', 'Gösterilen açı kadar saat yönünde dönün.', 'Artık Mekke’deki Kâbe’ye dönüksünüz.'],
+    note: 'Şehir merkezinden Kâbe’ye büyük daire üzerindeki yön. Telefonu düz ve metalden uzak tutun.', times: (n) => `${n} namaz vakitleri`, country: (k) => `${k} kıble yönü`, list: 'Şehirler', tool: 'Bulunduğunuz yerden kıbleyi bulun' },
 };
 
 export function buildQibla({ listed, langsOf, ALL_LANGS, countriesIn, layout, esc, breadcrumb, qibla, compass, distanceKm, fmtDistance, named, kname, cityUrl, KAABA, SITE }) {
