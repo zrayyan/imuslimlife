@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["B4CB85UVD7.com.rayyan.salatemustaqeem"],
+        "components": [
+          { "/": "/invite", "comment": "Community invite links" }
+        ]
+      }
+    ]
+  }
+}

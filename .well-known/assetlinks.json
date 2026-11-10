@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.rayyan.salatemustaqeem",
+      "sha256_cert_fingerprints": [
+        "D2:F1:A8:90:62:30:1E:8A:BE:EB:70:A2:D2:00:EC:0A:2D:22:06:28:63:E8:5B:21:91:5D:F4:E6:71:40:02:2A",
+        "9F:DC:3A:E3:81:04:BB:A9:80:3C:5D:C1:6B:11:EC:1A:B4:8B:C3:82:C5:FB:16:43:60:A1:37:F9:74:63:0B:58"
+      ]
+    }
+  }
+]
