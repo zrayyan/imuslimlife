@@ -1,6 +1,6 @@
 # Deploys imuslimlife.com to GitHub Pages (2026-11-06). Lives in the imuslimlife repo as
 # .github/workflows/pages.yml; the source of truth is
-# prayer-times-api/public/react/salat-e-mustaqeem-client/scripts/site-pages.yml, copied there
+# prayer-times-api/apps/web/scripts/site-pages.yml, copied there
 # by scripts/publish-site.sh. Replaces Pages' built-in "pages build and deployment", whose
 # deploy step gives up after 10 minutes (it timed out twice on 2026-11-07 at ~540 MB).
 # Runs on GitHub's runners: the repo is public, so Actions minutes cost nothing.

@@ -1,6 +1,6 @@
 # Rebuilds the city prayer-time pages every night (pilot, 2026-10-20).
 # Lives in the imuslimlife repo as .github/workflows/city-pages.yml; the source
-# of truth is prayer-times-api/public/react/salat-e-mustaqeem-client/scripts/city-pages/,
+# of truth is prayer-times-api/apps/web/scripts/city-pages/,
 # copied here by scripts/publish-site.sh. Pages only change when the month does,
 # so most nights commit nothing. 500 cities x 12 month pages (/prayer-times/<cc>/<city>/<month>/):
 # requests are paced (1 per 2.5 s) and budgeted; only new or rolled-over months are fetched
