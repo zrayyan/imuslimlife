@@ -299,14 +299,14 @@ ${near ? `<script>(function(){var el=document.getElementById('mt');fetch(el.data
   })).sort((a, b) => a.n.localeCompare(b.n));
 
   // For the city pages: masjids within NEAR_CITY_KM, nearest first.
-  const nearCity = (city) => {
+  const nearCity = (city, max = 8) => {
     if (!['us', 'ca'].includes(city.country)) return null;
     const list = all.map((m) => ({ m, d: distanceKm(m, city) })).filter((o) => o.d <= NEAR_CITY_KM).sort((a, b) => a.d - b.d);
     if (!list.length) return null;
     const top = list[0].m;
     return {
       count: list.length,
-      html: `<section class="card"><h2>Masjids near ${esc(named(city))}</h2><ul class="cities">${list.slice(0, 8).map(({ m, d }) => `<li><a href="${linkOf(m)}">${esc(m.name)}</a><span>${esc(m.town || '')}${m.town ? ' · ' : ''}${fmtDist(d, city.country)}</span></li>`).join('')}</ul><p class="note"><a href="${regionUrl(top.cc, top.region)}">All masjids in ${esc(regionName(top.cc, top.region))}</a> · <a href="/mosque-directory/">Find a masjid near me</a></p></section>`,
+      html: `<section class="card"><h2>Masjids near ${esc(named(city))}</h2><ul class="cities">${list.slice(0, max).map(({ m, d }) => `<li><a href="${linkOf(m)}">${esc(m.name)}</a><span>${esc(m.town || '')}${m.town ? ' · ' : ''}${fmtDist(d, city.country)}</span></li>`).join('')}</ul><p class="note"><a href="${regionUrl(top.cc, top.region)}">All masjids in ${esc(regionName(top.cc, top.region))}</a> · <a href="/mosque-directory/">Find a masjid near me</a></p></section>`,
     };
   };
 

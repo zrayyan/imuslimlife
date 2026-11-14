@@ -31,6 +31,9 @@ import { cityData, embedPage, builderBody } from './widget.mjs';
 import { METHODS } from './methods.mjs';
 import { buildQibla } from './qibla.mjs';
 import { indexable } from './indexing.mjs';
+import { monthFacts, hm } from './month-facts.mjs';
+import { MONTH_TEXT } from './month-i18n.mjs';
+import { aboutPages } from './about.mjs';
 import { buildCalendar, occurrences, eventUrl, hubUrl, HIJRI_MONTHS } from './calendar.mjs';
 import { loadMasjids, loadMasjidAdditions, loadMasjidConnect, buildMasjids } from './masjids.mjs';
 
@@ -222,7 +225,7 @@ ${BEACON}
 ${body}
 <footer class="foot wrap">
   <p><a href="/">iMuslim Life</a> · ${ramadan ? `<a href="${ramadan.url}">${T.foot.ramadan(ramadan.year)}</a> · ` : ''}<a href="${hubUrl(L)}">${T.cal.all}</a> · ${footerCountries(L).map(([cc]) => `<a href="${countryUrl(cc, L)}">${esc(kname(cc, L))}</a>`).join(' · ')} · <a href="${countriesUrl(L)}">${T.foot.all}</a></p>
-  <p><a href="/widget/">${T.foot.widget}</a> · <a href="/privacy-policy/">${T.foot.privacy}</a> · <a href="/terms/">${T.foot.terms}</a> · ${T.foot.adfree} · ${T.foot.data} <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0)</p>${credit ? `\n  <p>${credit}</p>` : ''}
+  <p><a href="/widget/">${T.foot.widget}</a> · <a href="/about/">${T.foot.about}</a> · <a href="/about/methodology/">${T.foot.method}</a> · <a href="/privacy-policy/">${T.foot.privacy}</a> · <a href="/terms/">${T.foot.terms}</a> · ${T.foot.adfree} · ${T.foot.data} <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0)</p>${credit ? `\n  <p>${credit}</p>` : ''}
 </footer>
 </body>
 </html>
@@ -439,6 +442,24 @@ function monthPage(city, month, now, L) {
   const first = month.days[0];
   const last = month.days[month.days.length - 1];
   const ramNote = ram.length ? `<p class="note">${T.month.ramNote(esc(ramYear), dateIn(ram[0].date, L, { month: 'long', day: 'numeric' }))}</p>` : '';
+  // Task 152 step 3: what this month is like in this city, in words, from its own data.
+  const MT = MONTH_TEXT[L];
+  const f = monthFacts(month);
+  const tm = (t) => { const { t: v, suffix } = clock(t, L); return suffix ? `${v} ${suffix}` : v; };
+  const day = (iso) => dateIn(iso, L, { month: 'long', day: 'numeric' });
+  const dur = (n) => { const { h, m } = hm(n); return MT.dur(h, m); };
+  const x = {
+    n, mo: label, m: mname(cc, L), a: aname(cc, L),
+    fajrE: tm(f.fajr.earliest.t), fajrEd: day(f.fajr.earliest.date), fajrL: tm(f.fajr.latest.t), fajrLd: day(f.fajr.latest.date),
+    magE: tm(f.maghrib.earliest.t), magEd: day(f.maghrib.earliest.date), magL: tm(f.maghrib.latest.t), magLd: day(f.maghrib.latest.date),
+    dayFirst: dur(f.daylight.first), dayLast: dur(f.daylight.last),
+    change: Math.abs(f.daylight.change) >= 2 ? dur(f.daylight.change) : null, longer: f.daylight.change > 0,
+    dst: f.dst && { date: day(f.dst.date), fwd: f.dst.minutes > 0 },
+    ram: f.ramadan && { year: f.ramadan.year, date: f.ramadan.start && day(f.ramadan.start) },
+    eidF: f.eidFitr && day(f.eidFitr), eidA: f.eidAdha && day(f.eidAdha),
+  };
+  const faq = MT.faq(x);
+  const masjids = L === 'en' ? masjidDir?.nearCity(city, 3)?.html || '' : '';
   const body = `
 <main class="wrap">
   <p class="crumbs noprint"><a href="${rootUrl(L)}">${T.root}</a> › <a href="${countryUrl(cc, L)}">${esc(kname(cc, L))}</a> › <a href="${cityUrl(city, L)}">${esc(n)}</a> › ${monthName(month.m, L)}</p>
@@ -450,12 +471,21 @@ function monthPage(city, month, now, L) {
     ${monthTable(month, T.month.caption(place(city, L), label), L)}
     <p class="printnote">imuslimlife.com${monthUrl(city, month.m, L)} · ${esc(T.month.printnote(mname(cc, L)))}</p>
   </section>
+  <section class="card">
+    <h2>${esc(MT.introH(n, label))}</h2>
+    ${MT.intro(x).filter(Boolean).map((p) => `<p>${p}</p>`).join('\n    ')}
+  </section>
   ${calcCard(city, L)}
+${masjids}
   <section class="card noprint">
     <h2>${esc(T.month.others(n))}</h2>
     ${monthLinks(city, now, month.m, L)}
   </section>
   ${ctaCard(city, L)}
+  <section class="card">
+    <h2>${T.city.questions}</h2>
+    ${faq.map(([qq, a]) => `<details><summary>${esc(qq)}</summary><p>${esc(a)}</p></details>`).join('')}
+  </section>
 </main>
 ${dataScript({ tz: city.tz, y: month.y, m: month.m, days: month.days, i: clientWords(L), c: calcData(city) })}
 ${calcScripts}
@@ -467,7 +497,7 @@ ${calcScripts}
     canonical: monthUrl(city, month.m, L),
     alternates: langsOf(cc).map((l) => [l, monthUrl(city, month.m, l)]),
     image: ogImage(city),
-    jsonLd: [breadcrumb([['iMuslim Life', '/'], [T.root, rootUrl(L)], [kname(cc, L), countryUrl(cc, L)], [n, cityUrl(city, L)], [label, monthUrl(city, month.m, L)]])],
+    jsonLd: [breadcrumb([['iMuslim Life', '/'], [T.root, rootUrl(L)], [kname(cc, L), countryUrl(cc, L)], [n, cityUrl(city, L)], [label, monthUrl(city, month.m, L)]]), faqLd(faq)],
     body,
   });
 }
@@ -710,10 +740,15 @@ writeIfChanged(outFile('/widget/'), layout({
   body: builderBody(),
 }));
 
+// Trust pages (about.mjs, task 152 step 5).
+const about = aboutPages({ layout, esc, breadcrumb, countries, listed, SITE });
+for (const [url, html] of about.pages) writeIfChanged(outFile(url), html);
+
 const month = new Date().toISOString().slice(0, 7);
 const built = (c) => data.has(c) || fs.existsSync(outFile(monthUrl(c, 1)));
 const urls = [
   '/widget/',
+  ...about.urls,
   ...masjidDir.urls,
   ...(ramadan ? [ramadan.url] : []),
   ...calendar.urls,
