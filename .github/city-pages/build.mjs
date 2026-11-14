@@ -30,6 +30,7 @@ import { LANGS, LANG_COUNTRIES } from './i18n.mjs';
 import { cityData, embedPage, builderBody } from './widget.mjs';
 import { METHODS } from './methods.mjs';
 import { buildQibla } from './qibla.mjs';
+import { indexable } from './indexing.mjs';
 import { buildCalendar, occurrences, eventUrl, hubUrl, HIJRI_MONTHS } from './calendar.mjs';
 import { loadMasjids, loadMasjidAdditions, loadMasjidConnect, buildMasjids } from './masjids.mjs';
 
@@ -177,10 +178,15 @@ function footerCountries(L) {
 
 const RTL_FONT = 'https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600&display=swap';
 
-function layout({ L = 'en', title, description, canonical, alternates = [], jsonLd, body, image = null, credit = null }) {
+function layout({ L = 'en', title, description, canonical, alternates = [], jsonLd, body, image = null, credit = null, noindex = false }) {
   const T = LANGS[L];
-  const hreflang = alternates.length > 1
-    ? `\n${alternates.map(([l, u]) => `<link rel="alternate" hreflang="${l}" href="${SITE}${u}">`).join('\n')}\n<link rel="alternate" hreflang="x-default" href="${SITE}${alternates[0][1]}">`
+  // Task 152: noindex pages keep their language links for people but give Google no
+  // hreflang; indexable pages only point Google at alternates that are indexable too.
+  const index = !noindex && indexable(canonical, TODAY);
+  const seo = index ? alternates.filter(([, u]) => indexable(u, TODAY)) : [];
+  const robots = index ? '' : '\n<meta name="robots" content="noindex,follow">';
+  const hreflang = seo.length > 1
+    ? `\n${seo.map(([l, u]) => `<link rel="alternate" hreflang="${l}" href="${SITE}${u}">`).join('\n')}\n<link rel="alternate" hreflang="x-default" href="${SITE}${seo[0][1]}">`
     : '';
   const switcher = alternates.length > 1
     ? `\n<nav class="langs wrap" aria-label="Language">${alternates.map(([l, u]) => (l === L ? `<b lang="${l}">${LANGS[l].label}</b>` : `<a href="${u}" lang="${l}" hreflang="${l}">${LANGS[l].label}</a>`)).join(' · ')}</nav>`
@@ -192,7 +198,7 @@ function layout({ L = 'en', title, description, canonical, alternates = [], json
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>
-<meta name="description" content="${esc(description)}">
+<meta name="description" content="${esc(description)}">${robots}
 <link rel="canonical" href="${SITE}${canonical}">${hreflang}
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="iMuslim Life">
@@ -715,13 +721,15 @@ const urls = [
   ...ALL_LANGS.flatMap((L) => [countriesUrl(L), ...countriesIn(L).map(([cc]) => countryUrl(cc, L))]),
   ...listed.filter(built).flatMap((c) => langsOf(c.country).flatMap((L) => [cityUrl(c, L), ...MONTHS.map((_, i) => monthUrl(c, i + 1, L))])),
 ];
+// Task 152: only pages Google should index (the same rule layout() uses for noindex).
+const sitemap = urls.filter((u) => indexable(u, TODAY));
 writeIfChanged(path.join(OUT, 'sitemap-cities.xml'), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map((u) => `  <url><loc>${SITE}${u}</loc><lastmod>${month}-01</lastmod></url>`).join('\n')}
+${sitemap.map((u) => `  <url><loc>${SITE}${u}</loc><lastmod>${month}-01</lastmod></url>`).join('\n')}
 </urlset>
 `);
 
-console.log(`city-pages: ${data.size}/${cities.length} cities built (${fetched} months fetched, ${outOfBudget} left for the next run), ${listed.length} listed, ${changed} files changed, ${urls.length} URLs, out ${OUT}`);
+console.log(`city-pages: ${data.size}/${cities.length} cities built (${fetched} months fetched, ${outOfBudget} left for the next run), ${listed.length} listed, ${changed} files changed, ${sitemap.length}/${urls.length} URLs in the sitemap, out ${OUT}`);
 if (failed.length) {
   console.error(`city-pages: kept the previous pages for ${failed.length} cities:\n  ${failed.join('\n  ')}`);
   process.exitCode = failed.length > 50 ? 1 : 0;

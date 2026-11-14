@@ -10,6 +10,7 @@
 // (1 + one per masjid). All calls paced by build.mjs.
 // A Masjid Connect masjid within 300 m of an OSM one takes it over: the page links to its
 // live iqamah times at /mosque/<id>; one with no OSM match is listed by its live page.
+import { masjidIndexable } from './indexing.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -83,6 +84,7 @@ const slugify = (s) => String(s || '').normalize('NFKD').replace(/[\u0300-\u036f
 export function buildMasjids(ctx) {
   const { osm: osmOnly, additions = [], connect, layout, esc, breadcrumb, qibla, compass, distanceKm, cityUrl, named, listed, SITE } = ctx;
   const hubUrl = '/masjids/';
+  const thin = new Set();
   const regionUrl = (cc, code) => `/masjids/${cc}/${regionSlug(code)}/`;
   const pageUrl = (m) => `${regionUrl(m.cc, m.region)}${m.slug}/`;
   // Additions get slugs that don't clash with the OSM ones in their region.
@@ -274,7 +276,10 @@ ${near ? `<script>(function(){var el=document.getElementById('mt');fetch(el.data
       ...(phone ? { telephone: phone } : {}),
       ...(site ? { sameAs: [site] } : {}),
     };
+    const thinPage = !masjidIndexable(m);
+    if (thinPage) thin.add(url);
     pages.push([url, layout({
+      noindex: thinPage,
       title: `${m.name}, ${[m.town, m.region].filter(Boolean).join(', ')}: Directions, Prayer Times & Qibla | iMuslim Life`,
       description: `${m.name}${m.type === 'musalla' ? ' (musalla)' : ''} in ${[m.town, rname].filter(Boolean).join(', ')}: ${addressLine ? `${addressLine}. ` : ''}Directions, ${near ? "today's prayer times, " : ''}Qibla direction${close.length ? ' and masjids nearby' : ''}.`,
       canonical: url,
@@ -305,5 +310,6 @@ ${near ? `<script>(function(){var el=document.getElementById('mt');fetch(el.data
     };
   };
 
-  return { pages, index, nearCity, urls: pages.map(([u]) => u) };
+  // Task 152: map-pin-only masjid pages stay live but noindex and out of the sitemap.
+  return { pages, index, nearCity, urls: pages.map(([u]) => u).filter((u) => !thin.has(u)) };
 }
