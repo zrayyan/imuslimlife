@@ -574,6 +574,7 @@ function ramadanPage() {
       <div class="slot"><span>First Taraweeh</span><b>${longDate(firstTaraweeh, { weekday: 'short', year: undefined })}</b></div>
     </div>
     <p class="next" id="rm-count" data-start="${start}">&nbsp;</p>
+    <p class="btns"><a class="btn" href="/ramadan/">Live countdown and reminder</a></p>
   </section>
 
   <section class="card">
