@@ -11,6 +11,7 @@ import { MONTH_TEXT } from './month-i18n.mjs';
 import { buildCalendar, occurrences, eventUrl, hubUrl, HIJRI_MONTHS } from './calendar.mjs';
 
 import { todayText } from './today.mjs';
+import { cityPlace, graphJson } from './schema.mjs';
 export const SITE = 'https://imuslimlife.com';
 export const BEACON = `<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "3937a625dcce4781b04cf88f4f50fe59"}'></script><!-- End Cloudflare Web Analytics -->`;
 export const KAABA = { lat: 21.4225, lon: 39.8262 };
@@ -181,7 +182,7 @@ function layout({ L = 'en', title, description, canonical, alternates = [], json
 <meta name="theme-color" content="#006400">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/prayer-times/cities.css">${rtlFont}
-<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': jsonLd }).replace(/</g, '\\u003c')}</script>
+<script type="application/ld+json">${graphJson(jsonLd)}</script>
 ${BEACON}
 </head>
 <body>
@@ -401,7 +402,7 @@ ${calcScripts}
     canonical: cityUrl(city, L),
     alternates: langsOf(cc).map((l) => [l, cityUrl(city, l)]),
     image: ogImage(city),
-    jsonLd: [breadcrumb([['iMuslim Life', '/'], [T.root, rootUrl(L)], [kname(cc, L), countryUrl(cc, L)], [n, cityUrl(city, L)]]), faqLd(faq)],
+    jsonLd: [breadcrumb([['iMuslim Life', '/'], [T.root, rootUrl(L)], [kname(cc, L), countryUrl(cc, L)], [n, cityUrl(city, L)]]), cityPlace({ name: n, url: `${SITE}${cityUrl(city, L)}`, lat: city.lat, lon: city.lon, countryName: kname(cc, L), countryCode: cc.toUpperCase() }), faqLd(faq)],
     body,
   });
 }
