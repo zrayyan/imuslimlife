@@ -34,13 +34,14 @@ const Q = {
     note: 'Şehir merkezinden Kâbe’ye büyük daire üzerindeki yön. Telefonu düz ve metalden uzak tutun.', times: (n) => `${n} namaz vakitleri`, country: (k) => `${k} kıble yönü`, list: 'Şehirler', tool: 'Bulunduğunuz yerden kıbleyi bulun' },
 };
 
-export function buildQibla({ listed, langsOf, ALL_LANGS, countriesIn, layout, esc, breadcrumb, qibla, compass, distanceKm, fmtDistance, named, kname, cityUrl, KAABA, SITE }) {
+// pages: false skips rendering every page (the Worker renders one per request with cityPage/countryPage).
+export function buildQibla({ listed, langsOf, ALL_LANGS, countriesIn, layout, esc, breadcrumb, qibla, compass, distanceKm, fmtDistance, named, kname, cityUrl, KAABA, SITE, pages: render = true }) {
   const pre = (L) => (L === 'en' ? '' : `/${L}`);
   const qUrl = (c, L = 'en') => `${pre(L)}/qibla/${c.country}/${c.slug}/`;
   const kUrl = (cc, L = 'en') => `${pre(L)}/qibla/${cc}/`;
   const pages = [];
   const urls = [];
-  const add = (u, html) => { pages.push([u, html]); urls.push(u); };
+  const add = (u, page) => { if (render) pages.push([u, page()]); urls.push(u); };
 
   const dial = (q) => `<svg class="qdial" viewBox="0 0 200 200" role="img" aria-hidden="true">
 <circle cx="100" cy="100" r="94" class="q-ring"/><circle cx="100" cy="100" r="80" class="q-ring2"/>
@@ -91,7 +92,7 @@ if(DeviceOrientationEvent.requestPermission){DeviceOrientationEvent.requestPermi
       canonical: kUrl(cc, L), alternates: langsOf(cc).map((l) => [l, kUrl(cc, l)]), jsonLd: [breadcrumb([[T.country(kname(cc, L)), kUrl(cc, L)]])], body });
   }
 
-  for (const c of listed) for (const L of langsOf(c.country)) if (Q[L]) add(qUrl(c, L), cityPage(c, L));
-  for (const L of ALL_LANGS) if (Q[L]) for (const [cc] of countriesIn(L)) add(kUrl(cc, L), countryPage(cc, L));
-  return { pages, urls, qUrl };
+  for (const c of listed) for (const L of langsOf(c.country)) if (Q[L]) add(qUrl(c, L), () => cityPage(c, L));
+  for (const L of ALL_LANGS) if (Q[L]) for (const [cc] of countriesIn(L)) add(kUrl(cc, L), () => countryPage(cc, L));
+  return { pages, urls, qUrl, kUrl, cityPage, countryPage, langs: Object.keys(Q) };
 }

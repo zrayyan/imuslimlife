@@ -34,12 +34,15 @@ const typeLabel = (m) => (m.type === 'musalla' ? 'Musalla' : 'Masjid');
 const regionName = (cc, code) => REGIONS[cc]?.[code] || code || 'Other';
 const regionSlug = (code) => String(code || 'other').toLowerCase();
 
+// osm-masjids.json → the rows buildMasjids() takes (pure; the Worker bundles the JSON).
+export const normalizeMasjids = (json) => json.masjids
+  .filter((m) => m.lat != null && m.region)
+  .map((m) => ({ ...m, cc: m.country.toLowerCase() }));
+
 export function loadMasjids(here) {
   for (const file of [path.join(here, 'osm-masjids.json'), path.join(here, '../masjids/osm-masjids.json')]) {
     if (fs.existsSync(file)) {
-      return JSON.parse(fs.readFileSync(file, 'utf8')).masjids
-        .filter((m) => m.lat != null && m.region)
-        .map((m) => ({ ...m, cc: m.country.toLowerCase() }));
+      return normalizeMasjids(JSON.parse(fs.readFileSync(file, 'utf8')));
     }
   }
   return [];
@@ -84,7 +87,6 @@ const slugify = (s) => String(s || '').normalize('NFKD').replace(/[\u0300-\u036f
 export function buildMasjids(ctx) {
   const { osm: osmOnly, additions = [], connect, layout, esc, breadcrumb, qibla, compass, distanceKm, cityUrl, named, listed, SITE } = ctx;
   const hubUrl = '/masjids/';
-  const thin = new Set();
   const regionUrl = (cc, code) => `/masjids/${cc}/${regionSlug(code)}/`;
   const pageUrl = (m) => `${regionUrl(m.cc, m.region)}${m.slug}/`;
   // Additions get slugs that don't clash with the OSM ones in their region.
@@ -136,6 +138,28 @@ export function buildMasjids(ctx) {
     try { return ['http:', 'https:'].includes(new URL(href).protocol) ? href : null; } catch { return null; }
   };
 
+  // For the React directory: short keys keep it small.
+  const index = all.map((m) => ({
+    n: m.name, u: linkOf(m), t: m.town || null, r: m.region || null, c: m.cc,
+    la: Math.round(m.lat * 1e5) / 1e5, lo: Math.round(m.lon * 1e5) / 1e5,
+    ...(m.type === 'musalla' ? { k: 'musalla' } : {}),
+    ...(denomination(m) ? { d: denomination(m) } : {}),
+    ...(m.live || m.connect ? { v: (m.connect || m).id } : {}),
+  })).sort((a, b) => a.n.localeCompare(b.n));
+
+  // For the city pages: masjids within NEAR_CITY_KM, nearest first.
+  const nearCity = (city, max = 8) => {
+    if (!['us', 'ca'].includes(city.country)) return null;
+    const list = all.map((m) => ({ m, d: distanceKm(m, city) })).filter((o) => o.d <= NEAR_CITY_KM).sort((a, b) => a.d - b.d);
+    if (!list.length) return null;
+    const top = list[0].m;
+    return {
+      count: list.length,
+      html: `<section class="card"><h2>Masjids near ${esc(named(city))}</h2><ul class="cities">${list.slice(0, max).map(({ m, d }) => `<li><a href="${linkOf(m)}">${esc(m.name)}</a><span>${esc(m.town || '')}${m.town ? ' · ' : ''}${fmtDist(d, city.country)}</span></li>`).join('')}</ul><p class="note"><a href="${regionUrl(top.cc, top.region)}">All masjids in ${esc(regionName(top.cc, top.region))}</a> · <a href="/places/">Find a masjid near me</a></p></section>`,
+    };
+  };
+
+
   const byRegion = new Map();
   for (const m of all) {
     const k = `${m.cc}/${m.region || 'other'}`;
@@ -146,10 +170,8 @@ export function buildMasjids(ctx) {
     .map(([k, list]) => ({ code: k.split('/')[1], list }))
     .sort((a, b) => regionName(cc, a.code).localeCompare(regionName(cc, b.code)));
 
-  const pages = [];
-
   // Hub
-  {
+  function hubPage() {
     const total = all.length;
     const body = `
 <main class="wrap">
@@ -157,7 +179,7 @@ export function buildMasjids(ctx) {
   <section class="hero">
     <h1>Mosque Directory: USA &amp; Canada</h1>
     <p class="sub">${total.toLocaleString('en-US')} masjids and musallas, with directions, Qibla and prayer times</p>
-    <p class="btns" style="justify-content:center"><a class="btn" href="/mosque-directory/">Find a masjid near me</a></p>
+    <p class="btns" style="justify-content:center"><a class="btn" href="/places/">Find a masjid near me</a></p>
   </section>
   ${['us', 'ca'].map((cc) => `<section class="card"><h2>Masjids in ${COUNTRY_NAMES[cc]}</h2><ul class="cities">${regionsOf(cc).map(({ code, list }) => `<li><a href="${regionUrl(cc, code)}">${esc(regionName(cc, code))}</a><span>${list.length} ${list.length === 1 ? 'masjid' : 'masjids'}</span></li>`).join('')}</ul></section>`).join('\n  ')}
   <section class="card"><h2>Is your masjid missing or out of date?</h2>
@@ -165,19 +187,18 @@ export function buildMasjids(ctx) {
     <p class="btns"><a class="btn" href="${requestUrl({ kind: 'add' })}">Add a masjid</a><a class="btn alt" href="${requestUrl({ kind: 'claim' })}">I run a masjid</a></p>
   </section>
 </main>`;
-    pages.push([hubUrl, layout({
+    return layout({
       title: `Mosque Directory: ${total.toLocaleString('en-US')} Masjids in the USA & Canada | iMuslim Life`,
       description: `Find a masjid in the United States or Canada: ${total.toLocaleString('en-US')} mosques and musallas by state and province, with directions, Qibla direction and today's prayer times.`,
       canonical: hubUrl,
       jsonLd: [breadcrumb([['iMuslim Life', '/'], ['Masjids', hubUrl]])],
       credit,
       body,
-    })]);
+    });
   }
 
   // State / province pages
-  for (const cc of ['us', 'ca']) {
-    for (const { code, list } of regionsOf(cc)) {
+  function regionPage(cc, code, list) {
       const name = regionName(cc, code);
       const towns = new Map();
       for (const m of [...list].sort((a, b) => a.name.localeCompare(b.name))) {
@@ -194,7 +215,7 @@ export function buildMasjids(ctx) {
   <section class="hero">
     <h1>Mosques in ${esc(name)}</h1>
     <p class="sub">${list.length} ${list.length === 1 ? 'masjid' : 'masjids and musallas'} in ${townList.length} ${townList.length === 1 ? 'town' : 'towns'}</p>
-    <p class="btns" style="justify-content:center"><a class="btn" href="/mosque-directory/">Find a masjid near me</a></p>
+    <p class="btns" style="justify-content:center"><a class="btn" href="/places/">Find a masjid near me</a></p>
   </section>
   <section class="card">
     ${townList.map(([town, ms]) => `<h2 class="town">${esc(town)}</h2><ul class="masjids">${ms.map((m) => `<li><a href="${linkOf(m)}">${esc(m.name)}</a>${m.live || m.connect ? ' <span class="tag ok">Iqamah times</span>' : ''}${m.type === 'musalla' ? ' <span class="tag">Musalla</span>' : ''}${denomination(m) ? ` <span class="tag">${esc(denomination(m))}</span>` : ''}<span>${esc(m.address || where(m))}</span></li>`).join('')}</ul>`).join('\n    ')}
@@ -202,19 +223,18 @@ export function buildMasjids(ctx) {
   ${cityPagesHere.length ? `<section class="card"><h2>Prayer times in ${esc(name)}</h2><ul class="cities">${cityPagesHere.map((c) => `<li><a href="${cityUrl(c)}">${esc(named(c))}</a><span>Prayer times &amp; Qibla</span></li>`).join('')}</ul></section>` : ''}
   <section class="card"><h2>Is your masjid missing?</h2><p>Add it on Masjid Connect to list your iqamah and Jumu&rsquo;ah times here, or add it to <a href="https://www.openstreetmap.org/" rel="noopener">OpenStreetMap</a>; this page follows OpenStreetMap.</p><p class="btns"><a class="btn" href="${requestUrl({ kind: 'add', country: cc, region: code })}">Add a masjid</a></p></section>
 </main>`;
-      pages.push([url, layout({
+      return layout({
         title: `Mosques in ${name}: ${list.length} Masjids, Directions & Prayer Times | iMuslim Life`,
         description: `${list.length} mosques and musallas in ${name}${townList.length > 1 ? `, in ${townList.slice(0, 4).map(([t]) => t).join(', ')} and more` : ''}: addresses, directions, Qibla and today's prayer times.`,
         canonical: url,
         jsonLd: [breadcrumb([['iMuslim Life', '/'], ['Masjids', hubUrl], [name, url]])],
         credit,
         body,
-      })]);
-    }
+      });
   }
 
   // One page per OSM masjid
-  for (const m of osm) {
+  function masjidPage(m) {
     const url = pageUrl(m);
     const rname = regionName(m.cc, m.region);
     const near = nearestCity(m);
@@ -277,8 +297,7 @@ ${near ? `<script>(function(){var el=document.getElementById('mt');fetch(el.data
       ...(site ? { sameAs: [site] } : {}),
     };
     const thinPage = !masjidIndexable(m);
-    if (thinPage) thin.add(url);
-    pages.push([url, layout({
+    return layout({
       noindex: thinPage,
       title: `${m.name}, ${[m.town, m.region].filter(Boolean).join(', ')}: Directions, Prayer Times & Qibla | iMuslim Life`,
       description: `${m.name}${m.type === 'musalla' ? ' (musalla)' : ''} in ${[m.town, rname].filter(Boolean).join(', ')}: ${addressLine ? `${addressLine}. ` : ''}Directions, ${near ? "today's prayer times, " : ''}Qibla direction${close.length ? ' and masjids nearby' : ''}.`,
@@ -286,30 +305,27 @@ ${near ? `<script>(function(){var el=document.getElementById('mt');fetch(el.data
       jsonLd: [breadcrumb([['iMuslim Life', '/'], ['Masjids', hubUrl], [rname, regionUrl(m.cc, m.region)], [m.name, url]]), ld],
       credit,
       body,
-    })]);
+    });
   }
 
-  // For the React directory: short keys keep it small.
-  const index = all.map((m) => ({
-    n: m.name, u: linkOf(m), t: m.town || null, r: m.region || null, c: m.cc,
-    la: Math.round(m.lat * 1e5) / 1e5, lo: Math.round(m.lon * 1e5) / 1e5,
-    ...(m.type === 'musalla' ? { k: 'musalla' } : {}),
-    ...(denomination(m) ? { d: denomination(m) } : {}),
-    ...(m.live || m.connect ? { v: (m.connect || m).id } : {}),
-  })).sort((a, b) => a.n.localeCompare(b.n));
-
-  // For the city pages: masjids within NEAR_CITY_KM, nearest first.
-  const nearCity = (city, max = 8) => {
-    if (!['us', 'ca'].includes(city.country)) return null;
-    const list = all.map((m) => ({ m, d: distanceKm(m, city) })).filter((o) => o.d <= NEAR_CITY_KM).sort((a, b) => a.d - b.d);
-    if (!list.length) return null;
-    const top = list[0].m;
-    return {
-      count: list.length,
-      html: `<section class="card"><h2>Masjids near ${esc(named(city))}</h2><ul class="cities">${list.slice(0, max).map(({ m, d }) => `<li><a href="${linkOf(m)}">${esc(m.name)}</a><span>${esc(m.town || '')}${m.town ? ' · ' : ''}${fmtDist(d, city.country)}</span></li>`).join('')}</ul><p class="note"><a href="${regionUrl(top.cc, top.region)}">All masjids in ${esc(regionName(top.cc, top.region))}</a> · <a href="/mosque-directory/">Find a masjid near me</a></p></section>`,
-    };
+  // url -> page. The Worker (ADR 052) renders one page per request with render(url), so
+  // pages: false skips the ~1,500 pages (about 15 s of CPU); the build renders them all.
+  const regionByUrl = new Map(['us', 'ca'].flatMap((cc) => regionsOf(cc).map(({ code, list }) => [regionUrl(cc, code), { cc, code, list }])));
+  const masjidByUrl = new Map(osm.map((m) => [pageUrl(m), m]));
+  const render = (url) => {
+    if (url === hubUrl) return hubPage();
+    const r = regionByUrl.get(url);
+    if (r) return regionPage(r.cc, r.code, r.list);
+    const m = masjidByUrl.get(url);
+    return m ? masjidPage(m) : null;
   };
-
   // Task 152: map-pin-only masjid pages stay live but noindex and out of the sitemap.
-  return { pages, index, nearCity, urls: pages.map(([u]) => u).filter((u) => !thin.has(u)) };
+  const thin = new Set(osm.filter((m) => !masjidIndexable(m)).map(pageUrl));
+  const urls = [hubUrl, ...regionByUrl.keys(), ...osm.map(pageUrl)].filter((u) => !thin.has(u));
+  if (ctx.pages === false) return { pages: [], index, nearCity, urls, render };
+
+  const pages = [[hubUrl, hubPage()]];
+  for (const [url, r] of regionByUrl) pages.push([url, regionPage(r.cc, r.code, r.list)]);
+  for (const m of osm) pages.push([pageUrl(m), masjidPage(m)]);
+  return { pages, index, nearCity, render, urls };
 }

@@ -61,12 +61,15 @@ export const yearUrl = (y, L = 'en') => `${hubUrl(L)}${y}/`;
 
 // Pages in every language of ALL_LANGS, linked with hreflang. City links on an event page
 // go to the largest city of each country that has pages in that language.
-export function buildCalendar({ LANGS, langs, layout, esc, breadcrumb, faqLd, inLang, countries, cityUrl, monthUrl, named, kname, countriesUrl, rootUrl, monthYearShown, ramadan, today }) {
+// Each page is a thunk: the build renders them all; with pages: false, the Worker renders one
+// per request with render(url) (all 175 at once cost ~110 ms of CPU). Page bodies are not
+// re-indented: their template whitespace is the HTML.
+export function buildCalendar({ LANGS, langs, layout, esc, breadcrumb, faqLd, inLang, countries, cityUrl, monthUrl, named, kname, countriesUrl, rootUrl, monthYearShown, ramadan, today, pages: eager = true }) {
   const y0 = Number(today.slice(0, 4));
   const years = [y0, y0 + 1];
-  const pages = new Map();
+  const thunks = new Map();
   const urls = [];
-  const put = (url, html) => { pages.set(url, html); urls.push(url); };
+  const put = (url, page) => { thunks.set(url, page); urls.push(url); };
   const all = years.flatMap((y) => occurrences(`${y}-01-01`, daysIn(y)));
   const coming = occurrences(today, 366);
   // An event can fall twice in one Gregorian year (about every 33 years); the first one has the page.
@@ -93,10 +96,11 @@ export function buildCalendar({ LANGS, langs, layout, esc, breadcrumb, faqLd, in
     const big = (occ) => occ.filter((o) => ['ramadan', 'eid-al-fitr', 'eid-al-adha'].includes(o.ev.slug)).map((o) => `${name(o)} ${fmt(o.date, { weekday: undefined })}`).join(', ');
 
     for (const y of years) {
+      put(yearUrl(y, L), () => {
       const occ = all.filter((o) => o.date.startsWith(String(y)));
       const starts = monthStarts(y);
       const hy = [...new Set(starts.map((s) => s.hijri.y))].join('–');
-      put(yearUrl(y, L), layout({
+      return layout({
         L,
         title: T.yearTitle(y, hy),
         description: T.yearDesc(y, big(occ)),
@@ -111,18 +115,20 @@ export function buildCalendar({ LANGS, langs, layout, esc, breadcrumb, faqLd, in
   <section class="card"><h2>${T.months(y)}</h2><table class="tt cal"><thead><tr><th scope="col">${T.month}</th><th scope="col">${T.begins}</th></tr></thead><tbody>${starts.map((s) => `<tr><th scope="row">${mon(s.hijri.m)} ${s.hijri.y}</th><td>${fmt(s.date)}</td></tr>`).join('')}</tbody></table></section>
   <section class="card"><h2>${T.other}</h2>${yearLinks}<p>${citiesLink}</p></section>
 </main>`,
-      }));
+      });
+      });
     }
 
     for (const o of all) {
       if (!linked(o)) continue;
+      put(eventUrl(o, L), () => {
       const y = o.date.slice(0, 4);
       const m = Number(o.date.slice(5, 7));
       const n = name(o);
       // Month pages show one occurrence of each month; link the ones that show this event's.
       const cityLinks = capitals.filter((c) => monthYearShown(c, m) === Number(y));
       const faq = [[T.faqWhen(n, y), T.faqWhenA(n, y, when(o), hj(o.hijri), night(o))], [T.faqWhat(n), T.about[o.ev.slug]]];
-      put(eventUrl(o, L), layout({
+      return layout({
         L,
         title: T.evTitle(n, y, o.hijri.y),
         description: T.evDesc(n, y, fmt(o.date), hj(o.hijri)),
@@ -139,11 +145,12 @@ export function buildCalendar({ LANGS, langs, layout, esc, breadcrumb, faqLd, in
   <section class="card"><h2>${T.questions}</h2>${faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</section>
   <section class="card"><h2>${T.more}</h2>${yearLinks}</section>
 </main>`,
-      }));
+      });
+      });
     }
 
     // The hub: the next twelve months of events.
-    put(hubUrl(L), layout({
+    put(hubUrl(L), () => layout({
       L,
       title: T.hubTitle(y0, y0 + 1),
       description: T.hubDesc(coming.slice(0, 4).map((o) => `${name(o)} ${fmt(o.date, { weekday: undefined })}`).join(', ')),
@@ -160,5 +167,7 @@ export function buildCalendar({ LANGS, langs, layout, esc, breadcrumb, faqLd, in
     }));
   }
 
-  return { pages, urls, coming };
+  const render = (url) => thunks.get(url)?.() ?? null;
+  const pages = eager ? new Map([...thunks].map(([u, page]) => [u, page()])) : new Map();
+  return { pages, urls, coming, render };
 }

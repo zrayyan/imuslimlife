@@ -27,7 +27,7 @@ export const LANGS = {
     points: ['north', 'north-northeast', 'northeast', 'east-northeast', 'east', 'east-southeast', 'southeast', 'south-southeast', 'south', 'south-southwest', 'southwest', 'west-southwest', 'west', 'west-northwest', 'northwest', 'north-northwest'],
     asr: ["standard (Shafi'i, Maliki, Hanbali)", 'Hanafi'],
     methods: {},
-    nav: { times: 'Prayer Times', cities: 'Cities', quran: 'Quran', alexa: 'Athan on Alexa' },
+    nav: { times: 'Prayer Times', cities: 'Cities', quran: 'Quran', alexa: 'Athan on Alexa', places: 'Places' },
     foot: { about: 'About', method: 'How times are calculated', widget: 'Free widget for masjids', all: 'All countries', privacy: 'Privacy', terms: 'Terms', adfree: 'Always ad-free', data: 'City data ©', ramadan: (y) => `Ramadan ${y}` },
     root: 'Prayer times', countriesCrumb: 'Countries', date: 'Date',
     city: {
@@ -95,7 +95,7 @@ export const LANGS = {
     points: ['الشمال', 'الشمال-الشمال الشرقي', 'الشمال الشرقي', 'الشرق-الشمال الشرقي', 'الشرق', 'الشرق-الجنوب الشرقي', 'الجنوب الشرقي', 'الجنوب-الجنوب الشرقي', 'الجنوب', 'الجنوب-الجنوب الغربي', 'الجنوب الغربي', 'الغرب-الجنوب الغربي', 'الغرب', 'الغرب-الشمال الغربي', 'الشمال الغربي', 'الشمال-الشمال الغربي'],
     asr: ['الجمهور (الشافعي والمالكي والحنبلي)', 'الحنفي'],
     methods: { 3: 'رابطة العالم الإسلامي', 4: 'تقويم أم القرى، مكة المكرمة', 5: 'الهيئة المصرية العامة للمساحة', 8: 'منطقة الخليج', 9: 'الكويت', 10: 'قطر', 16: 'دبي', 18: 'تونس', 19: 'الجزائر', 21: 'المغرب', 23: 'الأردن' },
-    nav: { times: 'مواقيت الصلاة', cities: 'المدن', quran: 'القرآن', alexa: 'الأذان على أليكسا' },
+    nav: { times: 'مواقيت الصلاة', cities: 'المدن', quran: 'القرآن', alexa: 'الأذان على أليكسا', places: 'الأماكن' },
     foot: { about: 'من نحن', method: 'طريقة الحساب', widget: 'أداة مجانية لمواقع المساجد', all: 'جميع الدول', privacy: 'الخصوصية', terms: 'الشروط', adfree: 'بلا إعلانات دائمًا', data: 'بيانات المدن ©', ramadan: (y) => `رمضان ${y}` },
     root: 'مواقيت الصلاة', countriesCrumb: 'الدول', date: 'التاريخ',
     city: {
@@ -163,7 +163,7 @@ export const LANGS = {
     points: ['شمال', 'شمال-شمال مشرق', 'شمال مشرق', 'مشرق-شمال مشرق', 'مشرق', 'مشرق-جنوب مشرق', 'جنوب مشرق', 'جنوب-جنوب مشرق', 'جنوب', 'جنوب-جنوب مغرب', 'جنوب مغرب', 'مغرب-جنوب مغرب', 'مغرب', 'مغرب-شمال مغرب', 'شمال مغرب', 'شمال-شمال مغرب'],
     asr: ['شافعی، مالکی، حنبلی', 'حنفی'],
     methods: { 1: 'جامعہ علومِ اسلامیہ، کراچی' },
-    nav: { times: 'نماز کے اوقات', cities: 'شہر', quran: 'قرآن', alexa: 'الیکسا پر اذان' },
+    nav: { times: 'نماز کے اوقات', cities: 'شہر', quran: 'قرآن', alexa: 'الیکسا پر اذان', places: 'مقامات' },
     foot: { about: 'ہمارے بارے میں', method: 'اوقات کیسے نکالے جاتے ہیں', widget: 'مساجد کی ویب سائٹ کے لیے مفت ویجٹ', all: 'تمام ممالک', privacy: 'پرائیویسی', terms: 'شرائط', adfree: 'ہمیشہ اشتہارات کے بغیر', data: 'شہروں کا ڈیٹا ©', ramadan: (y) => `رمضان ${y}` },
     root: 'نماز کے اوقات', countriesCrumb: 'ممالک', date: 'تاریخ',
     city: {
@@ -231,7 +231,7 @@ export const LANGS = {
     points: ['utara', 'utara-timur laut', 'timur laut', 'timur-timur laut', 'timur', 'timur-tenggara', 'tenggara', 'selatan-tenggara', 'selatan', 'selatan-barat daya', 'barat daya', 'barat-barat daya', 'barat', 'barat-barat laut', 'barat laut', 'utara-barat laut'],
     asr: ["Syafi'i (standar)", 'Hanafi'],
     methods: { 20: 'Kementerian Agama RI (Kemenag)' },
-    nav: { times: 'Jadwal Sholat', cities: 'Kota', quran: "Al-Qur'an", alexa: 'Azan di Alexa' },
+    nav: { times: 'Jadwal Sholat', cities: 'Kota', quran: "Al-Qur'an", alexa: 'Azan di Alexa', places: 'Tempat' },
     foot: { about: 'Tentang kami', method: 'Cara menghitung waktu', widget: 'Widget gratis untuk situs masjid', all: 'Semua negara', privacy: 'Privasi', terms: 'Ketentuan', adfree: 'Selalu tanpa iklan', data: 'Data kota ©', ramadan: (y) => `Ramadan ${y}` },
     root: 'Jadwal sholat', countriesCrumb: 'Negara', date: 'Tanggal',
     city: {
@@ -297,7 +297,7 @@ export const LANGS = {
     points: ['utara', 'utara-timur laut', 'timur laut', 'timur-timur laut', 'timur', 'timur-tenggara', 'tenggara', 'selatan-tenggara', 'selatan', 'selatan-barat daya', 'barat daya', 'barat-barat daya', 'barat', 'barat-barat laut', 'barat laut', 'utara-barat laut'],
     asr: ['Syafie (standard)', 'Hanafi'],
     methods: { 17: 'JAKIM (Jabatan Kemajuan Islam Malaysia)', 11: 'Majlis Ugama Islam Singapura (MUIS)' },
-    nav: { times: 'Waktu Solat', cities: 'Bandar', quran: 'Al-Quran', alexa: 'Azan di Alexa' },
+    nav: { times: 'Waktu Solat', cities: 'Bandar', quran: 'Al-Quran', alexa: 'Azan di Alexa', places: 'Tempat' },
     foot: { about: 'Tentang kami', method: 'Cara waktu dikira', widget: 'Widget percuma untuk laman masjid', all: 'Semua negara', privacy: 'Privasi', terms: 'Terma', adfree: 'Sentiasa tanpa iklan', data: 'Data bandar ©', ramadan: (y) => `Ramadan ${y}` },
     root: 'Waktu solat', countriesCrumb: 'Negara', date: 'Tarikh',
     city: {
@@ -362,7 +362,7 @@ export const LANGS = {
     points: ['nord', 'nord-nord-est', 'nord-est', 'est-nord-est', 'est', 'est-sud-est', 'sud-est', 'sud-sud-est', 'sud', 'sud-sud-ouest', 'sud-ouest', 'ouest-sud-ouest', 'ouest', 'ouest-nord-ouest', 'nord-ouest', 'nord-nord-ouest'],
     asr: ['standard (chaféite, malikite, hanbalite)', 'hanafite'],
     methods: { 12: 'Union des organisations islamiques de France (UOIF)' },
-    nav: { times: 'Horaires de prière', cities: 'Villes', quran: 'Coran', alexa: 'Adhan sur Alexa' },
+    nav: { times: 'Horaires de prière', cities: 'Villes', quran: 'Coran', alexa: 'Adhan sur Alexa', places: 'Lieux' },
     foot: { about: 'À propos', method: 'Méthode de calcul', widget: 'Widget gratuit pour les mosquées', all: 'Tous les pays', privacy: 'Confidentialité', terms: 'Conditions', adfree: 'Toujours sans publicité', data: 'Données des villes ©', ramadan: (y) => `Ramadan ${y}` },
     root: 'Horaires de prière', countriesCrumb: 'Pays', date: 'Date',
     city: {
@@ -428,7 +428,7 @@ export const LANGS = {
     points: ['kuzey', 'kuzey-kuzeydoğu', 'kuzeydoğu', 'doğu-kuzeydoğu', 'doğu', 'doğu-güneydoğu', 'güneydoğu', 'güney-güneydoğu', 'güney', 'güney-güneybatı', 'güneybatı', 'batı-güneybatı', 'batı', 'batı-kuzeybatı', 'kuzeybatı', 'kuzey-kuzeybatı'],
     asr: ['standart (Şafii, Maliki, Hanbeli)', 'Hanefi'],
     methods: { 13: 'Diyanet İşleri Başkanlığı' },
-    nav: { times: 'Namaz Vakitleri', cities: 'Şehirler', quran: 'Kur’an', alexa: 'Alexa’da Ezan' },
+    nav: { times: 'Namaz Vakitleri', cities: 'Şehirler', quran: 'Kur’an', alexa: 'Alexa’da Ezan', places: 'Yerler' },
     foot: { about: 'Hakkımızda', method: 'Vakitler nasıl hesaplanır', widget: 'Camiler için ücretsiz widget', all: 'Tüm ülkeler', privacy: 'Gizlilik', terms: 'Koşullar', adfree: 'Her zaman reklamsız', data: 'Şehir verileri ©', ramadan: (y) => `Ramazan ${y}` },
     root: 'Namaz vakitleri', countriesCrumb: 'Ülkeler', date: 'Tarih',
     city: {

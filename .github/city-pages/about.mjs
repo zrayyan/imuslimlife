@@ -51,7 +51,7 @@ export function aboutPages({ layout, esc, breadcrumb, countries, listed, SITE })
     <ul>
       <li><a href="/prayer-times/">Prayer times</a> for ${listed.length} cities in ${Object.keys(counts).length} countries, with monthly timetables and Hijri dates.</li>
       <li><a href="/qibla/">Qibla direction</a> and the <a href="/islamic-calendar/">Islamic calendar</a>.</li>
-      <li>A <a href="/mosque-directory/">masjid directory</a> for the USA and Canada, and a <a href="/widget/">free prayer-times widget</a> for masjid websites.</li>
+      <li>A <a href="/places/">masjid directory</a> for the USA and Canada, and a <a href="/widget/">free prayer-times widget</a> for masjid websites.</li>
       <li>The <a href="/quran/">Quran</a> with recitation and translation.</li>
     </ul>
   </section>
