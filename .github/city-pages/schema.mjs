@@ -17,6 +17,10 @@ export const FORBIDDEN_KEYS = ['aggregateRating', 'ratingValue', 'ratingCount', 
 /** The publisher node every page's software and articles point to by @id. */
 export const organization = () => ({ '@type': 'Organization', '@id': ORG_ID, name: 'iMuslim Life', url: `${SITE}/`, logo: `${SITE}/logo512.png` });
 
+/** The WebSite node with the site search box (SearchAction), on every page's graph. */
+export const website = () => ({ '@type': 'WebSite', '@id': `${SITE}/#website`, name: 'iMuslim Life', url: `${SITE}/`, publisher: { '@id': ORG_ID }, inLanguage: ['en', 'ar', 'ur', 'fr', 'es', 'id', 'ms', 'tr'],
+  potentialAction: { '@type': 'SearchAction', target: { '@type': 'EntryPoint', urlTemplate: `${SITE}/search/?q={search_term_string}` }, 'query-input': 'required name=search_term_string' } });
+
 const definedIds = (v, out = new Set()) => { if (Array.isArray(v)) v.forEach((x) => definedIds(x, out)); else if (v && typeof v === 'object') { if (v['@id'] && Object.keys(v).length > 1) out.add(v['@id']); Object.values(v).forEach((x) => definedIds(x, out)); } return out; };
 const refIds = (v, out = new Set()) => { if (Array.isArray(v)) v.forEach((x) => refIds(x, out)); else if (v && typeof v === 'object') { if (v['@id'] && Object.keys(v).length === 1) out.add(v['@id']); Object.values(v).forEach((x) => refIds(x, out)); } return out; };
 
