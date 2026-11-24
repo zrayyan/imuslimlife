@@ -34,6 +34,7 @@ main { padding: 18px 0 32px; display: grid; gap: 18px; }
 .slot b { display: block; font-size: 20px; font-weight: 500; color: var(--green); margin-top: 2px; white-space: nowrap; }
 .slot.is-next { border-color: var(--gold); background: var(--gold-soft); box-shadow: 0 0 0 1px var(--gold); }
 .slot.is-next span { color: var(--gold-dark); font-weight: 600; }
+.answer { margin-top: 14px; font-size: 1.05rem; }
 .next { margin-top: 14px; min-height: 1.5em; }
 .next b { color: var(--green); }
 

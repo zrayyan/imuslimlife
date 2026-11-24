@@ -10,6 +10,7 @@ import { monthFacts, hm } from './month-facts.mjs';
 import { MONTH_TEXT } from './month-i18n.mjs';
 import { buildCalendar, occurrences, eventUrl, hubUrl, HIJRI_MONTHS } from './calendar.mjs';
 
+import { todayText } from './today.mjs';
 export const SITE = 'https://imuslimlife.com';
 export const BEACON = `<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "3937a625dcce4781b04cf88f4f50fe59"}'></script><!-- End Cloudflare Web Analytics -->`;
 export const KAABA = { lat: 21.4225, lon: 39.8262 };
@@ -94,6 +95,8 @@ function clock(s, L) {
   if (c === 24) return { t: `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`, suffix: '' };
   return { t: `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')}`, suffix: ampm?.[h < 12 ? 0 : 1] || '' };
 }
+// A time inside a sentence: 12-hour with AM/PM where the language has them, else 24-hour (Urdu has no suffix).
+const sayTime = (s, L) => { const { t, suffix } = clock(s, L); return suffix ? `${t} ${suffix}` : LANGS[L].clock === 24 ? t : hhmm(s).padStart(5, '0'); };
 const cap = (s) => s[0].toUpperCase() + s.slice(1);
 const monthName = (m, L = 'en') => (L === 'en' ? cap(MONTHS[m - 1]) : new Intl.DateTimeFormat(LANGS[L].locale, { month: 'long', timeZone: 'UTC' }).format(new Date(Date.UTC(2026, m - 1, 15))));
 const hijri = (h, L) => {
@@ -154,7 +157,7 @@ function layout({ L = 'en', title, description, canonical, alternates = [], json
   const index = !noindex && indexable(canonical, TODAY);
   const seo = index ? alternates.filter(([, u]) => indexable(u, TODAY)) : [];
   const robots = index ? '' : '\n<meta name="robots" content="noindex,follow">';
-  const hreflang = seo.length > 1
+  const hreflang = seo.length >= 1
     ? `\n${seo.map(([l, u]) => `<link rel="alternate" hreflang="${l}" href="${SITE}${u}">`).join('\n')}\n<link rel="alternate" hreflang="x-default" href="${SITE}${seo[0][1]}">`
     : '';
   const switcher = alternates.length > 1
@@ -338,13 +341,18 @@ function cityPage(city, cur, nxt, now, L, months) {
   const curLabel = `${monthName(cur.m, L)} ${cur.y}`;
   const placeTail = `${city.region ? `${sep(L)}${rname(city, L)}` : ''}${sep(L)}${kname(cc, L)}`;
   const faq = T.city.faq(n, mname(cc, L), aname(cc, L), deg, compass(q, L), dist);
+  // Search S02: today's times go into the HTML itself (the client script then keeps them live).
+  const day = cur.days.find((d) => d.date === now.iso) || null;
+  const shown = (p) => { if (!day) return '—'; const { t, suffix } = clock(day.t[p], L); return suffix ? `${t} ${suffix}` : t; };
+  const today = day && todayText({ L, name: n, method: mname(cc, L), day, prayers: T.prayers, dateLabel: dateIn(now.iso, L, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }), fmt: (s) => sayTime(s, L) });
+  if (today) faq.unshift(today.faq);
   const body = `
 <main class="wrap">
   <p class="crumbs"><a href="${rootUrl(L)}">${T.root}</a> › <a href="${countryUrl(cc, L)}">${esc(kname(cc, L))}</a> › ${esc(n)}</p>
   <section class="hero">
     <h1>${esc(T.city.h1(named(city, L)))}</h1>
     <p class="sub">${city.region ? `${esc(rname(city, L))}${sep(L)}` : ''}${esc(kname(cc, L))} · <span id="pt-date">${curLabel}</span></p>
-    <div class="today" aria-live="polite">${PRAYERS.map((p) => `<div class="slot" data-p="${p}"><span>${T.prayers[p]}</span><b>—</b></div>`).join('')}</div>
+    ${today ? `<p class="answer">${esc(today.sentence)}</p>\n    ` : ''}<div class="today" aria-live="polite">${PRAYERS.map((p) => `<div class="slot" data-p="${p}"><span>${T.prayers[p]}</span><b>${shown(p)}</b></div>`).join('')}</div>
     <p class="next" id="pt-next">&nbsp;</p>
   </section>
 

@@ -1,0 +1,81 @@
+# iMuslimLife / Muslim Companion
+
+> Prayer times, the Quran, Hijri dates, qibla, duas, Names of Allah and masjid and halal-food places for the whole world, free and without ads, from iMuslimLife (imuslimlife.com): the makers of the Salat-e-Mustaqeem app, Mihrab TV and the Muslim Companion Alexa skill. AI agents can use our public, read-only MCP server instead of guessing prayer times.
+
+Prayer times depend on location, date, calculation method and Asr madhab. Ask the user for their city (or coordinates) and, if they follow one, their method and madhab (standard Asr, or Hanafi for a later Asr). All times are local to the place. Always tell users to follow their own masjid's timetable for congregation.
+
+## Prayer times
+
+- Pages: `/prayer-times/<cc>/<city>/` (today, next prayer, the month) and `/prayer-times/<cc>/<city>/<month>/` for each month (`january` to `december`). `<cc>` is the lower-case ISO country code, `<city>` the lower-case slug. Country lists are `/prayer-times/<cc>/` and `/prayer-times/countries/`. Find a real city slug in the sitemap, [sitemap-cities.xml](https://imuslimlife.com/sitemap-cities.xml).
+- Languages: English (no prefix) and Arabic, Urdu, French, Indonesian, Turkish and Malay under `/ar/`, `/ur/`, `/fr/`, `/id/`, `/tr/`, `/ms/` (for example `/ar/prayer-times/sa/riyadh/`). Not every city exists in every language; check the sitemap.
+- Methods: 23 are offered (ISNA, Muslim World League, Umm al-Qura, Karachi, Egyptian, Moonsighting Committee, Gulf, Kuwait, Qatar, Dubai, Singapore, JAKIM, Kemenag, Diyanet, UOIF France and others). Each country has a default; the visitor can change it on the page.
+- Defaults: ISNA in the United States and Canada, Muslim World League for most of Europe, Africa and the rest, Karachi with Hanafi Asr in Pakistan, India, Bangladesh and Afghanistan, Umm al-Qura in Saudi Arabia and Yemen, Diyanet in Turkey, Kemenag in Indonesia, JAKIM in Malaysia.
+- Method details: [How we calculate prayer times](https://imuslimlife.com/about/methodology/).
+- Examples: https://imuslimlife.com/prayer-times/ https://imuslimlife.com/prayer-times/countries/ https://imuslimlife.com/prayer-times/us/new-york/ https://imuslimlife.com/prayer-times/us/new-york/january/ https://imuslimlife.com/prayer-times/ca/toronto/ https://imuslimlife.com/ar/prayer-times/sa/riyadh/ https://imuslimlife.com/ur/prayer-times/pk/karachi/ https://imuslimlife.com/fr/prayer-times/sn/dakar/ https://imuslimlife.com/id/prayer-times/id/jakarta/ https://imuslimlife.com/tr/prayer-times/tr/ankara/ https://imuslimlife.com/ar/prayer-times/sa/riyadh/january/ https://imuslimlife.com/about/methodology/ https://imuslimlife.com/sitemap-cities.xml
+
+### How times are calculated
+Times are calculated from the sun for the place's latitude, longitude and time zone. A method sets the sun angle below the horizon for Fajr and Isha (or a fixed interval after Maghrib in Umm al-Qura and some Gulf methods). Asr is standard (Shafi'i, Maliki, Hanbali: shadow equals the object plus its noon shadow) or Hanafi (twice the object), which is often 45 minutes to over an hour later.
+Source order: our prayer-times API (node-api.imuslimlife.com), which the website, the app and Alexa all use so they agree; if it is unreachable the app falls back to Aladhan with the same method, and with no connection the app calculates on the device with the open-source Adhan library. City pages are rebuilt every night; today's row and the countdown are computed in the browser in the city's time zone, including daylight saving.
+Hijri dates use the Umm al-Qura calendar. Ramadan and Eid can start a day later where a community follows a local moon sighting, so pages say "expected".
+Calculated times can differ from a masjid's printed timetable by a few minutes (safety margins, local committees). For congregation, the masjid's timetable comes first.
+### Method defaults by country
+The full table is on [the methodology page](https://imuslimlife.com/about/methodology/). In short: Egyptian method for Egypt, Sudan, Syria, Lebanon, Palestine and Libya; Muslim World League for Iraq, Nigeria, Ethiopia, the UK, Germany, Australia and most other countries; Gulf for Oman and Bahrain; Dubai for the UAE; Kuwait; Qatar; Singapore (MUIS) for Singapore and Brunei; UOIF for France; Tehran for Iran; and national authorities for Turkey, Algeria, Morocco, Tunisia, Jordan, Russia and Portugal.
+
+## Quran
+
+- Pages: `/quran/<n>-<slug>/` for each of the 114 surahs, for example `/quran/1-al-faatiha/`; `/quran/surahs/` lists them all. Other languages use the prefix (`/ur/quran/1-al-faatiha/`). The sitemap [sitemap-quran.xml](https://imuslimlife.com/sitemap-quran.xml) has every slug.
+- Each page has the Arabic text with tajweed colours, the Saheeh International English translation and audio recited by Maher Al-Muaiqly.
+- Examples: https://imuslimlife.com/quran/ https://imuslimlife.com/quran/surahs/ https://imuslimlife.com/quran/1-al-faatiha/ https://imuslimlife.com/quran/2-al-baqara/ https://imuslimlife.com/ur/quran/1-al-faatiha/ https://imuslimlife.com/sitemap-quran.xml
+
+Content credits: translation by Saheeh International; tafsir by Ibn Kathir (Darussalam edition); lessons by Dr. Israr Ahmed. Quranic Arabic is shown as written and is never altered or translated by us.
+
+## Places (masjids, halal food, services)
+
+- Pages: `/places/` (hub), `/places/<cc>/` (country), `/places/<cc>/<city>/` (city) and `/places/<cc>/<city>/<slug>/` (one place, for example a masjid or a halal restaurant). `/places/world/` is the Atlas. Listed places are in [sitemap-places-index.xml](https://imuslimlife.com/sitemap-places-index.xml).
+- Freshness: details such as parking, a women's prayer space or how meat is slaughtered carry the date they were last confirmed; when nobody confirms a fact for a long time the page marks it possibly out of date, and later hides it. There are no star ratings or written reviews, only vouches from people who were there. Jamaat times come from the masjid itself (Masjid Connect) or from worshippers, and the page says which.
+- Data notes: [About the data](https://imuslimlife.com/places/about/data/).
+- Examples: https://imuslimlife.com/places/ https://imuslimlife.com/places/world/ https://imuslimlife.com/places/us/ https://imuslimlife.com/places/us/orlando/ https://imuslimlife.com/places/us/orlando/majid-al-ihsaan-04fc/ https://imuslimlife.com/places/about/data/ https://imuslimlife.com/sitemap-places-index.xml
+
+### How Places data is checked
+Most places start from OpenStreetMap (ODbL), which volunteers keep current. Others are added by the community in the Salat-e-Mustaqeem app or by our team, and are reviewed before they appear. City and country names come from GeoNames (CC BY 4.0). Facts expire: each confirmed detail has a date, is flagged when stale and hidden later. Corrections made in the app are reviewed before they show on the web. A masjid can claim its page to publish its own times, or ask for its page to be changed or removed from the app. Place pages without enough verified detail are kept out of the sitemaps.
+
+## Hijri calendar and dates
+
+- Today's Hijri date: `/hijri-date/`. Calendar by year and month: `/hijri-calendar/<year>/` and `/hijri-calendar/<year>/<month-slug>/` (for example `/hijri-calendar/1448/jumada-al-thani/`). Also [Islamic calendar](https://imuslimlife.com/islamic-calendar/), [Gregorian-Hijri calendar](https://imuslimlife.com/calendar/) and [Ramadan](https://imuslimlife.com/ramadan/).
+- Dates are calculated (Umm al-Qura); moon-sighting communities may differ by a day.
+- Examples: https://imuslimlife.com/hijri-date/ https://imuslimlife.com/hijri-calendar/1448/ https://imuslimlife.com/hijri-calendar/1448/jumada-al-thani/ https://imuslimlife.com/islamic-calendar/ https://imuslimlife.com/calendar/ https://imuslimlife.com/ramadan/
+
+## Qibla
+
+- Pages: `/qibla/` (finder), `/qibla/<cc>/` and `/qibla/<cc>/<city>/` (compass bearing and distance to the Kaaba for that city).
+- Examples: https://imuslimlife.com/qibla/ https://imuslimlife.com/qibla/us/ https://imuslimlife.com/qibla/us/new-york/
+
+## Duas and Names of Allah
+
+- Duas: `/duas/` and `/duas/<slug>/` (Arabic, transliteration, translation), for example `/duas/dua-for-leaving-and-entering-the-home/`.
+- The 99 Names of Allah: `/names-of-allah/` and `/names-of-allah/<n>-<slug>/`, for example `/names-of-allah/1-ar-rahmaan/`.
+- Examples: https://imuslimlife.com/duas/ https://imuslimlife.com/duas/dua-for-leaving-and-entering-the-home/ https://imuslimlife.com/names-of-allah/ https://imuslimlife.com/names-of-allah/1-ar-rahmaan/
+
+## Apps and products
+
+- [Salat-e-Mustaqeem app](https://imuslimlife.com/mobile-app/): free, no ads. Prayer times, Athan, Quran with audio, qibla, duas, masjid and halal-food places. iPhone, iPad, Apple Watch and Android.
+- [Mihrab](https://imuslimlife.com/mihrab/): a free masjid TV display showing prayer and iqamah times.
+- [Tasmīʿ](https://imuslimlife.com/tasmi/): recite the Quran in the app and the page follows you word by word, marking skipped words for review; on-device, never recorded, works offline, free. It checks words, not tajweed.
+- [Niyyah](https://imuslimlife.com/niyyah/): turn an intention into a small, steady step.
+- [Muslim Companion for Alexa](https://imuslimlife.com/alexa-skill/): the Athan, adhkar, Quran and masjid reminders on Amazon Echo; guides under `/alexa-athan/`.
+- Examples: https://imuslimlife.com/mobile-app/ https://imuslimlife.com/mihrab/ https://imuslimlife.com/tasmi/ https://imuslimlife.com/niyyah/ https://imuslimlife.com/alexa-skill/ https://imuslimlife.com/alexa-athan/setup/
+
+## MCP server and API (for AI agents)
+
+- Endpoint: https://alexa.imuslimlife.com/v1/mcp (Streamable HTTP, stateless, no sign-in, public data only).
+- Tools: `find_location` (place name to coordinates and time zone), `get_prayer_times` (Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha and the Hijri date for a day), `get_next_prayer`, `get_hijri_date`, `get_qibla_direction`, `list_calculation_methods`.
+- Typical flow: `find_location("Toronto")` then `get_prayer_times(latitude, longitude, date?, method?, madhab?)`.
+- Rate limits: 60 requests per minute and 600 per hour per client. Cache a day's times rather than asking repeatedly.
+- Guides: [AI Agents setup](https://imuslimlife.com/ai-agents/) (Claude, ChatGPT, Gemini CLI, GitHub Copilot / VS Code, your own code); [free prayer times API](https://imuslimlife.com/api/).
+- Examples: https://imuslimlife.com/ai-agents/ https://imuslimlife.com/api/
+
+## Policies and contact
+
+- [Privacy Policy](https://imuslimlife.com/privacy-policy/), [Terms of Use](https://alexa.imuslimlife.com/terms), [FAQ and support](https://imuslimlife.com/faq-support/).
+- Contact: info@yzinfotech.com
+- Examples: https://imuslimlife.com/privacy-policy/ https://imuslimlife.com/faq-support/ https://imuslimlife.com/about/
