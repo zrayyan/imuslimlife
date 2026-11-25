@@ -96,7 +96,8 @@ p{margin:0}
 :where(a,button,input):focus-visible{outline:2px solid currentColor;outline-offset:3px}
 
 /* The stage: header and hero sit on the sky; the ground silhouette closes it. */
-.sk-stage{position:relative;overflow:hidden;background:var(--sky-bg);color:var(--sky-ink)}
+/* overflow-x only: the header's More panel hangs below a short hero, and overflow:hidden clipped its last links (K07b) */
+.sk-stage{position:relative;overflow-x:clip;background:var(--sky-bg);color:var(--sky-ink)}
 .sk-stage a{color:inherit}
 .sk-scene{position:absolute;inset-inline:0;inset-block-end:0;inline-size:100%;block-size:120px;display:block;pointer-events:none}
 .sk-skyline{fill:var(--sky-ground)}
@@ -202,6 +203,7 @@ ${SKY_ORDER.map((k) => `.sk-sun[data-for="${k}"]{display:var(--show-${k})}`).joi
 .hr-ask svg{flex:none}
 .hr-ask input{flex:1;min-inline-size:0;block-size:48px;border:0;background:transparent;color:inherit;font:400 17px var(--sans);outline:0}
 .hr-ask input::placeholder{color:var(--sky-soft);opacity:1}
+@media (max-width:480px){.hr-ask input{font-size:15px}}
 .hr-ask button{flex:none;min-block-size:48px;padding-inline:22px;border:0;border-radius:999px;background:var(--sky-ink);color:var(--sky-on);font:600 15px var(--sans);cursor:pointer}
 .hr-ask:focus-within{box-shadow:inset 0 0 0 2px var(--sky-accent),0 20px 60px -30px rgba(0,0,0,.45)}
 .hr-chips{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;font-size:14px}
