@@ -1,66 +1,92 @@
 User-agent: Googlebot
 Allow: /
 Disallow: /api/quran/
+Disallow: /quran/go/
+Disallow: /*/quran/go/
 Disallow: /admin/
 
 User-agent: Bingbot
 Allow: /
 Disallow: /api/quran/
+Disallow: /quran/go/
+Disallow: /*/quran/go/
 Disallow: /admin/
 
 User-agent: GPTBot
 Allow: /
 Disallow: /api/quran/
+Disallow: /quran/go/
+Disallow: /*/quran/go/
 Disallow: /admin/
 
 User-agent: OAI-SearchBot
 Allow: /
 Disallow: /api/quran/
+Disallow: /quran/go/
+Disallow: /*/quran/go/
 Disallow: /admin/
 
 User-agent: ChatGPT-User
 Allow: /
 Disallow: /api/quran/
+Disallow: /quran/go/
+Disallow: /*/quran/go/
 Disallow: /admin/
 
 User-agent: ClaudeBot
 Allow: /
 Disallow: /api/quran/
+Disallow: /quran/go/
+Disallow: /*/quran/go/
 Disallow: /admin/
 
 User-agent: Claude-SearchBot
 Allow: /
 Disallow: /api/quran/
+Disallow: /quran/go/
+Disallow: /*/quran/go/
 Disallow: /admin/
 
 User-agent: Claude-User
 Allow: /
 Disallow: /api/quran/
+Disallow: /quran/go/
+Disallow: /*/quran/go/
 Disallow: /admin/
 
 User-agent: PerplexityBot
 Allow: /
 Disallow: /api/quran/
+Disallow: /quran/go/
+Disallow: /*/quran/go/
 Disallow: /admin/
 
 User-agent: Perplexity-User
 Allow: /
 Disallow: /api/quran/
+Disallow: /quran/go/
+Disallow: /*/quran/go/
 Disallow: /admin/
 
 User-agent: Google-Extended
 Allow: /
 Disallow: /api/quran/
+Disallow: /quran/go/
+Disallow: /*/quran/go/
 Disallow: /admin/
 
 User-agent: Applebot-Extended
 Allow: /
 Disallow: /api/quran/
+Disallow: /quran/go/
+Disallow: /*/quran/go/
 Disallow: /admin/
 
 User-agent: *
 Allow: /
 Disallow: /api/quran/
+Disallow: /quran/go/
+Disallow: /*/quran/go/
 Disallow: /admin/
 
 Sitemap: https://imuslimlife.com/sitemap.xml
