@@ -25,6 +25,46 @@ const skyVars = (key) => {
 };
 const pageVars = (k) => { const p = PAGES[k]; return `--bg:${p.bg};--ink:${p.ink};--soft:${p.soft};--card:${p.card};--line:${p.line};--gold:${p.gold};--accent:${p.accent};--band:${p.band}`; };
 
+/**
+ * The same tokens and the header, footer and season-bar rules only, for pages that keep their own content styles
+ * (the React pages, the Alexa guides, the dua pages): no rule on a bare element, no body background, no color-scheme.
+ * Every selector is `.sk-` prefixed or a custom property, so nothing in the page body changes except by choice.
+ */
+export function chromeCss() {
+  const full = skyCss();
+  const base = full.slice(full.indexOf('.sk-quran'), full.indexOf('/* The hero'));
+  const keep = base.split('\n').filter((l) => !l.startsWith(':where(a,button,input)') && !l.startsWith('.sk-quran')).join('\n');
+  // The page-theme tokens (--bg, --ink, --line, --gold ...) are names the host pages use too: here they sit on the footer and skip link only.
+  const day = SKY_ORDER.filter((k) => pageFor(k) === 'day'), night = SKY_ORDER.filter((k) => pageFor(k) === 'night');
+  const scoped = (keys, th) => `${keys.flatMap((k) => ['.sk-footer', '.sk-skip'].map((e) => `[data-sky="${k}"] ${e}`)).join(',')}{${pageVars(th)}}`;
+  const vars = [
+    ...['--s0', '--s1', '--s2', '--s3'].map((n) => `@property ${n}{syntax:"<color>";inherits:true;initial-value:#000}`),
+    ':root{--serif:Marcellus,"Marcellus Fallback",Georgia,serif;--sans:Inter,"Inter Fallback",system-ui,-apple-system,sans-serif}',
+    ':root{' + skyVars('dhuhr') + '}',
+    `.sk-footer,.sk-skip{${pageVars('day')}}`,
+    ...SKY_ORDER.map((k) => `[data-sky="${k}"]{${skyVars(k)}}`),
+    scoped(day, 'day'), scoped(night, 'night'),
+  ].join('\n');
+  return `${vars}
+.sk-skip,.sk-header,.sk-footer{box-sizing:border-box;font:400 16px/1.55 var(--sans)}
+.sk-header *,.sk-footer *,.sk-season *{box-sizing:border-box}
+.sk-header p,.sk-footer p{margin:0}
+.sk-footer{font-size:16px}
+.sk-header :focus-visible,.sk-footer :focus-visible{outline:2px solid currentColor;outline-offset:3px}
+${keep}
+`;
+}
+
+/**
+ * The page-theme tokens under `--pg-*` names, on <html> (static pages only: their stylesheets bring their own variables, and
+ * `--pg-*` is the one place that maps them to the sky). Day skies get the Day page, night skies the Night page.
+ */
+export function pageTokensCss() {
+  const set = (k) => Object.entries(PAGES[k]).map(([n, v]) => `--pg-${n}:${v}`).join(';') + `;--pg-on:${k === 'night' ? '#0B2219' : '#F7F1E3'}`;
+  const night = SKY_ORDER.filter((k) => pageFor(k) === 'night').map((k) => `[data-sky="${k}"]`).join(',');
+  return `:root{${set('day')}}\n${night}{${set('night')}}`;
+}
+
 export function skyCss() {
   const byTheme = { day: SKY_ORDER.filter((k) => pageFor(k) === 'day'), night: SKY_ORDER.filter((k) => pageFor(k) === 'night') };
   const themes = Object.entries(byTheme).map(([th, ks]) => `${ks.map((k) => `[data-sky="${k}"]`).join(',')}{${pageVars(th)};color-scheme:${th === 'day' ? 'light' : 'dark'}}`).join('\n');
@@ -190,7 +230,7 @@ ${SKY_ORDER.map((k) => `.sk-sun[data-for="${k}"]{display:var(--show-${k})}`).joi
 .hr-preview a{display:inline-flex;align-items:center;block-size:34px;padding-inline:12px;border-radius:999px;font:500 13px var(--sans);text-decoration:none}
 .hr-preview a[aria-current]{background:var(--sky-ink);color:var(--sky-on)}
 @media (max-width:720px){
-  .hr-top{padding:40px 16px 28px}.hr-when{font-size:18px}.hr-name{font-size:clamp(64px,22vw,96px)}
+  .hr-top{padding:72px 16px 28px}.sk-moon{inset-block-start:var(--moon-top,150px);inline-size:40px;block-size:40px}.hr-when{font-size:18px}.hr-name{font-size:clamp(64px,22vw,96px)}
   .hr-arc,.hr-gw,.hr-foot{padding-inline:16px}
   .hr-times{block-size:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:10px 4px;padding-block:14px 8px}
   .hr-t{position:static;transform:none}

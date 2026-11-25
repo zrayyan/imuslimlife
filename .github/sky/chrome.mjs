@@ -52,15 +52,15 @@ const COLS = (s) => [
   [s.appCol, [[s.mobile, '/mobile-app/'], [s.support, '/faq-support/']]],
 ];
 
-/** @param {{lang?:string, path?:string, year?:number, hrefs?:Record<string,string>}} o path: this page's path, for the language links; hrefs: the page's own URL per language (static pages whose languages live at other paths, e.g. the city pages), and only those languages are listed */
-export function footer({ lang = 'en', path = '/', year = new Date().getUTCFullYear(), hrefs = null } = {}) {
+/** @param {{lang?:string, path?:string, year?:number, hrefs?:Record<string,string>, languages?:boolean}} o path: this page's path, for the language links; hrefs: the page's own URL per language (static pages whose languages live at other paths, e.g. the city pages), and only those languages are listed */
+export function footer({ lang = 'en', path = '/', year = new Date().getUTCFullYear(), hrefs = null, languages = true } = {}) {
   const s = t(lang);
   const cols = COLS(s).map(([h, ls]) => `<div class="sk-col"><b>${esc(h)}</b>${ls.map(([n, href]) => `<a href="${href}">${esc(n)}</a>`).join('')}</div>`).join('');
   const langs = LANGS.filter((l) => !hrefs || hrefs[l]).map((l) => `<a href="${esc(hrefs ? hrefs[l] : langHref(path, l))}" lang="${l}"${RTL.has(l) ? ' dir="rtl"' : ''}${l === lang ? ' aria-current="true"' : ''} hreflang="${l}">${esc(LANG_NAMES[l])}</a>`).join('');
   return `<footer class="sk-footer"><div class="sk-wrap">
 <div class="sk-foot-top"><div class="sk-about"><span class="sk-logo-static">${MARK}<span>iMuslim Life</span></span><p>${esc(s.tag)}</p></div>
 <nav class="sk-cols" aria-label="${esc(s.site)}">${cols}</nav></div>
-<nav class="sk-langs" aria-label="${esc(s.langs)}">${langs}</nav>
+${languages ? `<nav class="sk-langs" aria-label="${esc(s.langs)}">${langs}</nav>` : ''}
 <div class="sk-legal"><span>© ${year} iMuslim Life</span><span class="sk-legal-links"><a href="/privacy-policy/">${esc(s.privacy)}</a><a href="/terms/">${esc(s.terms)}</a><a href="/faq-support/">${esc(s.contact)}</a></span></div>
 </div></footer>`;
 }
