@@ -169,7 +169,7 @@ for (const L of ALL_LANGS) {
 if (ramadan) writeIfChanged(outFile(ramadan.url), ramadanPage());
 // The Islamic calendar hub (calendar.mjs, 2026-11-02), in every page language.
 const calendar = buildCalendar({
-  LANGS, langs: ALL_LANGS, layout, esc, breadcrumb, faqLd, inLang, countries, cityUrl, monthUrl, named, kname, countriesUrl, rootUrl, ramadan,
+  LANGS, langs: ALL_LANGS, layout: (o) => layout({ ...o, sky: true }), esc, breadcrumb, faqLd, inLang, countries, cityUrl, monthUrl, named, kname, countriesUrl, rootUrl, ramadan,
   monthYearShown: (c, m) => yearFor(m, todayIn(c.tz)),
   today: TODAY,
 });

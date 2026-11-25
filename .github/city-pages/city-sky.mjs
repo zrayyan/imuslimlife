@@ -12,6 +12,7 @@ import { cityPlace, graphJson } from './schema.mjs';
 import { header, footer, ltr, esc } from '../sky/chrome.mjs';
 import { FONT_FACES, FONTS, FONT_FILES, skyCss } from '../sky/css.mjs';
 import { stars, moon, scene } from '../sky/scene.mjs';
+import { HUB_CSS } from './hubs-css.mjs';
 
 export const CITY_SKY_CSS_PATH = '/prayer-times/city-sky.css';
 const PRAYERS = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
@@ -150,7 +151,7 @@ const CSS = `
 
 const hash = (s) => { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); } return (h >>> 0).toString(36); };
 /** The page's stylesheet (fonts, the sky, this page), built once. The Worker serves it itself and build.mjs writes the same text to the site. */
-export const CITY_SKY_CSS = `${FONT_FACES}\n${skyCss()}\n${CSS}`;
+export const CITY_SKY_CSS = `${FONT_FACES}\n${skyCss()}\n${CSS}\n${HUB_CSS}`;
 export const CITY_SKY_CSS_URL = `${CITY_SKY_CSS_PATH}?v=${hash(CITY_SKY_CSS)}`;
 const SCHEDULE_SLOT = '__SKY_TIMES__'; // the Worker fills it per visitor (sky/page.mjs); without it the page paints its own city's sky
 
