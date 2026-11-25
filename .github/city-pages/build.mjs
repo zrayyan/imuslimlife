@@ -33,6 +33,7 @@ import { buildQibla } from './qibla.mjs';
 import { monthFacts, hm } from './month-facts.mjs';
 import { MONTH_TEXT } from './month-i18n.mjs';
 import { aboutPages } from './about.mjs';
+import { citiesSkyCss } from '../sky/cities-sky.mjs';
 import { buildCalendar, occurrences, eventUrl, hubUrl, HIJRI_MONTHS } from './calendar.mjs';
 import { loadMasjids, loadMasjidAdditions, loadMasjidConnect, buildMasjids } from './masjids.mjs';
 import { cityPagesUrls, citySitemap } from './sitemap.mjs';
@@ -176,6 +177,7 @@ for (const [url, html] of calendar.pages) writeIfChanged(outFile(url), html);
 const qiblaPages = buildQibla({ listed, langsOf, ALL_LANGS, countriesIn, layout, esc, breadcrumb, qibla, compass, distanceKm, fmtDistance, named, kname, cityUrl, KAABA, SITE });
 for (const [url, html] of qiblaPages.pages) writeIfChanged(outFile(url), html);
 writeIfChanged(path.join(OUT, 'prayer-times', 'cities.css'), fs.readFileSync(path.join(HERE, 'cities.css'), 'utf8'));
+writeIfChanged(path.join(OUT, 'prayer-times', 'cities-sky.css'), citiesSkyCss(fs.readFileSync(path.join(HERE, 'cities.css'), 'utf8')));
 writeIfChanged(path.join(OUT, 'prayer-times', 'calc.js'), fs.readFileSync(path.join(HERE, 'calc.js'), 'utf8'));
 
 // The masjid widget (widget.mjs): a data file per city, the city index, the embed and builder pages.

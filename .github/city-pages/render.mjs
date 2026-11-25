@@ -12,6 +12,12 @@ import { buildCalendar, occurrences, eventUrl, hubUrl, HIJRI_MONTHS } from './ca
 
 import { todayText } from './today.mjs';
 import { cityPlace, graphJson } from './schema.mjs';
+import { header as skyHeader, footer as skyFooter } from '../sky/chrome.mjs';
+import { FONTS as SKY_FONTS_URL } from '../sky/css.mjs';
+
+// The Ramaḍān timetable pages (/ramadan/<year>/ and the city months that hold Ramaḍān) wear the Living Sky (K08):
+// the shared header and footer, tokens and fonts, from /prayer-times/cities-sky.css (written by build.mjs).
+const SKY_CSS_URL = '/prayer-times/cities-sky.css';
 export const SITE = 'https://imuslimlife.com';
 export const BEACON = `<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "3937a625dcce4781b04cf88f4f50fe59"}'></script><!-- End Cloudflare Web Analytics -->`;
 export const KAABA = { lat: 21.4225, lon: 39.8262 };
@@ -151,7 +157,7 @@ function footerCountries(L) {
 
 const RTL_FONT = 'https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600&display=swap';
 
-function layout({ L = 'en', title, description, canonical, alternates = [], jsonLd, body, image = null, credit = null, noindex = false }) {
+function layout({ L = 'en', title, description, canonical, alternates = [], jsonLd, body, image = null, credit = null, noindex = false, sky = false }) {
   const T = LANGS[L];
   // Task 152: noindex pages keep their language links for people but give Google no
   // hreflang; indexable pages only point Google at alternates that are indexable too.
@@ -161,12 +167,16 @@ function layout({ L = 'en', title, description, canonical, alternates = [], json
   const hreflang = seo.length >= 1
     ? `\n${seo.map(([l, u]) => `<link rel="alternate" hreflang="${l}" href="${SITE}${u}">`).join('\n')}\n<link rel="alternate" hreflang="x-default" href="${SITE}${seo[0][1]}">`
     : '';
-  const switcher = alternates.length > 1
+  const switcher = !sky && alternates.length > 1
     ? `\n<nav class="langs wrap" aria-label="Language">${alternates.map(([l, u]) => (l === L ? `<b lang="${l}">${LANGS[l].label}</b>` : `<a href="${u}" lang="${l}" hreflang="${l}">${LANGS[l].label}</a>`)).join(' · ')}</nav>`
     : '';
   const rtlFont = T.dir === 'rtl' ? `\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link href="${RTL_FONT}" rel="stylesheet" media="print" onload="this.media='all'">` : '';
+  const footLinks = `<footer class="foot wrap">
+  <p><a href="/">iMuslim Life</a> · ${ramadan ? `<a href="${ramadan.url}">${T.foot.ramadan(ramadan.year)}</a> · ` : ''}<a href="${hubUrl(L)}">${T.cal.all}</a> · ${footerCountries(L).map(([cc]) => `<a href="${countryUrl(cc, L)}">${esc(kname(cc, L))}</a>`).join(' · ')} · <a href="${countriesUrl(L)}">${T.foot.all}</a></p>
+  <p><a href="/widget/">${T.foot.widget}</a> · <a href="/about/">${T.foot.about}</a> · <a href="/about/methodology/">${T.foot.method}</a> · <a href="/privacy-policy/">${T.foot.privacy}</a> · <a href="/terms/">${T.foot.terms}</a> · ${T.foot.adfree} · ${T.foot.data} <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0)</p>${credit ? `\n  <p>${credit}</p>` : ''}
+</footer>`;
   return `<!DOCTYPE html>
-<html lang="${L}"${T.dir === 'rtl' ? ' dir="rtl"' : ''}>
+<html lang="${L}"${T.dir === 'rtl' ? ' dir="rtl"' : ''}${sky ? ' data-sky="dhuhr"' : ''}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -179,24 +189,24 @@ function layout({ L = 'en', title, description, canonical, alternates = [], json
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${SITE}${canonical}">
 <meta property="og:image" content="${SITE}${image || '/logo512.png'}">${image ? '\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n<meta name="twitter:card" content="summary_large_image">' : ''}
-<meta name="theme-color" content="#006400">
+<meta name="theme-color" content="${sky ? '#07150F' : '#006400'}">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/prayer-times/cities.css">${rtlFont}
+${sky ? `<link rel="preload" as="font" type="font/woff2" href="/fonts/sky/marcellus-latin.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/fonts/sky/inter-latin.woff2" crossorigin>
+<link rel="stylesheet" href="${SKY_CSS_URL}">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="${SKY_FONTS_URL}" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="${SKY_FONTS_URL}"></noscript>` : `<link rel="stylesheet" href="/prayer-times/cities.css">${rtlFont}`}
 <script type="application/ld+json">${graphJson(jsonLd)}</script>
 ${BEACON}
 </head>
 <body>
-<header class="bar">
+${sky ? skyHeader({ lang: L, current: 'times' }) : `<header class="bar">
   <div class="wrap bar-in">
     <a class="brand" href="/" dir="ltr"><span aria-hidden="true">🕋</span> i<b>Muslim</b> Life</a>
     <nav><a href="/prayer-times/">${T.nav.times}</a><a href="${countriesUrl(L)}">${T.nav.cities}</a><a href="/quran/">${T.nav.quran}</a><a href="${L === 'en' ? '/places/' : `/${L}/places/`}">${T.nav.places}</a><a href="/alexa-athan/">${T.nav.alexa}</a></nav>
   </div>
-</header>${switcher}
-${body}
-<footer class="foot wrap">
-  <p><a href="/">iMuslim Life</a> · ${ramadan ? `<a href="${ramadan.url}">${T.foot.ramadan(ramadan.year)}</a> · ` : ''}<a href="${hubUrl(L)}">${T.cal.all}</a> · ${footerCountries(L).map(([cc]) => `<a href="${countryUrl(cc, L)}">${esc(kname(cc, L))}</a>`).join(' · ')} · <a href="${countriesUrl(L)}">${T.foot.all}</a></p>
-  <p><a href="/widget/">${T.foot.widget}</a> · <a href="/about/">${T.foot.about}</a> · <a href="/about/methodology/">${T.foot.method}</a> · <a href="/privacy-policy/">${T.foot.privacy}</a> · <a href="/terms/">${T.foot.terms}</a> · ${T.foot.adfree} · ${T.foot.data} <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0)</p>${credit ? `\n  <p>${credit}</p>` : ''}
-</footer>
+</header>${switcher}`}
+${sky ? body.replace('<main class="wrap">', '<main class="wrap" id="main">') : body}
+${footLinks}${sky ? `\n${skyFooter({ lang: L, path: canonical, hrefs: alternates.length ? Object.fromEntries(alternates) : { [L]: canonical } })}` : ''}
 </body>
 </html>
 `;
@@ -474,6 +484,7 @@ ${calcScripts}
     image: ogImage(city),
     jsonLd: [breadcrumb([['iMuslim Life', '/'], [T.root, rootUrl(L)], [kname(cc, L), countryUrl(cc, L)], [n, cityUrl(city, L)], [label, monthUrl(city, month.m, L)]]), faqLd(faq)],
     body,
+    sky: ram.length > 0, // the Ramaḍān timetables wear the Living Sky (K08); the other months wait for K04
   });
 }
 
@@ -585,6 +596,7 @@ function ramadanPage() {
     canonical: ramadan.url,
     jsonLd: [breadcrumb([['iMuslim Life', '/'], ['Prayer times', '/prayer-times/'], [`Ramadan ${year}`, ramadan.url]]), faqLd(faq)],
     body,
+    sky: true,
   });
 }
 
