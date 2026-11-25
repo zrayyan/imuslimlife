@@ -35,7 +35,9 @@ const Q = {
 };
 
 // pages: false skips rendering every page (the Worker renders one per request with cityPage/countryPage).
-export function buildQibla({ listed, langsOf, ALL_LANGS, countriesIn, layout, esc, breadcrumb, qibla, compass, distanceKm, fmtDistance, named, kname, cityUrl, KAABA, SITE, pages: render = true }) {
+export function buildQibla({ listed, langsOf, ALL_LANGS, countriesIn, layout: baseLayout, esc, breadcrumb, qibla, compass, distanceKm, fmtDistance, named, kname, cityUrl, KAABA, SITE, pages: render = true }) {
+  // K07: the default page is the Living Sky one; `classic` renders the previous design (Worker only, /classic/qibla/..., noindex, canonical to the new page).
+  const layoutFor = (classic) => (o) => baseLayout(classic ? { ...o, noindex: true } : { ...o, sky: true });
   const pre = (L) => (L === 'en' ? '' : `/${L}`);
   const qUrl = (c, L = 'en') => `${pre(L)}/qibla/${c.country}/${c.slug}/`;
   const kUrl = (cc, L = 'en') => `${pre(L)}/qibla/${cc}/`;
@@ -50,7 +52,8 @@ ${Array.from({ length: 72 }, (_, i) => `<line x1="100" y1="${i % 9 === 0 ? 10 : 
 <g id="q-rose"><g transform="rotate(${q.toFixed(1)} 100 100)"><path d="M100 26 L112 104 L100 94 L88 104 Z" class="q-needle"/><rect x="92" y="18" width="16" height="16" rx="2" class="q-kaaba"/></g></g>
 <circle cx="100" cy="100" r="7" class="q-hub"/></svg>`;
 
-  function cityPage(c, L) {
+  function cityPage(c, L, classic = false) {
+    const layout = layoutFor(classic);
     const T = Q[L];
     const n = named(c, L);
     const q = qibla(c.lat, c.lon);
@@ -81,7 +84,8 @@ if(DeviceOrientationEvent.requestPermission){DeviceOrientationEvent.requestPermi
       jsonLd: [breadcrumb([[T.country(kname(c.country, L)), kUrl(c.country, L)], [n, qUrl(c, L)]]), { '@type': 'Place', name: n, geo: { '@type': 'GeoCoordinates', latitude: c.lat, longitude: c.lon }, url: `${SITE}${qUrl(c, L)}` }], body });
   }
 
-  function countryPage(cc, L) {
+  function countryPage(cc, L, classic = false) {
+    const layout = layoutFor(classic);
     const T = Q[L];
     const cities = listed.filter((c) => c.country === cc).sort((a, b) => named(a, L).localeCompare(named(b, L), L));
     const body = `<main class="wrap"><section class="hero"><h1>${esc(T.country(kname(cc, L)))}</h1></section>

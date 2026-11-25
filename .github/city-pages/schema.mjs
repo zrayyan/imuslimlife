@@ -27,9 +27,11 @@ const refIds = (v, out = new Set()) => { if (Array.isArray(v)) v.forEach((x) => 
 /** @id references (nodes that are only an @id) that no node on the page defines; [] when whole. */
 export const danglingIds = (nodes) => { const d = definedIds(nodes); return [...refIds(nodes)].filter((i) => !d.has(i)); };
 
-/** The JSON-LD <script> payload (escaped for HTML) for a list of nodes; adds the Organization when the nodes point at it and don't define it. */
+/** The JSON-LD <script> payload (escaped for HTML) for a list of nodes; adds the Organization (and the WebSite) when the nodes point at it and don't define it. */
 export function graphJson(nodes) {
-  const all = danglingIds(nodes).includes(ORG_ID) ? [organization(), ...nodes] : nodes;
+  const dangling = danglingIds(nodes);
+  // K07: a page that points at the WebSite by @id (the prayer-times hub's isPartOf) gets the node too, so no @id dangles.
+  const all = [...(dangling.includes(ORG_ID) ? [organization()] : []), ...(dangling.includes(`${SITE}/#website`) ? [website()] : []), ...nodes];
   return JSON.stringify({ '@context': 'https://schema.org', '@graph': all }).replace(/</g, '\\u003c');
 }
 
