@@ -48,14 +48,27 @@ export function loadMasjids(here) {
   return [];
 }
 
+// The iqāmah times a Masjid Connect masjid gave for one day (from the detail the loader already fetches, so no extra
+// call): { date, Fajr: 'HH:MM', ... } in the masjid's own clock, only for prayers that have one; null when none do.
+export function iqamahOf(day) {
+  if (!day?.date || !Array.isArray(day.prayers)) return null;
+  const out = { date: day.date };
+  for (const p of day.prayers) {
+    const t = /T(\d{2}:\d{2})/.exec(p?.iqamah?.at || '')?.[1];
+    if (t) out[String(p.prayer).replace(/^./, (c) => c.toUpperCase())] = t;
+  }
+  return Object.keys(out).length > 1 ? out : null;
+}
+
 // Masjid Connect: active masjids with coordinates. `get` is build.mjs's paced fetch.
 export async function loadMasjidConnect(get, api) {
   try {
     const list = (await get(`${api}/alexa/masjids`))?.data?.masjids || [];
     const out = [];
     for (const m of list) {
-      const d = (await get(`${api}/alexa/masjids/${encodeURIComponent(m.id)}`))?.data?.masjid;
-      if (d?.latitude != null) out.push({ id: d.id, name: d.name, address: d.address, city: d.city, website: d.website, phone: d.phone, lat: Number(d.latitude), lon: Number(d.longitude) });
+      const res = (await get(`${api}/alexa/masjids/${encodeURIComponent(m.id)}`))?.data;
+      const d = res?.masjid;
+      if (d?.latitude != null) out.push({ id: d.id, name: d.name, address: d.address, city: d.city, website: d.website, phone: d.phone, lat: Number(d.latitude), lon: Number(d.longitude), iqamah: iqamahOf(res.today) });
     }
     return out;
   } catch (err) {
@@ -153,8 +166,16 @@ export function buildMasjids(ctx) {
     const list = all.map((m) => ({ m, d: distanceKm(m, city) })).filter((o) => o.d <= NEAR_CITY_KM).sort((a, b) => a.d - b.d);
     if (!list.length) return null;
     const top = list[0].m;
+    // For the Living Sky city page (K04): the nearest masjids, those with today's iqāmah times from Masjid Connect first.
+    // Times only where Masjid Connect gave them; every other masjid says so, never a guess.
+    const items = list.slice(0, 40).map(({ m, d }) => {
+      const iq = m.connect?.iqamah || m.iqamah || null;
+      return { name: m.name, url: linkOf(m), dist: `${m.town ? `${m.town} · ` : ''}${fmtDist(d, city.country)}`, iq: iq ? Object.fromEntries(Object.entries(iq).filter(([k]) => k !== 'date')) : null, date: iq?.date || null };
+    });
+    const withTimes = items.filter((x) => x.iq);
     return {
       count: list.length,
+      list: [...withTimes.slice(0, 3), ...items.filter((x) => !x.iq)].slice(0, 4),
       html: `<section class="card"><h2>Masjids near ${esc(named(city))}</h2><ul class="cities">${list.slice(0, max).map(({ m, d }) => `<li><a href="${linkOf(m)}">${esc(m.name)}</a><span>${esc(m.town || '')}${m.town ? ' · ' : ''}${fmtDist(d, city.country)}</span></li>`).join('')}</ul><p class="note"><a href="${regionUrl(top.cc, top.region)}">All masjids in ${esc(regionName(top.cc, top.region))}</a> · <a href="/places/">Find a masjid near me</a></p></section>`,
     };
   };

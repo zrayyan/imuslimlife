@@ -12,6 +12,7 @@ import { buildCalendar, occurrences, eventUrl, hubUrl, HIJRI_MONTHS } from './ca
 
 import { todayText } from './today.mjs';
 import { cityPlace, graphJson } from './schema.mjs';
+import { citySkyPage } from './city-sky.mjs';
 import { header as skyHeader, footer as skyFooter } from '../sky/chrome.mjs';
 import { FONTS as SKY_FONTS_URL } from '../sky/css.mjs';
 
@@ -342,7 +343,17 @@ document.querySelectorAll('b[data-d][data-p]').forEach(function(b){var e=PTCalc.
 const calcScripts = `<script src="/prayer-times/calc.js"></script>\n<script>${CLIENT_CALC}</script>`;
 const dataScript = (data) => `<script type="application/json" id="pt-data">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`;
 
-function cityPage(city, cur, nxt, now, L, months) {
+// K04: the default city page is the Living Sky one (city-sky.mjs). `classic` renders the previous design, served by the
+// Worker only at /classic/prayer-times/... (noindex, canonical to the new page). `variant` {m, a, x} is a method choice
+// whose times the Worker has already calculated into cur/nxt (the form without JavaScript); that page is noindex too.
+const classicUrl = (c, L = 'en') => `/classic${cityUrl(c, L)}`;
+const methodName = (id, L) => LANGS[L].methods[id] || METHODS.find(([n]) => n === Number(id))?.[1] || String(id);
+// The shared event and call-to-action cards, re-classed for the sky page (they keep their own markup and links).
+const eventsSky = (city, months, L) => eventsCard(city, months, L).replace('<section class="card events">', '<section class="ct-sec">').replace('<ul>', '<ul class="ct-ev">').replace('<p class="sub">', '<p>');
+const ctaSky = (city, L) => ctaCard(city, L).replace('card cta noprint', 'ct-sec').replace('class="btns"', 'class="ct-btns"').replace('class="btn alt"', 'class="ct-btn alt"').replace('class="btn"', 'class="ct-btn"');
+const skyHelpers = { cname, named, rname, kname, mname, sep, place, clock, dateIn, hijri, monthName, cityUrl, monthUrl, countryUrl, rootUrl, qibla, compass, nearbyCities, monthLinks, langsOf, ogImage, breadcrumb, faqLd, clientWords, calcData, methodName, eventsSky, ctaSky, SITE, BEACON, get TODAY() { return TODAY; } };
+
+function cityPage(city, cur, nxt, now, L, months, opts = {}) {
   const T = LANGS[L];
   const cc = city.country;
   const n = cname(city, L);
@@ -357,6 +368,9 @@ function cityPage(city, cur, nxt, now, L, months) {
   const shown = (p) => { if (!day) return '—'; const { t, suffix } = clock(day.t[p], L); return suffix ? `${t} ${suffix}` : t; };
   const today = day && todayText({ L, name: n, method: mname(cc, L), day, prayers: T.prayers, dateLabel: dateIn(now.iso, L, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }), fmt: (s) => sayTime(s, L) });
   if (today) faq.unshift(today.faq);
+  if (!opts.classic) {
+    return citySkyPage(skyHelpers, { city, cur, nxt, now, L, months, variant: opts.variant || null, today, faq, defaults: countries[cc].params, masjids: L === 'en' ? masjidDir?.nearCity(city)?.list || null : null });
+  }
   const body = `
 <main class="wrap">
   <p class="crumbs"><a href="${rootUrl(L)}">${T.root}</a> › <a href="${countryUrl(cc, L)}">${esc(kname(cc, L))}</a> › ${esc(n)}</p>
@@ -410,7 +424,8 @@ ${calcScripts}
     title: T.city.title(named(city, L)),
     description: T.city.description(named(city, L), placeTail),
     canonical: cityUrl(city, L),
-    alternates: langsOf(cc).map((l) => [l, cityUrl(city, l)]),
+    alternates: langsOf(cc).map((l) => [l, classicUrl(city, l)]),
+    noindex: true,
     image: ogImage(city),
     jsonLd: [breadcrumb([['iMuslim Life', '/'], [T.root, rootUrl(L)], [kname(cc, L), countryUrl(cc, L)], [n, cityUrl(city, L)]]), cityPlace({ name: n, url: `${SITE}${cityUrl(city, L)}`, lat: city.lat, lon: city.lon, countryName: kname(cc, L), countryCode: cc.toUpperCase() }), faqLd(faq)],
     body,
@@ -602,5 +617,5 @@ function ramadanPage() {
 
 
 const set = (s) => { for (const k of Object.keys(s)) { if (k === 'listed') { listed = s.listed; memo.inLang.clear(); memo.countriesIn.clear(); } else if (k === 'masjidDir') masjidDir = s.masjidDir; else if (k === 'ramadan') ramadan = s.ramadan; else if (k === 'data') data = s.data; } };
-return { set, esc, key, langsOf, pre, cityUrl, monthUrl, countryUrl, countriesUrl, rootUrl, cname, named, rname, kname, mname, aname, sep, place, ogImage, hhmm, clock, cap, monthName, hijri, dateIn, todayIn, yearFor, rad, qibla, distanceKm, compass, KM, fmtDistance, inLang, countriesIn, listedCountries, footerCountries, RTL_FONT, layout, breadcrumb, faqLd, monthTable, ramadanDays, ctaCard, monthLinks, nearbyCities, CLIENT_TODAY, clientWords, calcCard, TODAY, upcoming, eventsCard, calcData, CLIENT_CALC, calcScripts, dataScript, cityPage, monthPage, countryPage, countriesPage, longDate, ramadanPage };
+return { classicUrl, set, esc, key, langsOf, pre, cityUrl, monthUrl, countryUrl, countriesUrl, rootUrl, cname, named, rname, kname, mname, aname, sep, place, ogImage, hhmm, clock, cap, monthName, hijri, dateIn, todayIn, yearFor, rad, qibla, distanceKm, compass, KM, fmtDistance, inLang, countriesIn, listedCountries, footerCountries, RTL_FONT, layout, breadcrumb, faqLd, monthTable, ramadanDays, ctaCard, monthLinks, nearbyCities, CLIENT_TODAY, clientWords, calcCard, TODAY, upcoming, eventsCard, calcData, CLIENT_CALC, calcScripts, dataScript, cityPage, monthPage, countryPage, countriesPage, longDate, ramadanPage };
 }
