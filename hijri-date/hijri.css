@@ -79,3 +79,9 @@ a{color:var(--pg-accent)}
 @media (max-width:640px){.hs-hero{padding-block:32px 48px}.hgrid{padding:10px}.hgrid ol{gap:4px}.days li{min-block-size:64px;padding:6px}.days b{font-size:17px}.days small{font-size:10px}.days i{display:none}.days .is-ev::after{content:"";position:absolute;inset-block-end:6px;inset-inline-end:6px;inline-size:6px;block-size:6px;border-radius:50%;background:var(--pg-gold)}}
 @media (prefers-reduced-motion:reduce){.mlist a{transition:none}.mlist a:hover{transform:none}}
 :lang(ur) .hs-h1,:lang(ur) .hs-big{line-height:1.6}:lang(ur) .hs-ar{margin-block-end:8px}
+/* event icons (as on the classic home page) */
+.evs .ev-row{flex-direction:row;align-items:center;gap:14px}
+.ev-tx{display:block;min-inline-size:0}.ev-tx>span{display:block;margin-block-start:2px}
+.evs .ev-ic{flex:none;display:grid;place-items:center;inline-size:48px;block-size:48px;border-radius:14px;background:var(--pg-band);font-size:26px;line-height:1}
+.days i .ev-ic{margin-inline-end:3px}
+@media (max-width:640px){.days .is-ev::after{display:none}.days li .ev-ic{display:block;font-size:14px}.days i{display:block;font-size:0}.days i .ev-ic{font-size:15px}}
