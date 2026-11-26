@@ -1,42 +1,81 @@
-/* Hijri date pages (scripts/hijri-pages): parchment and gold on the city-pages base. */
-:root { --ink: #1d1a12; --gold: #b38a2a; --vellum: #fffdf6; --vellum-2: #f6eeda; --today: #006400; }
-@media (prefers-color-scheme: dark) { :root { --ink: #f2ead2; --gold: #e2c15a; --vellum: #121a3d; --vellum-2: #0b1130; --today: #4caf50; } }
-.langs { font-size: 13px; padding: 10px 16px 0; color: var(--muted); }
-.h { gap: 20px; }
-.h > * { min-width: 0; }
-.hhead { text-align: center; padding: 30px 18px 24px; border-radius: 16px; color: var(--ink);
-  background: radial-gradient(120% 120% at 50% 0%, var(--vellum), var(--vellum-2)); border: 1px solid var(--gold);
-  box-shadow: inset 0 0 0 5px var(--vellum), inset 0 0 0 6px color-mix(in srgb, var(--gold) 55%, transparent); }
-.hhead h1 { font-family: Marcellus, Georgia, serif; font-weight: 400; font-size: clamp(22px, 4vw, 32px); }
-.hhead .ar { font-family: Amiri, serif; font-size: clamp(24px, 5vw, 34px); color: var(--gold); }
-.today-card .eyebrow { font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
-.today-card .big { font-family: Marcellus, Georgia, serif; font-size: clamp(30px, 7vw, 52px); line-height: 1.15; margin: 6px 0; }
-.today-card h1 { font-size: 16px; color: var(--muted); margin-top: 12px; font-family: inherit; }
-.hgrid { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 12px; }
-.hgrid ol { list-style: none; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
-.wd li { text-align: center; font-size: 12px; color: var(--muted); padding: 4px 0; }
-.days li { min-height: 64px; border: 1px solid var(--line); border-radius: 10px; padding: 6px; display: grid; align-content: start; gap: 2px; background: var(--paper); }
-.days li.pad { border: 0; background: none; }
-.days b { font-family: Marcellus, Georgia, serif; font-size: 20px; font-weight: 400; color: var(--ink); }
-.days small { font-size: 11px; color: var(--muted); }
-.days i { font-style: normal; font-size: 11px; line-height: 1.25; color: var(--gold-dark); font-weight: 600; overflow-wrap: anywhere; }
-.days .is-ev { background: var(--gold-soft); border-color: var(--gold); }
-.days .is-fri b { color: var(--green); }
-.days .is-today { box-shadow: 0 0 0 2px var(--today); }
-.more { text-align: end; }
-.evs { list-style: none; display: grid; gap: 10px; }
-.conv label { display: grid; gap: 6px; max-width: 320px; }
-.conv input { min-height: 44px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; font: inherit; background: var(--paper); color: var(--text); }
-.conv output { display: block; margin-top: 12px; font-family: Marcellus, Georgia, serif; font-size: 24px; }
-.faq details { border-top: 1px solid var(--line); padding: 10px 0; }
-.faq summary { cursor: pointer; font-weight: 500; min-height: 32px; }
-.faq p { margin-top: 6px; color: var(--muted); }
-.mlist { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
-.mlist a { display: grid; grid-template-columns: 36px 1fr; gap: 0 10px; padding: 14px; border-radius: 12px; background: var(--paper); border: 1px solid var(--line); text-decoration: none; color: var(--text); }
-.mlist a:hover { border-color: var(--gold); }
-.mlist b { grid-row: span 3; align-self: center; text-align: center; font-family: Marcellus, serif; color: var(--gold-dark); }
-.mlist .ar { font-family: Amiri, serif; font-size: 20px; }
-.mlist small { color: var(--muted); }
-.pn { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-.pn a, .pn b { min-height: 44px; display: inline-flex; align-items: center; padding: 0 16px; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); text-decoration: none; }
-@media (max-width: 560px) { .days li { min-height: 52px; padding: 4px; } .days b { font-size: 16px; } .days small { font-size: 10px; } }
+/* Hijri date pages in the Living Sky (task K11). Sky tokens only: --sky-* for the band at the top, --pg-* for the
+   page, so the day page shows for Dhuhr and Asr and the night page for the rest. Logical properties: RTL needs nothing more.
+   The previous design is hijri-classic.css (/classic/hijri-date/). */
+body{margin:0;background:var(--pg-bg);color:var(--pg-ink);font:400 16px/1.6 var(--sans);-webkit-text-size-adjust:100%}
+*,*::before,*::after{box-sizing:border-box}
+a{color:var(--pg-accent)}
+:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+.hs-wrap{max-inline-size:1160px;margin-inline:auto;padding-inline:24px}
+
+/* the sky band */
+.hs-sky{background:var(--sky-bg);color:var(--sky-ink)}
+.hs-sky a{color:var(--sky-ink)}
+.hs-hero{padding-block:44px 64px;text-align:center}
+.hs-crumbs{text-align:start;font-size:14px;color:var(--sky-soft);margin-block-end:24px}
+.hs-crumbs a{color:var(--sky-soft);text-decoration:none}
+.hs-crumbs a:hover,.hs-crumbs span:last-child{color:var(--sky-ink)}
+.hs-eb{margin:0;font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--sky-accent)}
+.hs-big{margin:10px 0 0;font-family:var(--serif);font-weight:400;font-size:clamp(40px,8vw,76px);line-height:1.08}
+.hs-ar{margin:10px 0 0;font-family:Amiri,serif;font-size:clamp(28px,5vw,44px);line-height:1.6;color:var(--sky-accent)}
+.hs-h1{margin:4px 0 0;font-family:var(--serif);font-weight:400;font-size:clamp(34px,6vw,58px);line-height:1.1}
+.hs-lead{margin:12px 0 0;font-size:18px;color:var(--sky-soft)}
+.hs-small{margin:22px 0 0;font:500 15px var(--sans);color:var(--sky-soft)}
+.hs-years{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-block-start:26px}
+.hs-years a,.hs-years b{display:inline-flex;align-items:center;min-block-size:44px;padding-inline:18px;border-radius:999px;border:1px solid var(--sky-line);text-decoration:none;font-weight:600}
+.hs-years b{background:var(--sky-accent);color:var(--sky-on);border-color:transparent}
+
+/* the page */
+.hs-main{padding-block:48px 96px;display:flex;flex-direction:column;gap:24px}
+.hs-row{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.hs-col2{flex:999 1 560px;min-inline-size:0}
+.hs-col1{flex:1 1 300px;display:flex;flex-direction:column;gap:24px;min-inline-size:0}
+.hs-more{margin:12px 0 0;text-align:end}
+.hs-more a{font-weight:600;text-decoration:none}
+.hs-note{margin:8px 0 0;font-size:14px;color:var(--pg-soft);text-align:center}
+.card{padding:26px;border-radius:22px;background:var(--pg-card);border:1px solid var(--pg-line)}
+.card h2{margin:0 0 14px;font-family:var(--serif);font-weight:400;font-size:24px}
+
+/* a month as a grid */
+.hgrid{padding:18px;border-radius:22px;background:var(--pg-card);border:1px solid var(--pg-line)}
+.hgrid ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.wd li{padding-block:4px 10px;text-align:center;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--pg-soft)}
+.days li{position:relative;display:flex;flex-direction:column;gap:2px;min-block-size:84px;padding:10px;border-radius:14px;background:var(--pg-band);overflow:hidden}
+.days li.pad{background:transparent}
+.days b{font-family:var(--serif);font-weight:400;font-size:22px;line-height:1}
+.days small{font-size:12px;color:var(--pg-soft)}
+.days i{font-style:normal;font-size:11px;line-height:1.3;color:var(--pg-gold);font-weight:600}
+.days .is-fri{box-shadow:inset 0 0 0 1px var(--pg-line)}
+.days .is-ev{box-shadow:inset 0 0 0 1px var(--pg-gold)}
+.days .is-today{background:var(--pg-accent);color:var(--pg-on)}
+.days .is-today small,.days .is-today i{color:inherit;opacity:.9}
+
+/* year: twelve months */
+.mlist{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.mlist a{position:relative;display:flex;flex-direction:column;gap:4px;min-block-size:150px;padding:22px;border-radius:20px;background:var(--pg-card);border:1px solid var(--pg-line);color:var(--pg-ink);text-decoration:none;transition:border-color .2s,transform .2s}
+.mlist a:hover{border-color:var(--pg-gold);transform:translateY(-2px)}
+.mlist b{font-family:var(--serif);font-weight:400;font-size:14px;color:var(--pg-gold)}
+.mlist span{font-family:var(--serif);font-size:22px}
+.mlist .ar{position:absolute;inset-block-start:16px;inset-inline-end:20px;font-family:Amiri,serif;font-size:24px;color:var(--pg-gold)}
+.mlist small{margin-block-start:auto;font-size:13px;color:var(--pg-soft)}
+
+/* converter, events, questions */
+.conv label{display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--pg-soft)}
+.conv input{min-block-size:48px;padding-inline:14px;border-radius:14px;border:1px solid var(--pg-line);background:var(--pg-bg);color:var(--pg-ink);font:16px var(--sans);color-scheme:light dark}
+.conv output{display:block;margin-block-start:14px;font-family:var(--serif);font-size:24px}
+.conv output a{text-decoration:none}
+.evs{list-style:none;margin:0;padding:0}
+.evs li{display:flex;flex-direction:column;gap:2px;padding-block:12px;border-block-end:1px solid var(--pg-line)}
+.evs li:last-child{border-block-end:0}
+.evs b{font-weight:600}
+.evs b a{color:var(--pg-ink);text-decoration:none}
+.evs span,.evs small{font-size:14px;color:var(--pg-soft)}
+.faq details{border-block-end:1px solid var(--pg-line)}
+.faq details:last-child{border-block-end:0}
+.faq summary{display:flex;align-items:center;min-block-size:52px;cursor:pointer;font-weight:600}
+.faq p{margin:0 0 16px;color:var(--pg-soft)}
+.hs-pn{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hs-pn a{display:inline-flex;align-items:center;min-block-size:44px;font-weight:600;text-decoration:none}
+
+@media (max-width:640px){.hs-hero{padding-block:32px 48px}.hgrid{padding:10px}.hgrid ol{gap:4px}.days li{min-block-size:64px;padding:6px}.days b{font-size:17px}.days small{font-size:10px}.days i{display:none}.days .is-ev::after{content:"";position:absolute;inset-block-end:6px;inset-inline-end:6px;inline-size:6px;block-size:6px;border-radius:50%;background:var(--pg-gold)}}
+@media (prefers-reduced-motion:reduce){.mlist a{transition:none}.mlist a:hover{transform:none}}
+:lang(ur) .hs-h1,:lang(ur) .hs-big{line-height:1.6}:lang(ur) .hs-ar{margin-block-end:8px}
