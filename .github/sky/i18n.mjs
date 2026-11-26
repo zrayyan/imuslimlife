@@ -23,14 +23,14 @@ const T = {
 };
 // Navigation labels added in K02 (the full header and footer). Machine-translated except en; flagged for native review in the PR.
 const NAVT = {
-  en: { more: 'More', moreLabel: 'More pages', alexaSkill: 'Alexa', mobile: 'Mobile app', agentsNav: 'AI Agents', mihrab: 'Mihrab for Masjids', support: 'Support & FAQ', cities: 'Cities', appCol: 'The app' },
-  ar: { more: 'المزيد', moreLabel: 'صفحات أخرى', alexaSkill: 'أليكسا', mobile: 'تطبيق الجوال', agentsNav: 'وكلاء الذكاء الاصطناعي', mihrab: 'محراب للمساجد', support: 'الدعم والأسئلة الشائعة', cities: 'المدن', appCol: 'التطبيق' },
-  ur: { more: 'مزید', moreLabel: 'مزید صفحات', alexaSkill: 'الیکسا', mobile: 'موبائل ایپ', agentsNav: 'اے آئی ایجنٹس', mihrab: 'مساجد کے لیے محراب', support: 'مدد اور اکثر پوچھے گئے سوالات', cities: 'شہر', appCol: 'ایپ' },
-  fr: { more: 'Plus', moreLabel: 'Autres pages', alexaSkill: 'Alexa', mobile: 'Application mobile', agentsNav: 'Agents IA', mihrab: 'Mihrab pour mosquées', support: 'Aide et FAQ', cities: 'Villes', appCol: 'L’application' },
-  es: { more: 'Más', moreLabel: 'Más páginas', alexaSkill: 'Alexa', mobile: 'App móvil', agentsNav: 'Agentes de IA', mihrab: 'Mihrab para mezquitas', support: 'Ayuda y preguntas', cities: 'Ciudades', appCol: 'La app' },
-  id: { more: 'Lainnya', moreLabel: 'Halaman lainnya', alexaSkill: 'Alexa', mobile: 'Aplikasi seluler', agentsNav: 'Agen AI', mihrab: 'Mihrab untuk Masjid', support: 'Bantuan & FAQ', cities: 'Kota', appCol: 'Aplikasi' },
-  tr: { more: 'Daha fazla', moreLabel: 'Diğer sayfalar', alexaSkill: 'Alexa', mobile: 'Mobil uygulama', agentsNav: 'Yapay zekâ ajanları', mihrab: 'Camiler için Mihrab', support: 'Destek ve SSS', cities: 'Şehirler', appCol: 'Uygulama' },
-  ms: { more: 'Lagi', moreLabel: 'Halaman lain', alexaSkill: 'Alexa', mobile: 'Aplikasi mudah alih', agentsNav: 'Ejen AI', mihrab: 'Mihrab untuk Masjid', support: 'Sokongan & Soalan Lazim', cities: 'Bandar', appCol: 'Aplikasi' },
+  en: { more: 'More', moreLabel: 'More pages', alexaSkill: 'Alexa', mobile: 'Mobile app', agentsNav: 'AI Agents', mihrab: 'Mihrab for Masjids', support: 'Support & FAQ', cities: 'Cities', appCol: 'The app', volunteerNav: 'Volunteer' },
+  ar: { more: 'المزيد', moreLabel: 'صفحات أخرى', alexaSkill: 'أليكسا', mobile: 'تطبيق الجوال', agentsNav: 'وكلاء الذكاء الاصطناعي', mihrab: 'محراب للمساجد', support: 'الدعم والأسئلة الشائعة', cities: 'المدن', appCol: 'التطبيق', volunteerNav: 'تطوّع معنا' },
+  ur: { more: 'مزید', moreLabel: 'مزید صفحات', alexaSkill: 'الیکسا', mobile: 'موبائل ایپ', agentsNav: 'اے آئی ایجنٹس', mihrab: 'مساجد کے لیے محراب', support: 'مدد اور اکثر پوچھے گئے سوالات', cities: 'شہر', appCol: 'ایپ', volunteerNav: 'رضاکار بنیں' },
+  fr: { more: 'Plus', moreLabel: 'Autres pages', alexaSkill: 'Alexa', mobile: 'Application mobile', agentsNav: 'Agents IA', mihrab: 'Mihrab pour mosquées', support: 'Aide et FAQ', cities: 'Villes', appCol: 'L’application', volunteerNav: 'Bénévolat' },
+  es: { more: 'Más', moreLabel: 'Más páginas', alexaSkill: 'Alexa', mobile: 'App móvil', agentsNav: 'Agentes de IA', mihrab: 'Mihrab para mezquitas', support: 'Ayuda y preguntas', cities: 'Ciudades', appCol: 'La app', volunteerNav: 'Voluntariado' },
+  id: { more: 'Lainnya', moreLabel: 'Halaman lainnya', alexaSkill: 'Alexa', mobile: 'Aplikasi seluler', agentsNav: 'Agen AI', mihrab: 'Mihrab untuk Masjid', support: 'Bantuan & FAQ', cities: 'Kota', appCol: 'Aplikasi', volunteerNav: 'Relawan' },
+  tr: { more: 'Daha fazla', moreLabel: 'Diğer sayfalar', alexaSkill: 'Alexa', mobile: 'Mobil uygulama', agentsNav: 'Yapay zekâ ajanları', mihrab: 'Camiler için Mihrab', support: 'Destek ve SSS', cities: 'Şehirler', appCol: 'Uygulama', volunteerNav: 'Gönüllü ol' },
+  ms: { more: 'Lagi', moreLabel: 'Halaman lain', alexaSkill: 'Alexa', mobile: 'Aplikasi mudah alih', agentsNav: 'Ejen AI', mihrab: 'Mihrab untuk Masjid', support: 'Sokongan & Soalan Lazim', cities: 'Bandar', appCol: 'Aplikasi', volunteerNav: 'Sukarelawan' },
 };
 const MERGED = Object.fromEntries(LANGS.map((l) => [l, { ...T.en, ...NAVT.en, ...T[l], ...NAVT[l] }]));
 export const t = (lang) => MERGED[lang] || MERGED.en;

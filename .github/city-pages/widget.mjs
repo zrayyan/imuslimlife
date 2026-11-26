@@ -134,7 +134,7 @@ export function builderBody() {
     <h2>Questions</h2>
     <details><summary>Does it cost anything?</summary><p>No. The widget is free, has no ads and needs no account.</p></details>
     <details><summary>Does it update by itself?</summary><p>Yes. It shows today's times every day, with the next prayer and a countdown, in the city's time zone.</p></details>
-    <details><summary>Can it show our iqamah times?</summary><p>Not yet. Masjids that join Masjid Connect can publish their iqamah and Jumu'ah times for the Muslim Companion Alexa skill; email info@yzinfotech.com.</p></details>
+    <details><summary>Can it show our iqamah times?</summary><p>Not yet. Masjids that join Masjid Connect can publish their iqamah and Jumu'ah times for the Muslim Companion Alexa skill; email support@imuslimlife.com.</p></details>
   </section>
 </main>
 <script>

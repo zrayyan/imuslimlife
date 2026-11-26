@@ -12,7 +12,7 @@ export const organizationLd = (SITE) => ({
   name: 'iMuslim Life',
   url: `${SITE}/`,
   logo: `${SITE}/logo512.png`,
-  email: 'info@yzinfotech.com',
+  email: 'support@imuslimlife.com',
   sameAs: [APP_STORE, PLAY, ALEXA],
 });
 
@@ -65,7 +65,7 @@ export function aboutPages({ layout, esc, breadcrumb, countries, listed, SITE })
   </section>
   <section class="card">
     <h2>Contact</h2>
-    <p>Corrections, a masjid to add or a question: <a href="mailto:info@yzinfotech.com">info@yzinfotech.com</a>. We read every message.</p>
+    <p>Corrections, a masjid to add or a question: <a href="mailto:support@imuslimlife.com">support@imuslimlife.com</a>. We read every message.</p>
   </section>
 </main>`,
   });
@@ -110,7 +110,7 @@ export function aboutPages({ layout, esc, breadcrumb, countries, listed, SITE })
   </section>
   <section class="card">
     <h2>Your masjid's timetable comes first</h2>
-    <p>Calculated times can differ from a masjid's printed timetable by a few minutes, because masjids add safety margins or follow a local committee. For congregation, follow your masjid. If a time here looks wrong, email <a href="mailto:info@yzinfotech.com">info@yzinfotech.com</a> with the city and date and we will check it.</p>
+    <p>Calculated times can differ from a masjid's printed timetable by a few minutes, because masjids add safety margins or follow a local committee. For congregation, follow your masjid. If a time here looks wrong, email <a href="mailto:support@imuslimlife.com">support@imuslimlife.com</a> with the city and date and we will check it.</p>
   </section>
 </main>`,
   });

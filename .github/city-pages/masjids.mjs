@@ -303,9 +303,9 @@ export function buildMasjids(ctx) {
   ${close.length ? `<section class="card"><h2>Masjids nearby</h2><ul class="cities">${close.map(({ x, d: dist }) => `<li><a href="${linkOf(x)}">${esc(x.name)}</a><span>${esc(x.town || '')}${x.town ? ' · ' : ''}${fmtDist(dist, m.cc)}</span></li>`).join('')}</ul></section>` : ''}
   <section class="card">
     ${m.connect
-    ? `<h2>Masjid staff</h2><p>${esc(m.name)} is on Masjid Connect. Staff update its times and announcements at <a href="https://alexa.imuslimlife.com/masjid/manage" rel="noopener">alexa.imuslimlife.com</a>. Something wrong? <a href="mailto:info@yzinfotech.com?subject=${encodeURIComponent(`Correction: ${m.name}`)}">Tell us</a>.</p>`
+    ? `<h2>Masjid staff</h2><p>${esc(m.name)} is on Masjid Connect. Staff update its times and announcements at <a href="https://alexa.imuslimlife.com/masjid/manage" rel="noopener">alexa.imuslimlife.com</a>. Something wrong? <a href="mailto:support@imuslimlife.com?subject=${encodeURIComponent(`Correction: ${m.name}`)}">Tell us</a>.</p>`
     : `<h2>Is this your masjid?</h2>
-    <p>Add your iqamah and Jumu&rsquo;ah times, announcements and Alexa reminders on Masjid Connect, free. Something wrong here? ${osmEdit ? `Fix it on <a href="${osmEdit}" rel="noopener nofollow">OpenStreetMap</a> (this page follows it) or ` : ''}<a href="mailto:info@yzinfotech.com?subject=${encodeURIComponent(`Correction: ${m.name}`)}">tell us</a>.</p>
+    <p>Add your iqamah and Jumu&rsquo;ah times, announcements and Alexa reminders on Masjid Connect, free. Something wrong here? ${osmEdit ? `Fix it on <a href="${osmEdit}" rel="noopener nofollow">OpenStreetMap</a> (this page follows it) or ` : ''}<a href="mailto:support@imuslimlife.com?subject=${encodeURIComponent(`Correction: ${m.name}`)}">tell us</a>.</p>
     <p class="btns"><a class="btn" href="${esc(claimUrl)}">Claim this masjid</a></p>`}
   </section>
 </main>

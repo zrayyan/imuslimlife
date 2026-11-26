@@ -49,7 +49,7 @@ const COLS = (s) => [
   [s.find, [[s.places, '/places/'], [s.atlas, '/places/world/'], [s.addMasjid, '/mobile-app/']]],
   [s.masjidsCol, [[s.mihrab, '/mihrab/'], [s.claim, '/mihrab/']]],
   [s.builders, [[s.agentsNav, '/ai-agents/'], [s.api, '/api/']]],
-  [s.appCol, [[s.mobile, '/mobile-app/'], [s.support, '/faq-support/']]],
+  [s.appCol, [[s.mobile, '/mobile-app/'], [s.support, '/faq-support/'], [s.volunteerNav, '/volunteer/']]],
 ];
 
 /** @param {{lang?:string, path?:string, year?:number, hrefs?:Record<string,string>, languages?:boolean}} o path: this page's path, for the language links; hrefs: the page's own URL per language (static pages whose languages live at other paths, e.g. the city pages), and only those languages are listed */

@@ -77,5 +77,5 @@ Most places start from OpenStreetMap (ODbL), which volunteers keep current. Othe
 ## Policies and contact
 
 - [Privacy Policy](https://imuslimlife.com/privacy-policy/), [Terms of Use](https://alexa.imuslimlife.com/terms), [FAQ and support](https://imuslimlife.com/faq-support/).
-- Contact: info@yzinfotech.com
+- Contact: support@imuslimlife.com
 - Examples: https://imuslimlife.com/privacy-policy/ https://imuslimlife.com/faq-support/ https://imuslimlife.com/about/
