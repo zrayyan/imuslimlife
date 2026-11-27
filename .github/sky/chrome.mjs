@@ -61,6 +61,6 @@ export function footer({ lang = 'en', path = '/', year = new Date().getUTCFullYe
 <div class="sk-foot-top"><div class="sk-about"><span class="sk-logo-static">${MARK}<span>iMuslim Life</span></span><p>${esc(s.tag)}</p></div>
 <nav class="sk-cols" aria-label="${esc(s.site)}">${cols}</nav></div>
 ${languages ? `<nav class="sk-langs" aria-label="${esc(s.langs)}">${langs}</nav>` : ''}
-<div class="sk-legal"><span>© ${year} iMuslim Life</span><span class="sk-legal-links"><a href="/privacy-policy/">${esc(s.privacy)}</a><a href="/terms/">${esc(s.terms)}</a><a href="/faq-support/">${esc(s.contact)}</a></span></div>
+<div class="sk-legal"><span>© ${year} iMuslim Life</span><span class="sk-legal-links"><a href="/privacy-policy/">${esc(s.privacy)}</a><a href="/terms/">${esc(s.terms)}</a><a href="/faq-support/">${esc(s.contact)}</a><a href="/status/">Status</a></span></div>
 </div></footer>`;
 }

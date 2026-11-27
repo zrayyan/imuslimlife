@@ -7,7 +7,7 @@
 <title>The Mihrab Screen</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Amiri:wght@400;700&family=Jost:wght@300;400;500&display=swap">
 <style>
-/* Layout: a fixed 1920×1080 TV stage, scaled to fit; scenes cross-fade inside it. Single deliberate night look. */
+/* Layout: a fixed 1920×1080 TV stage, scaled to fit; scenes cross-fade inside it. Six looks, as the TV draws them (dashboard lib/mihrabLooks.ts); ?look=<id> picks one. */
 :root{
   --ink:#070b14; --lapis:#0d1830; --lapis2:#14244a;
   --gold:#d9b46a; --gold-hi:#f6dfa4; --gold-lo:#8a6a33;
@@ -24,6 +24,10 @@ body{margin:0;background:var(--ink);color:var(--ivory);font-family:var(--ui);pad
 .bar button[aria-pressed="true"]{background:var(--gold);color:#1a1205;border-color:var(--gold)}
 .bar button:focus-visible{outline:2px solid var(--gold-hi);outline-offset:2px}
 .note{font-size:13px;color:var(--mist);margin:0}
+.bar.looks button{display:inline-flex;align-items:center;gap:8px}
+.bar.looks i{width:14px;height:14px;border-radius:50%;box-shadow:0 0 0 1px #ffffff40}
+.bar .lbl{font:500 12px var(--ui);letter-spacing:.2em;text-transform:uppercase;color:var(--mist);margin-right:4px}
+/* stage (look colours are mapped from here on) */
 .tvbox{width:100%;aspect-ratio:16/9;max-width:100%;position:relative;border-radius:10px;overflow:hidden;box-shadow:0 0 0 1px #1d2742,0 30px 80px #0009}
 .stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;
   background:radial-gradient(1200px 700px at 50% 115%,#2a2140 0%,transparent 60%),radial-gradient(900px 600px at 50% -10%,var(--lapis2),transparent 70%),linear-gradient(var(--lapis),var(--ink));}
@@ -108,7 +112,7 @@ body{margin:0;background:var(--ink);color:var(--ivory);font-family:var(--ui);pad
 .amt{font:500 92px var(--display);color:var(--gold-hi);font-variant-numeric:tabular-nums;margin-top:26px}
 .amt small{font-size:36px;color:var(--mist)}
 .qr{display:flex;gap:24px;align-items:center;margin-top:30px;font:400 24px var(--ui);color:var(--ivory)}
-.qr canvas{width:150px;height:150px;border-radius:14px;background:var(--ivory);padding:12px}
+.qr canvas{width:150px;height:150px;border-radius:14px;background:#f8f4ea;padding:12px}
 /* notice */
 .notice{height:100%;display:grid;grid-template-columns:1fr 400px;gap:60px;align-items:center}
 .datecard{border:1px solid var(--gold);border-radius:200px 200px 26px 26px;padding:70px 30px 44px;text-align:center;background:linear-gradient(#d9b46a22,transparent)}
@@ -146,7 +150,8 @@ body{margin:0;background:var(--ink);color:var(--ivory);font-family:var(--ui);pad
     <button data-s="ramadan">Ramadan</button>
     <button id="auto" aria-pressed="true">Auto-rotate</button>
   </div>
-  <p class="note">A live preview of Mihrab at 1920×1080. Names, times and amounts are examples. Screens change by themselves, like on a masjid TV; pick one to hold it.</p>
+  <div class="bar looks" role="toolbar" aria-label="Looks" id="looks"><span class="lbl">Look</span></div>
+  <p class="note">A live preview of Mihrab at 1920×1080. Try each of the six looks; you choose one for your masjid in the dashboard. Names, times and amounts are examples. Screens change by themselves, like on a masjid TV; pick one to hold it.</p>
   <div class="tvbox" id="tv"><div class="stage" id="stage">
     <canvas id="stars"></canvas><div class="girih"></div>
 
@@ -168,12 +173,12 @@ body{margin:0;background:var(--ink);color:var(--ivory);font-family:var(--ui);pad
             <clipPath id="band"><path d="M40 700V330C40 150 200 40 360 6c160 34 320 144 320 324v370h-46V334C634 182 500 86 360 54 220 86 86 182 86 334v366z"/></clipPath>
           </defs>
           <ellipse cx="360" cy="420" rx="340" ry="330" fill="url(#glow)"/>
-          <path d="M40 700V330C40 150 200 40 360 6c160 34 320 144 320 324v370" fill="none" stroke="url(#gg)" stroke-width="3"/>
-          <rect width="720" height="700" fill="url(#fil)" clip-path="url(#band)"/>
-          <path d="M86 700V334C86 182 220 86 360 54c140 32 274 128 274 280v366" fill="none" stroke="url(#gg)" stroke-width="2"/>
-          <path d="M120 700V350C120 220 240 130 360 104c120 26 240 116 240 246v350" fill="#070b14" fill-opacity=".55" stroke="#d9b46a" stroke-opacity=".5" stroke-width="1.2"/>
-          <path id="fillArc" d="M120 700V350C120 220 240 130 360 104c120 26 240 116 240 246v350" fill="none" stroke="#f6dfa4" stroke-width="4" stroke-linecap="round" stroke-dasharray="1800" stroke-dashoffset="1800" style="filter:drop-shadow(0 0 10px #f6c46a)"/>
-          <g fill="#d9b46a"><circle cx="360" cy="6" r="6"/><path d="M360 -40c-12 10-12 26 0 34 12-8 12-24 0-34z"/></g>
+          <path class="a-out" d="M40 700V330C40 150 200 40 360 6c160 34 320 144 320 324v370" fill="none" stroke="url(#gg)" stroke-width="3"/>
+          <rect class="orig" width="720" height="700" fill="url(#fil)" clip-path="url(#band)"/>
+          <path class="a-mid" d="M86 700V334C86 182 220 86 360 54c140 32 274 128 274 280v366" fill="none" stroke="url(#gg)" stroke-width="2"/>
+          <path class="a-in" d="M120 700V350C120 220 240 130 360 104c120 26 240 116 240 246v350" fill="#070b14" fill-opacity=".55" stroke="#d9b46a" stroke-opacity=".5" stroke-width="1.2"/>
+          <path id="fillArc" pathLength="1800" d="M120 700V350C120 220 240 130 360 104c120 26 240 116 240 246v350" fill="none" stroke="#f6dfa4" stroke-width="4" stroke-linecap="round" stroke-dasharray="1800" stroke-dashoffset="1800" style="filter:drop-shadow(0 0 10px #f6c46a)"/>
+          <g class="orig" fill="#d9b46a"><circle cx="360" cy="6" r="6"/><path d="M360 -40c-12 10-12 26 0 34 12-8 12-24 0-34z"/></g>
           <g stroke="#d9b46a" stroke-opacity=".6" fill="none"><path d="M60 700V600M660 700V600"/><circle cx="63" cy="590" r="9"/><circle cx="657" cy="590" r="9"/></g>
         </svg>
         <div class="mi-in">
@@ -275,6 +280,37 @@ btns.forEach(b=>b.onclick=()=>{show(b.dataset.s);auto=false;document.getElementB
 document.getElementById('auto').onclick=e=>{auto=!auto;e.target.setAttribute('aria-pressed',auto)};
 setInterval(()=>{if(!auto)return;tick++;document.getElementById('prog').style.width=(tick/(DUR*4)*100)+'%';if(tick>=DUR*4)show(order[(order.indexOf(cur)+1)%order.length])},250);
 show('main');requestAnimationFrame(loop);
+// looks: swap Samarkand's colours for the chosen look's, in the stage CSS and SVG only
+const LOOKS=[
+ ['samarkand','Samarkand Lapis',0,'pointed',{bg:'#070b14',text:'#efe6d2',muted:'#9aa6bf',accent:'#d9b46a',hi:'#f6dfa4',fill:'#0d1830'}],
+ ['alhambra','Alhambra Dawn',1,'horseshoe',{bg:'#f2ead9',text:'#2a1d14',muted:'#6e5a48',accent:'#a4471f',hi:'#1d5f5b',fill:'#e9dcc3'}],
+ ['iznik','Iznik Tile',1,'keel',{bg:'#f6f6f1',text:'#13224f',muted:'#4f5c80',accent:'#1b3a8c',hi:'#b5332a',fill:'#eef1f8'}],
+ ['emerald','Madinah Emerald',0,'dome',{bg:'#05201a',text:'#eef3ea',muted:'#93ad9f',accent:'#c9ad6b',hi:'#f1e2b3',fill:'#0b3328'}],
+ ['kiswa','Kiswa Night',0,'pointed-tall',{bg:'#0b0a08',text:'#efe4c8',muted:'#9b9078',accent:'#c9a24a',hi:'#e9cd84',fill:'#12100c'}],
+ ['marble','Mughal Marble',1,'multifoil',{bg:'#f3f0ea',text:'#2b2420',muted:'#6d625a',accent:'#9a3a2a',hi:'#2f6b4f',fill:'#ece7de'}]];
+function archPath(k){switch(k){case'horseshoe':return'M14,140 V72 A40,40 0 1 1 86,72 V140';case'keel':return'M6,140 V66 C6,42 38,40 50,4 C62,40 94,42 94,66 V140';case'dome':return'M6,140 V58 A44,44 0 0 1 94,58 V140';case'pointed-tall':return'M10,140 V56 Q10,18 50,2 Q90,18 90,56 V140';
+ case'multifoil':{const cx=50,cy=60,R=44,n=7;let d=`M6,140 V${cy}`;for(let i=0;i<n;i++){const a=Math.PI-(i+1)*Math.PI/n,r=(R*Math.PI/n)/1.7;d+=` A${r},${r} 0 0 1 ${(cx+R*Math.cos(a)).toFixed(2)},${(cy-R*Math.sin(a)*1.15).toFixed(2)}`}return d+' V140'}default:return'M6,140 V62 Q6,22 50,4 Q94,22 94,62 V140'}}
+const css=document.querySelector('style'),CSS0=css.textContent,cut=CSS0.indexOf('/* stage');
+const svgs=[...st.querySelectorAll('svg')],ATTR=['fill','stroke','stop-color','style'],orig=new Map();
+svgs.forEach(g=>g.querySelectorAll('*').forEach(e=>ATTR.forEach(a=>{if(e.hasAttribute(a))orig.set(e,{...orig.get(e),[a]:e.getAttribute(a)})})));
+const arch=[...st.querySelectorAll('.a-out,.a-mid,.a-in,#fillArc')],archD=arch.map(e=>e.getAttribute('d'));
+const BOX=[[40,0,640,700],[86,48,548,652],[120,104,480,596]];
+function mix(a,b,t){const p=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16));const x=p(a),y=p(b);return'#'+x.map((v,i)=>Math.round(v+(y[i]-v)*t).toString(16).padStart(2,'0')).join('')}
+function applyLook(id){const L=LOOKS.find(l=>l[0]==id)||LOOKS[0],c=L[4],light=L[2];
+ const M=[['#070b14',c.bg],['#03050b',c.bg],['#0d1830',c.fill],['#14244a',mix(c.fill,c.accent,.12)],['#2a2140',mix(c.bg,c.accent,.18)],['#0a1226',c.fill],['#141f3d',mix(c.fill,c.accent,.1)],
+  ['#d9b46a',c.accent],['#f6dfa4',c.hi],['#8a6a33',mix(c.accent,c.bg,.45)],['#efe6d2',c.text],['#9aa6bf',c.muted],['#f6c46a',light?c.accent:'#f6c46a'],['#fff6d6',light?c.hi:'#fff6d6'],['#1a1205',light?c.bg:'#1a1205'],['#ffffff08',light?'#ffffff99':'#ffffff08']];
+ const map=t=>M.reduce((s,[a,b])=>s.split(a).join(b).split('%23'+a.slice(1)).join('%23'+b.slice(1)),t);
+ css.textContent=CSS0.slice(0,cut)+':root{--ink:#070b14}#stage{--ink:'+c.bg+';--lapis:'+c.fill+';--lapis2:'+mix(c.fill,c.accent,.12)+';--gold:'+c.accent+';--gold-hi:'+c.hi+';--gold-lo:'+mix(c.accent,c.bg,.45)+';--ivory:'+c.text+';--mist:'+c.muted+';color:'+c.text+';color-scheme:'+(light?'light':'dark')+'}'+map(CSS0.slice(cut));
+ orig.forEach((v,e)=>Object.entries(v).forEach(([a,x])=>e.setAttribute(a,map(x))));
+ sc.style.opacity=light?0:1;
+ const own=L[0]=='samarkand';st.querySelectorAll('.orig').forEach(e=>e.style.display=own?'':'none');
+ arch.forEach((e,i)=>{if(own){e.setAttribute('d',archD[i]);e.removeAttribute('transform');e.removeAttribute('vector-effect');return}
+  const[x,y,w,h]=BOX[Math.min(i,2)];e.setAttribute('d',archPath(L[3]));e.setAttribute('transform',`translate(${x},${y}) scale(${w/100},${h/140})`);e.setAttribute('vector-effect','non-scaling-stroke')});
+ document.querySelectorAll('#looks button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.l==L[0]));
+ try{const u=new URL(location);u.searchParams.set('look',L[0]);history.replaceState(null,'',u)}catch(e){}}
+const lb=document.getElementById('looks');
+LOOKS.forEach(L=>{const b=document.createElement('button');b.dataset.l=L[0];b.innerHTML=`<i style="background:linear-gradient(135deg,${L[4].bg} 50%,${L[4].accent} 50%)"></i>${L[1]}`;b.onclick=()=>{applyLook(L[0]);show(cur)};lb.appendChild(b)});
+applyLook(new URLSearchParams(location.search).get('look')||'samarkand');
 </script>
 </body>
 </html>
