@@ -54,6 +54,7 @@ html:not([data-sky]) .du-now[data-for=dhuhr],[data-sky=fajr] .du-now[data-for=fa
 .du-appcard{flex:1 1 340px;display:flex;flex-direction:column;justify-content:center;gap:8px;min-block-size:200px;padding:32px;border-radius:24px;background:var(--pg-band);border:1px solid var(--pg-line);color:var(--pg-soft);text-decoration:none}
 .du-appcard .du-serif{font-size:24px;color:var(--pg-ink)}
 .du-appcard b{color:var(--pg-accent);font-weight:600}
+.du-niyyah{background:linear-gradient(160deg,#10204A,#1B2F6B);border-color:#2B417F;color:#D7DDF0;min-block-size:0}.du-niyyah .du-serif{color:#F6EFD9}.du-niyyah b{color:#E2C27A}.du-niyyah .du-eb{margin:0;color:#E2C27A}
 .du-top{padding-block:40px 60px}
 .du-crumbs{font-size:14px;color:var(--sky-soft);margin-block-end:20px}
 .du-crumbs a{text-decoration:none;color:var(--sky-soft)}
