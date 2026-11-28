@@ -13,6 +13,7 @@ import { buildCalendar, occurrences, eventUrl, hubUrl, HIJRI_MONTHS } from './ca
 import { todayText } from './today.mjs';
 import { cityPlace, graphJson } from './schema.mjs';
 import { citySkyPage } from './city-sky.mjs';
+import { hubFacts } from './hub-facts.mjs';
 import { hubPage as skyHubPage, countriesSkyPage, countrySkyPage, monthSkyPage } from './hubs-sky.mjs';
 import { header as skyHeader, footer as skyFooter } from '../sky/chrome.mjs';
 import { FONTS as SKY_FONTS_URL } from '../sky/css.mjs';
@@ -20,6 +21,9 @@ import { FONTS as SKY_FONTS_URL } from '../sky/css.mjs';
 // The Ramaḍān timetable pages (/ramadan/<year>/ and the city months that hold Ramaḍān) wear the Living Sky (K08):
 // the shared header and footer, tokens and fonts, from /prayer-times/cities-sky.css (written by build.mjs).
 const SKY_CSS_URL = '/prayer-times/cities-sky.css';
+import { ramadanFast, ramadanIcs } from './ramadan-city.mjs';
+import { RAMADAN_TEXT } from './ramadan-sky-i18n.mjs';
+import { ramadanSkyPage } from './ramadan-sky.mjs';
 export const SITE = 'https://imuslimlife.com';
 export const BEACON = `<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "3937a625dcce4781b04cf88f4f50fe59"}'></script><!-- End Cloudflare Web Analytics -->`;
 export const KAABA = { lat: 21.4225, lon: 39.8262 };
@@ -67,7 +71,7 @@ export function computeRamadan(months, today) {
 }
 
 /* eslint-disable indent */
-export function createSite({ countries, cities, ALIASES = {}, NAMES = { cities: {}, regions: {}, countries: {} }, today, hasOg = () => false, paint = false }) {
+export function createSite({ countries, cities, ALIASES = {}, NAMES = { cities: {}, regions: {}, countries: {} }, today, hasOg = () => false, paint = false, engine = null }) {
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const key = (c) => `${c.country}/${c.slug}`;
@@ -563,6 +567,9 @@ function countriesPage(L, opts = {}) {
 }
 
 /** The prayer-times hub /prayer-times/ in the Living Sky (K04b); its previous design is the React page, served at /classic/prayer-times/. */
+let hubFactsMemo = null; // the hub's facts for TODAY: computed once per site (one day), never per request
+skyHelpers.hubFacts = () => hubFactsMemo || (hubFactsMemo = hubFacts({ cities: listed, countries, date: TODAY, compute: engine }));
+skyHelpers.ramadanCityUrl = (c, L) => ramadanCityUrl(c, L);
 const hubPage = () => skyHubPage(skyHelpers, { opts: { ramadan } });
 
 const longDate = (iso, opts = {}) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC', ...opts });
@@ -614,7 +621,7 @@ function ramadanPage() {
 
   ${listedCountries().map(([cc, c]) => `<section class="card"><h2><a href="${countryUrl(cc)}">Ramadan timetable ${year}: ${esc(c.name)}</a></h2><ul class="cities">${listed.filter((x) => x.country === cc).map((x) => {
     const mos = ramadanMonths(x);
-    return `<li><a href="${mos[0] ? monthUrl(x, mos[0].m) : cityUrl(x)}">${esc(named(x))}</a><span>${mos.map((mo) => `<a href="${monthUrl(x, mo.m)}">${monthName(mo.m)}</a>`).join(' · ')}</span></li>`;
+    return `<li><a href="${ramadanCityUrl(x)}">${esc(named(x))}</a><span>${mos.map((mo) => `<a href="${monthUrl(x, mo.m)}">${monthName(mo.m)}</a>`).join(' · ')}</span></li>`;
   }).join('')}</ul></section>`).join('\n  ')}
 
   <section class="card cta"><h2>Ramadan on your Echo and iPhone</h2><p>Muslim Companion's Ramadan mode reminds you before Suhoor ends, announces Iftar with the Maghrib Athan and plays Taraweeh from Makkah. The Salat-e-Mustaqeem app brings the same times to your iPhone.</p><p class="btns"><a class="btn" href="/alexa-athan/ramadan/">Ramadan on Alexa</a><a class="btn alt" href="/mobile-app/">Get the app</a></p></section>
@@ -632,7 +639,34 @@ function ramadanPage() {
   });
 }
 
+// K13: the city's whole Ramadan. The Gregorian months to load: the one before the coming Ramadan's start
+// (Makkah's; a city may begin a day earlier, across a month boundary) and the three from it (any Ramadan,
+// a day's local lag and Eid). Null when no Ramadan is known.
+const ramadanMonthsNeeded = () => {
+  if (!ramadan) return null;
+  const [y, m] = ramadan.start.split('-').map(Number);
+  return [-1, 0, 1, 2].map((k) => ({ y: y + Math.floor((m - 1 + k) / 12), m: (((m - 1 + k) % 12) + 12) % 12 + 1 }));
+};
+const ramadanCityUrl = (c, L = 'en') => `${cityUrl(c, L)}ramadan/`;
+// Null unless the months hold the whole Ramadan.
+function ramadanCityPage(city, months, L = 'en') {
+  const f = ramadanFast(months);
+  return f?.complete ? ramadanSkyPage(skyHelpers, { city, f, L }) : null;
+}
+// The calendar subscription (.../ramadan.ics), in the page's language.
+function ramadanCityIcs(city, months, L = 'en') {
+  const f = ramadanFast(months);
+  if (!f?.complete) return null;
+  const R = RAMADAN_TEXT[L];
+  const timeOf = (t) => { const { t: v, suffix } = clock(t, L); return suffix ? `${v} ${suffix}` : v; };
+  return ramadanIcs(city, f, { name: cname(city, L), url: `${SITE}${ramadanCityUrl(city, L)}`, timeOf, words: R.ics });
+}
+// The build's way in: the city's 12 loaded months (indexed 1-12, each for the year it is shown in).
+function ramadanCityPageFromYear(city, months, L = 'en') {
+  const need = ramadanMonthsNeeded();
+  return need && ramadanCityPage(city, need.map(({ y, m }) => (months[m]?.y === y ? months[m] : null)).filter(Boolean), L);
+}
 
-const set = (s) => { for (const k of Object.keys(s)) { if (k === 'listed') { listed = s.listed; memo.inLang.clear(); memo.countriesIn.clear(); } else if (k === 'masjidDir') masjidDir = s.masjidDir; else if (k === 'ramadan') ramadan = s.ramadan; else if (k === 'data') data = s.data; } };
-return { classicUrl, set, esc, key, langsOf, pre, cityUrl, monthUrl, countryUrl, countriesUrl, rootUrl, cname, named, rname, kname, mname, aname, sep, place, ogImage, hhmm, clock, cap, monthName, hijri, dateIn, todayIn, yearFor, rad, qibla, distanceKm, compass, KM, fmtDistance, inLang, countriesIn, listedCountries, footerCountries, RTL_FONT, layout, breadcrumb, faqLd, monthTable, ramadanDays, ctaCard, monthLinks, nearbyCities, CLIENT_TODAY, clientWords, calcCard, TODAY, upcoming, eventsCard, calcData, CLIENT_CALC, calcScripts, dataScript, cityPage, monthPage, countryPage, countriesPage, hubPage, classicOf, longDate, ramadanPage };
+const set = (s) => { for (const k of Object.keys(s)) { if (k === 'listed') { listed = s.listed; hubFactsMemo = null; memo.inLang.clear(); memo.countriesIn.clear(); } else if (k === 'masjidDir') masjidDir = s.masjidDir; else if (k === 'ramadan') ramadan = s.ramadan; else if (k === 'data') data = s.data; } };
+return { classicUrl, set, esc, key, langsOf, pre, cityUrl, monthUrl, countryUrl, countriesUrl, rootUrl, cname, named, rname, kname, mname, aname, sep, place, ogImage, hhmm, clock, cap, monthName, hijri, dateIn, todayIn, yearFor, rad, qibla, distanceKm, compass, KM, fmtDistance, inLang, countriesIn, listedCountries, footerCountries, RTL_FONT, layout, breadcrumb, faqLd, monthTable, ramadanDays, ctaCard, monthLinks, nearbyCities, CLIENT_TODAY, clientWords, calcCard, TODAY, upcoming, eventsCard, calcData, CLIENT_CALC, calcScripts, dataScript, cityPage, monthPage, countryPage, countriesPage, hubPage, classicOf, longDate, ramadanPage, ramadanMonthsNeeded, ramadanCityUrl, ramadanCityPage, ramadanCityPageFromYear, ramadanCityIcs };
 }

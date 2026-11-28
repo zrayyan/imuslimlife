@@ -63,7 +63,7 @@ const ALIASES = readJson('aliases.json', {});
 const NAMES = readJson('names.json', { cities: {}, regions: {}, countries: {} });
 const site = createSite({ countries, cities, ALIASES, NAMES, today: new Date().toISOString().slice(0, 10),
   hasOg: (rel) => fs.existsSync(path.join(OUT, rel)) });
-const { esc, key, langsOf, pre, cityUrl, monthUrl, countryUrl, countriesUrl, rootUrl, cname, named, rname, kname, mname, aname, sep, place, ogImage, hhmm, clock, cap, monthName, hijri, dateIn, todayIn, yearFor, rad, qibla, distanceKm, compass, KM, fmtDistance, inLang, countriesIn, listedCountries, footerCountries, RTL_FONT, layout, breadcrumb, faqLd, monthTable, ramadanDays, ctaCard, monthLinks, nearbyCities, CLIENT_TODAY, clientWords, calcCard, TODAY, upcoming, eventsCard, calcData, CLIENT_CALC, calcScripts, dataScript, cityPage, monthPage, countryPage, countriesPage, longDate, ramadanPage } = site;
+const { esc, key, langsOf, pre, cityUrl, monthUrl, countryUrl, countriesUrl, rootUrl, cname, named, rname, kname, mname, aname, sep, place, ogImage, hhmm, clock, cap, monthName, hijri, dateIn, todayIn, yearFor, rad, qibla, distanceKm, compass, KM, fmtDistance, inLang, countriesIn, listedCountries, footerCountries, RTL_FONT, layout, breadcrumb, faqLd, monthTable, ramadanDays, ctaCard, monthLinks, nearbyCities, CLIENT_TODAY, clientWords, calcCard, TODAY, upcoming, eventsCard, calcData, CLIENT_CALC, calcScripts, dataScript, cityPage, monthPage, countryPage, countriesPage, longDate, ramadanPage, ramadanCityUrl, ramadanCityPageFromYear } = site;
 let listed = cities;
 let masjidDir = null;
 let ramadan = null;
@@ -156,10 +156,16 @@ site.set({ listed });
   for (const [url, html] of masjidDir.pages) writeIfChanged(outFile(url), html);
   writeIfChanged(path.join(OUT, 'masjids', 'index.json'), `${JSON.stringify(masjidDir.index)}\n`);
 }
+const ramadanCities = [];
 for (const [city, { now, months }] of data) {
   for (const L of langsOf(city.country)) {
     writeIfChanged(outFile(cityUrl(city, L)), cityPage(city, months[now.m], months[(now.m % 12) + 1], now, L, months));
     for (let m = 1; m <= 12; m++) writeIfChanged(outFile(monthUrl(city, m, L)), monthPage(city, months[m], now, L));
+  }
+  // K13: the city's whole Ramadan, from the months already loaded; only English is reviewed and in the sitemap.
+  for (const L of langsOf(city.country)) {
+    const page = ramadanCityPageFromYear(city, months, L);
+    if (page) { writeIfChanged(outFile(ramadanCityUrl(city, L)), page); if (L === 'en') ramadanCities.push(ramadanCityUrl(city)); }
   }
 }
 for (const L of ALL_LANGS) {
@@ -214,6 +220,7 @@ const urls = cityPagesUrls({ aboutUrls: about.urls, masjidDir, ramadan, calendar
 const sitemap = citySitemap(urls, TODAY);
 writeIfChanged(path.join(OUT, 'sitemap-cities.xml'), sitemap.xml);
 
+console.log(`city-pages: ${ramadanCities.length} city Ramadan pages (English) for the ${data.size} cities with data`);
 console.log(`city-pages: ${data.size}/${cities.length} cities built (${fetched} months fetched, ${outOfBudget} left for the next run), ${listed.length} listed, ${changed} files changed, ${sitemap.count}/${urls.length} URLs in the sitemap, out ${OUT}`);
 if (failed.length) {
   console.error(`city-pages: kept the previous pages for ${failed.length} cities:\n  ${failed.join('\n  ')}`);

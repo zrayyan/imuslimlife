@@ -31,6 +31,8 @@ export function cityPagesUrls({ aboutUrls, masjidDir, ramadan, calendar, qibla, 
     ...aboutUrls,
     ...masjidDir.urls,
     ...(ramadan ? [ramadan.url] : []),
+    // K13: each city's whole Ramadan, English only until the translations are reviewed (ramadan-sky-i18n.mjs).
+    ...(ramadan ? cities.map((c) => `${cityUrl(c)}ramadan/`) : []),
     ...calendar.urls,
     ...qibla.urls,
     ...ALL_LANGS.flatMap((L) => [countriesUrl(L), ...countriesIn(L).map(([cc]) => countryUrl(cc, L))]),

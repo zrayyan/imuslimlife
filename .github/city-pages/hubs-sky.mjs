@@ -6,6 +6,7 @@ import { LANGS } from './i18n.mjs';
 import { SKY_TEXT } from './city-sky-i18n.mjs';
 import { HUB_TEXT } from './hubs-sky-i18n.mjs';
 import { METHODS } from './methods.mjs';
+import { RAMADAN_TEXT } from './ramadan-sky-i18n.mjs';
 import { indexable } from './indexing.mjs';
 import { graphJson } from './schema.mjs';
 import { CITY_SKY_CSS_URL } from './city-sky.mjs';
@@ -24,7 +25,7 @@ const FILTER = `(function(){var f=document.getElementById('hb-q'),n=document.get
 const fold = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 /** The whole document around a stage and a body. */
-function skyDoc(h, { L, title, description, canonical, alternates, jsonLd, noindex = false, robotsOnly = false, image = null, stage, main, scripts = '', hrefs = null, htmlAttrs = '' }) {
+export function skyDoc(h, { L, title, description, canonical, alternates, jsonLd, noindex = false, robotsOnly = false, image = null, stage, main, scripts = '', hrefs = null, htmlAttrs = '', head = '' }) {
   const T = LANGS[L];
   const index = !noindex && indexable(canonical, h.TODAY);
   const seo = index ? alternates.filter(([, u]) => indexable(u, h.TODAY)) : [];
@@ -44,7 +45,7 @@ function skyDoc(h, { L, title, description, canonical, alternates, jsonLd, noind
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${h.SITE}${canonical}">
 <meta property="og:image" content="${h.SITE}${image || '/logo512.png'}">${image ? '\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n<meta name="twitter:card" content="summary_large_image">' : ''}
-<meta name="theme-color" content="#07150F">
+<meta name="theme-color" content="#07150F">${head}
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" href="${FONT_FILES.marcellus}" crossorigin><link rel="preload" as="font" type="font/woff2" href="${FONT_FILES.inter}" crossorigin>
 <link rel="stylesheet" href="${CITY_SKY_CSS_URL}">
@@ -67,7 +68,7 @@ ${scripts}
 }
 
 /** The sky stage under the header: breadcrumb, h1, a sentence, optional extra (search) and an aside card. */
-function stage(L, { crumbs, h1, sub = '', extra = '', aside = '' }) {
+export function stage(L, { crumbs, h1, sub = '', extra = '', aside = '' }) {
   return `<div class="sk-stage ct-stage">${stars()}${moon()}${scene()}${header({ lang: L, current: 'times' })}
 <div class="sk-content ct" id="main"><div class="ct-top"><div class="ct-id"><nav class="ct-crumbs" aria-label="Breadcrumb">${crumbs}</nav><h1 class="ct-h1">${h1}</h1>${sub ? `<p class="hb-sub">${sub}</p>` : ''}${extra}</div>${aside}</div></div></div>
 <div class="ct-ground"></div>`;
@@ -92,10 +93,17 @@ export function hubPage(h, { opts = {} } = {}) {
   const countries = h.countriesIn(L);
   const popular = all.slice(0, POPULAR);
   const counts = new Map(countries.map(([cc]) => [cc, all.filter((c) => c.country === cc).length]));
-  // The methods the countries use, most common first (for "how times are calculated").
-  const byMethod = new Map();
-  for (const [cc] of countries) { const m = h.mname(cc, L); byMethod.set(m, (byMethod.get(m) || 0) + counts.get(cc)); }
-  const topMethods = [...byMethod].sort((a, b) => b[1] - a[1]).slice(0, 6);
+  // Facts computed from the site's own engine for today (task 152): extremes, methods and where they are used.
+  const f = h.hubFacts();
+  const t12 = (t) => { const { t: v, suffix } = h.clock(t, L); return `${v}${suffix ? ` ${suffix}` : ''}`; };
+  const cityLink = (c) => `<a href="${h.cityUrl(c, L)}">${esc(h.cname(c, L))}</a>, ${esc(h.kname(c.country, L))}`;
+  const span = (min) => `${Math.floor(min / 60)} h ${min % 60} min`;
+  const ccList = (ccs, n = 4) => { const names = ccs.map((cc) => h.kname(cc, L)); return names.length <= n ? names.join(', ') : `${names.slice(0, n).join(', ')} and ${names.length - n} more`; };
+  const fact = (label, x, fmt) => `<li><small>${label}</small><b>${fmt(x.value)}</b><span>${cityLink(x.city)}</span></li>`;
+  const todayLong = h.dateIn(f.date, L, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const rm = opts.ramadan;
+  const ramLong = (iso) => h.dateIn(iso, L, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const methodCards = f.methods.slice(0, 6).map((m) => `<div class="ct-card"><h3>${esc(m.name)}</h3><p>Used for ${esc(H.count(m.cities))} in ${esc(ccList(m.ccs))}.</p></div>`).join('');
   const canonical = '/prayer-times/';
   const crumbs = `<a href="/">iMuslim Life</a> › ${esc(T.root)}`;
   const popularHtml = `<ul class="hb-chips">${popular.map((c) => `<li><a href="${h.cityUrl(c, L)}"><b>${esc(h.named(c, L))}</b><span>${esc(h.rname(c, L) ? `${h.rname(c, L)}, ` : '')}${esc(h.kname(c.country, L))}</span></a></li>`).join('')}</ul>`;
@@ -106,17 +114,39 @@ export function hubPage(h, { opts = {} } = {}) {
     extra: searchForm(L, { placeholder: 'Ask: prayer times in Orlando', label: 'Ask about a city or a prayer time' }),
     aside: NEAR_SLOT,
   });
-  const main = `
-<section class="hb-sec" aria-labelledby="pop-h"><h2 id="pop-h">Popular cities</h2>${popularHtml}</section>
+  const ramadanHtml = rm ? `
+<section class="hb-sec" aria-labelledby="ram-h"><h2 id="ram-h">Ramadan ${esc(rm.hijriYear)}</h2>
+<p>By the Umm al-Qura calendar of Makkah, Ramadan ${esc(rm.hijriYear)} begins on ${esc(ramLong(rm.start))}${rm.eid ? ` and Eid al-Fitr falls on ${esc(ramLong(rm.eid))}` : ''}. Local moon sighting can move either date by a day. Each city below has its own timetable for the whole month, with Suhoor and Iftar, and a calendar file you can subscribe to.</p>
+<ul class="hb-chips">${popular.slice(0, 8).map((c) => `<li><a href="${h.ramadanCityUrl(c, L)}"><b>${esc(h.named(c, L))}</b><span>Ramadan ${esc(rm.hijriYear)} timetable</span></a></li>`).join('')}</ul>
+<p><a href="${rm.url}">All of Ramadan ${esc(rm.year)}</a></p></section>` : '';
+  const dayHtml = !f.fajr.earliest ? '' : `
+<section class="hb-sec" aria-labelledby="day-h"><h2 id="day-h">Today across ${f.cities} cities</h2>
+<p>On ${esc(todayLong)}, read on each city’s own clock, Fajr is earliest in ${cityLink(f.fajr.earliest.city)} and latest in ${cityLink(f.fajr.latest.city)}. Maghrib is earliest in ${cityLink(f.maghrib.earliest.city)} and latest in ${cityLink(f.maghrib.latest.city)}. The spread comes from latitude, season and daylight-saving clocks: the longest listed day is ${span(f.day.longest.value)} in ${cityLink(f.day.longest.city)} and the shortest ${span(f.day.shortest.value)} in ${cityLink(f.day.shortest.city)}.</p>
+<ul class="hb-facts">${fact('Earliest Fajr', f.fajr.earliest, t12)}${fact('Latest Fajr', f.fajr.latest, t12)}${fact('Earliest Maghrib', f.maghrib.earliest, t12)}${fact('Latest Maghrib', f.maghrib.latest, t12)}${fact('Longest day, sunrise to Maghrib', f.day.longest, span)}${fact('Shortest day, sunrise to Maghrib', f.day.shortest, span)}</ul></section>`;
+  const main = `${dayHtml}
+<section class="hb-sec" aria-labelledby="pop-h"><h2 id="pop-h">Popular cities</h2>${popularHtml}</section>${ramadanHtml}
 <section class="hb-sec" aria-labelledby="cty-h"><h2 id="cty-h">Prayer times by country</h2>${countriesHtml}<p><a href="${h.countriesUrl(L)}">All ${all.length} cities in ${countries.length} countries</a></p></section>
 <section class="hb-sec" aria-labelledby="how-h"><h2 id="how-h">How the times are calculated</h2>
-<p>Each prayer begins from the position of the sun at your city’s coordinates and in its time zone: Fajr and Isha at an angle below the horizon, Dhuhr just after the sun passes its highest point, Asr when a shadow reaches its length, and Maghrib at sunset. Countries and communities agree on different angles, so every city here uses the method its own country uses, and you can change the method and the Asr rule on any city page.</p>
-<div class="hb-how">${topMethods.map(([m, n]) => `<div class="ct-card"><h3>${esc(m)}</h3><p>Used for ${esc(H.count(n))}.</p></div>`).join('')}</div>
+<p>There are five daily prayers, and each begins from the sun’s position at your city’s coordinates, in its time zone.</p>
+<dl class="hb-prayers">
+<div><dt>Fajr</dt><dd>Dawn. It begins when the first light spreads across the sky, with the sun about 15 to 19.5 degrees below the horizon depending on the method, and ends at sunrise.</dd></div>
+<div><dt>Dhuhr</dt><dd>Midday. It begins just after the sun passes its highest point and lasts until Asr.</dd></div>
+<div><dt>Asr</dt><dd>Afternoon. It begins when an object’s shadow reaches its own length (standard) or twice its length (Hanafi), plus the shadow at noon.</dd></div>
+<div><dt>Maghrib</dt><dd>Sunset. It begins as the sun sets, which is also when a fast is broken.</dd></div>
+<div><dt>Isha</dt><dd>Night. It begins when the evening twilight has gone, with the sun about 15 to 18 degrees below the horizon, or a fixed time after Maghrib in a few methods.</dd></div>
+</dl>
+<h3 class="hb-h3">Calculation methods in use</h3>
+<p>Countries and communities agree on different twilight angles, so every city here uses the method of its own country. ${f.methods.length} methods are in use across the ${f.cities} cities, and you can change the method on any city page with the <a href="${h.cityUrl(popular[0], L)}#pt-calc">method picker</a>.</p>
+<div class="hb-how">${methodCards}</div>
+<h3 class="hb-h3">Asr: two schools</h3>
+<p>The standard rule (Shafi’i, Maliki and Hanbali) is used for ${esc(H.count(f.asr.standard.cities))} in ${f.asr.standard.ccs.length} countries. ${f.asr.hanafi.cities ? `The Hanafi rule, with its later Asr, is used for ${esc(H.count(f.asr.hanafi.cities))} in ${esc(ccList(f.asr.hanafi.ccs, 5))}.` : ''}</p>
+<h3 class="hb-h3">Far north and far south</h3>
+${f.north ? `<p>Beyond about 48 degrees of latitude the sky may never get dark enough for the usual Fajr and Isha angles in summer. Where that happens the times are set from a share of the night instead (the angle-based rule). The northernmost city listed is ${cityLink(f.north.city)} at ${esc(f.north.lat.toFixed(1))}° ${f.north.city.lat < 0 ? 'south' : 'north'}.</p>` : ''}
 <p>Your masjid’s timetable may differ by a few minutes, because a masjid sets its own iqāmah. <a href="/about/methodology/">Read the full method</a>.</p></section>
 <section class="hb-sec" aria-labelledby="more-h"><h2 id="more-h">More for the month and the year</h2><div class="hb-links"><a href="${h.hubUrl(L)}">${esc(T.cal.all)}</a>${opts.ramadan ? `<a href="${opts.ramadan.url}">${esc(T.foot.ramadan(opts.ramadan.year))}</a>` : ''}<a href="/qibla/">Qibla direction</a><a href="/places/">Masjids and halal food near you</a><a href="/mobile-app/">Get the app</a></div></section>`;
   const jsonLd = [
     h.breadcrumb([['iMuslim Life', '/'], [T.root, canonical]]),
-    { '@type': 'CollectionPage', name: 'Prayer times for your city', url: `${h.SITE}${canonical}`, inLanguage: 'en', isPartOf: { '@id': `${h.SITE}/#website` } },
+    { '@type': 'CollectionPage', name: 'Prayer times for your city', url: `${h.SITE}${canonical}`, inLanguage: 'en', dateModified: f.date, about: { '@type': 'Thing', name: 'Islamic prayer times' }, isPartOf: { '@id': `${h.SITE}/#website` } },
     itemList('Popular cities', popular.map((c) => [h.named(c, L), `${h.SITE}${h.cityUrl(c, L)}`])),
     itemList('Countries', countries.map(([cc]) => [h.kname(cc, L), `${h.SITE}${h.countryUrl(cc, L)}`])),
   ];
@@ -208,7 +238,8 @@ export function monthSkyPage(h, { city, month, now, L, faq, intro, ram, ramYear,
   const timeOf = (t) => { const { t: v, suffix } = h.clock(t, L); return suffix ? `${v} ${suffix}` : v; };
   const crumbs = `<a href="${h.rootUrl(L)}">${esc(T.root)}</a> › <a href="${h.countryUrl(cc, L)}">${esc(h.kname(cc, L))}</a> › <a href="${h.cityUrl(city, L)}">${esc(n)}</a> › ${esc(h.monthName(month.m, L))}`;
   const sub = `${esc(h.place(city, L))}${h.sep(L)}${esc(h.kname(cc, L))} · ${esc(h.hijri(first.hijri, L))} – ${esc(h.hijri(last.hijri, L))} · ${esc(T.month.sub(h.mname(cc, L), h.aname(cc, L)))}`;
-  const ramNote = ram.length ? `<p class="ct-answer">${T.month.ramNote(esc(ramYear), h.dateIn(ram[0].date, L, { month: 'long', day: 'numeric' }))}</p>` : '';
+  const ramLink = ` <a href="${h.cityUrl(city, L)}ramadan/">${esc(RAMADAN_TEXT[L].whole(n))}</a>`; // K13
+  const ramNote = ram.length ? `<p class="ct-answer">${T.month.ramNote(esc(ramYear), h.dateIn(ram[0].date, L, { month: 'long', day: 'numeric' }))}${ramLink}</p>` : '';
   const extra = `${ramNote}<p class="ct-btns top"><a class="ct-btn" href="${h.cityUrl(city, L)}">${esc(T.month.today(n))}</a><button class="ct-btn alt" type="button" onclick="window.print()">${esc(T.month.print)}</button></p>`;
   const st = stage(L, { crumbs, h1: esc(T.month.h1(h.named(city, L), label)), sub, extra });
   const rows = month.days.map((d) => {

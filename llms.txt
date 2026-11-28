@@ -21,10 +21,10 @@ Prayer times depend on location, date, calculation method and Asr madhab. Ask th
 
 ## Places (masjids, halal food, services)
 
-- Pages: `/places/` (hub), `/places/<cc>/` (country), `/places/<cc>/<city>/` (city) and `/places/<cc>/<city>/<slug>/` (one place, for example a masjid or a halal restaurant). `/places/world/` is the Atlas. Listed places are in [sitemap-places-index.xml](https://imuslimlife.com/sitemap-places-index.xml).
+- Pages: `/places/` (hub), `/places/<cc>/` (country), `/places/<cc>/<city>/` (city) and `/place/<slug>/` (one place, for example a masjid or a halal restaurant). `/places/world/` is the Atlas. Listed places are in [sitemap-places-index.xml](https://imuslimlife.com/sitemap-places-index.xml).
 - Freshness: details such as parking, a women's prayer space or how meat is slaughtered carry the date they were last confirmed; when nobody confirms a fact for a long time the page marks it possibly out of date, and later hides it. There are no star ratings or written reviews, only vouches from people who were there. Jamaat times come from the masjid itself (Masjid Connect) or from worshippers, and the page says which.
 - Data notes: [About the data](https://imuslimlife.com/places/about/data/).
-- Examples: https://imuslimlife.com/places/ https://imuslimlife.com/places/world/ https://imuslimlife.com/places/us/ https://imuslimlife.com/places/us/orlando/ https://imuslimlife.com/places/us/orlando/majid-al-ihsaan-04fc/ https://imuslimlife.com/places/about/data/ https://imuslimlife.com/sitemap-places-index.xml
+- Examples: https://imuslimlife.com/places/ https://imuslimlife.com/places/world/ https://imuslimlife.com/places/us/ https://imuslimlife.com/places/us/orlando/ https://imuslimlife.com/place/majid-al-ihsaan-04fc/ https://imuslimlife.com/places/about/data/ https://imuslimlife.com/sitemap-places-index.xml
 
 ## Hijri calendar and dates
 
